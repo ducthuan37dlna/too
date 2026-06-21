@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>FANTAN AUTO · DỰ ĐOÁN SIÊU TỰ ĐỘNG | HeaNg</title>
+    <title>FANTAN AUTO · PHÂN TÍCH CAO CẤP | HeaNg</title>
     <style>
         * { box-sizing: border-box; user-select: none; }
         body {
@@ -139,391 +139,395 @@
         ⏳ Cần ít nhất 6 ván để hiển thị backtest.
     </div>
     <div class="footer">
-        ⚡ 12 thuật toán + Hedge thông minh. Lịch sử lưu tự động trong trình duyệt.
+        ⚡ 18 thuật toán + Hedge thông minh. Chống trượt streak. Nhấn Ctrl+B để xem cửa tối ưu.
     </div>
 </div>
 
 <script>
-    // ========== HỆ THỐNG LƯU TRỮ TỰ ĐỘNG ==========
-    const HISTORY_STORAGE_KEY = "fantan_auto_history";
-    const WEIGHTS_STORAGE_KEY = "fantan_auto_weights";
+    // ========== HỆ THỐNG LƯU TRỮ ==========
+    const HISTORY_KEY = "fantan_auto_history";
+    const WEIGHTS_KEY = "fantan_auto_weights";
 
-    // Lấy lịch sử từ localStorage
     function loadHistory() {
-        let stored = localStorage.getItem(HISTORY_STORAGE_KEY);
-        if (stored) {
-            try {
-                let arr = JSON.parse(stored);
-                if (Array.isArray(arr)) return arr.filter(n => [1,2,3,4].includes(n));
-            } catch (e) {}
-        }
-        return [];
+        let s = localStorage.getItem(HISTORY_KEY);
+        return s ? JSON.parse(s).filter(n => [1,2,3,4].includes(n)) : [];
     }
+    function saveHistory(h) { localStorage.setItem(HISTORY_KEY, JSON.stringify(h)); }
 
-    // Lưu lịch sử vào localStorage
-    function saveHistory(hist) {
-        localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(hist));
-    }
-
-    // ========== 12 THUẬT TOÁN (giữ nguyên hoàn toàn) ==========
+    // ========== 18 THUẬT TOÁN ==========
     function timeWeightedFreq(hist) {
-        let s = {1:0,2:0,3:0,4:0}, l = hist.length;
-        for (let i = 0; i < l; i++) {
-            let w = Math.pow(0.94, l - 1 - i);
-            s[hist[i]] += w;
-        }
+        let s={1:0,2:0,3:0,4:0}, l=hist.length;
+        for(let i=0;i<l;i++) s[hist[i]] += Math.pow(0.94, l-1-i);
         return s;
     }
-
     function patternPrediction(hist) {
-        if (hist.length < 4) return {1:0,2:0,3:0,4:0};
-        let last = hist[hist.length-1], prev = hist[hist.length-2], pprev = hist[hist.length-3];
-        let s = {1:0,2:0,3:0,4:0};
-        if (last === prev) {
-            s[last] += 28;
-            if (prev === pprev) s[last] += 15;
-        } else {
-            if (prev === pprev && prev !== last) s[prev] += 20;
-            if (hist.length >= 5 && hist[hist.length-5] === hist[hist.length-3] && hist[hist.length-4] === hist[hist.length-2])
-                s[hist[hist.length-4]] += 18;
+        if(hist.length<4) return {1:0,2:0,3:0,4:0};
+        let last=hist[hist.length-1], prev=hist[hist.length-2], pprev=hist[hist.length-3], s={1:0,2:0,3:0,4:0};
+        if(last===prev){ s[last]+=28; if(prev===pprev) s[last]+=15; }
+        else{
+            if(prev===pprev && prev!==last) s[prev]+=20;
+            if(hist.length>=5 && hist[hist.length-5]===hist[hist.length-3] && hist[hist.length-4]===hist[hist.length-2])
+                s[hist[hist.length-4]]+=18;
         }
         return s;
     }
-
     function cyclePrediction(hist) {
-        if (hist.length < 6) return {1:0,2:0,3:0,4:0};
-        let bestCycle = null, bestScore = 0;
-        for (let c = 2; c <= Math.min(10, Math.floor(hist.length/2)); c++) {
-            let matches = 0, checks = Math.min(30, hist.length - c);
-            for (let i = 0; i < checks; i++)
-                if (hist[hist.length-1-i] === hist[hist.length-1-c-i]) matches++;
-            let score = checks > 0 ? matches / checks : 0;
-            if (score > bestScore && score > 0.55) { bestScore = score; bestCycle = c; }
+        if(hist.length<6) return {1:0,2:0,3:0,4:0};
+        let bestCycle=null, bestScore=0;
+        for(let c=2;c<=Math.min(10,Math.floor(hist.length/2));c++){
+            let matches=0, checks=Math.min(30,hist.length-c);
+            for(let i=0;i<checks;i++) if(hist[hist.length-1-i]===hist[hist.length-1-c-i]) matches++;
+            let score=checks>0?matches/checks:0;
+            if(score>bestScore && score>0.55){ bestScore=score; bestCycle=c; }
         }
-        let s = {1:0,2:0,3:0,4:0};
-        if (bestCycle) { let pred = hist[hist.length - bestCycle]; s[pred] += 22 * bestScore; }
+        let s={1:0,2:0,3:0,4:0};
+        if(bestCycle) s[hist[hist.length-bestCycle]]+=22*bestScore;
         return s;
     }
-
     function hotPair(hist) {
-        if (hist.length < 2) return {1:0,2:0,3:0,4:0};
-        let last = hist[hist.length-1], s = {1:0,2:0,3:0,4:0}, pc = {};
-        for (let i = 0; i < hist.length-1; i++) {
-            let key = `${hist[i]}-${hist[i+1]}`;
-            pc[key] = (pc[key] || 0) + 1;
-        }
-        for (let n = 1; n <= 4; n++) {
-            let key = `${last}-${n}`;
-            let cnt = pc[key] || 0;
-            s[n] += Math.min(22, cnt * 4.5);
-        }
+        if(hist.length<2) return {1:0,2:0,3:0,4:0};
+        let last=hist[hist.length-1], s={1:0,2:0,3:0,4:0}, pc={};
+        for(let i=0;i<hist.length-1;i++){ let k=`${hist[i]}-${hist[i+1]}`; pc[k]=(pc[k]||0)+1; }
+        for(let n=1;n<=4;n++) s[n]+=Math.min(22,(pc[`${last}-${n}`]||0)*4.5);
         return s;
     }
-
     function recentTrend(hist) {
-        let recent = hist.slice(-6), s = {1:0,2:0,3:0,4:0};
-        for (let i = 0; i < recent.length; i++) {
-            let w = 1 + i * 0.3;
-            s[recent[i]] += w;
-        }
+        let recent=hist.slice(-6), s={1:0,2:0,3:0,4:0};
+        for(let i=0;i<recent.length;i++) s[recent[i]]+=1+i*0.3;
         return s;
     }
-
     function basicFreq(hist) {
-        let f = {1:0,2:0,3:0,4:0}, t = hist.length;
-        for (let v of hist) f[v]++;
-        let s = {};
-        for (let i = 1; i <= 4; i++) s[i] = (f[i] / t) * 25;
+        let f={1:0,2:0,3:0,4:0}, t=hist.length;
+        for(let v of hist) f[v]++;
+        let s={}; for(let i=1;i<=4;i++) s[i]=(f[i]/t)*25;
         return s;
     }
-
     function markov1(hist) {
-        if (hist.length < 2) return {1:0,2:0,3:0,4:0};
-        let trans = {1: {1:0,2:0,3:0,4:0}, 2: {1:0,2:0,3:0,4:0}, 3: {1:0,2:0,3:0,4:0}, 4: {1:0,2:0,3:0,4:0}};
-        for (let i = 0; i < hist.length-1; i++) trans[hist[i]][hist[i+1]]++;
-        let last = hist[hist.length-1];
-        let total = trans[last][1] + trans[last][2] + trans[last][3] + trans[last][4];
-        if (total === 0) return {1:0,2:0,3:0,4:0};
-        let s = {};
-        for (let i = 1; i <= 4; i++) s[i] = (trans[last][i] / total) * 30;
+        if(hist.length<2) return {1:0,2:0,3:0,4:0};
+        let trans={1:{1:0,2:0,3:0,4:0},2:{1:0,2:0,3:0,4:0},3:{1:0,2:0,3:0,4:0},4:{1:0,2:0,3:0,4:0}};
+        for(let i=0;i<hist.length-1;i++) trans[hist[i]][hist[i+1]]++;
+        let last=hist[hist.length-1];
+        let total=trans[last][1]+trans[last][2]+trans[last][3]+trans[last][4];
+        if(total===0) return {1:0,2:0,3:0,4:0};
+        let s={}; for(let i=1;i<=4;i++) s[i]=(trans[last][i]/total)*30;
         return s;
     }
-
     function markov2(hist) {
-        if (hist.length < 3) return {1:0,2:0,3:0,4:0};
-        let last2 = `${hist[hist.length-2]},${hist[hist.length-1]}`;
-        let trans = {};
-        for (let i = 0; i < hist.length-2; i++) {
-            let key = `${hist[i]},${hist[i+1]}`;
-            let next = hist[i+2];
-            if (!trans[key]) trans[key] = {1:0,2:0,3:0,4:0};
-            trans[key][next]++;
+        if(hist.length<3) return {1:0,2:0,3:0,4:0};
+        let last2=`${hist[hist.length-2]},${hist[hist.length-1]}`;
+        let trans={};
+        for(let i=0;i<hist.length-2;i++){
+            let k=`${hist[i]},${hist[i+1]}`;
+            if(!trans[k]) trans[k]={1:0,2:0,3:0,4:0};
+            trans[k][hist[i+2]]++;
         }
-        let np = trans[last2];
-        if (!np) return {1:0,2:0,3:0,4:0};
-        let total = np[1] + np[2] + np[3] + np[4];
-        if (total === 0) return {1:0,2:0,3:0,4:0};
-        let s = {};
-        for (let i = 1; i <= 4; i++) s[i] = (np[i] / total) * 35;
+        let np=trans[last2]; if(!np) return {1:0,2:0,3:0,4:0};
+        let total=np[1]+np[2]+np[3]+np[4]; if(total===0) return {1:0,2:0,3:0,4:0};
+        let s={}; for(let i=1;i<=4;i++) s[i]=(np[i]/total)*35;
         return s;
     }
-
     function markov3(hist) {
-        if (hist.length < 4) return {1:0,2:0,3:0,4:0};
-        let last3 = `${hist[hist.length-3]},${hist[hist.length-2]},${hist[hist.length-1]}`;
-        let trans = {};
-        for (let i = 0; i < hist.length-3; i++) {
-            let key = `${hist[i]},${hist[i+1]},${hist[i+2]}`;
-            let next = hist[i+3];
-            if (!trans[key]) trans[key] = {1:0,2:0,3:0,4:0};
-            trans[key][next]++;
+        if(hist.length<4) return {1:0,2:0,3:0,4:0};
+        let last3=`${hist[hist.length-3]},${hist[hist.length-2]},${hist[hist.length-1]}`;
+        let trans={};
+        for(let i=0;i<hist.length-3;i++){
+            let k=`${hist[i]},${hist[i+1]},${hist[i+2]}`;
+            if(!trans[k]) trans[k]={1:0,2:0,3:0,4:0};
+            trans[k][hist[i+3]]++;
         }
-        let np = trans[last3];
-        if (!np) return {1:0,2:0,3:0,4:0};
-        let total = np[1] + np[2] + np[3] + np[4];
-        if (total === 0) return {1:0,2:0,3:0,4:0};
-        let s = {};
-        for (let i = 1; i <= 4; i++) s[i] = (np[i] / total) * 42;
+        let np=trans[last3]; if(!np) return {1:0,2:0,3:0,4:0};
+        let total=np[1]+np[2]+np[3]+np[4]; if(total===0) return {1:0,2:0,3:0,4:0};
+        let s={}; for(let i=1;i<=4;i++) s[i]=(np[i]/total)*42;
         return s;
     }
-
     function streakBreak(hist) {
-        if (hist.length < 10) return {1:0,2:0,3:0,4:0};
-        let lastSeen = {1:null,2:null,3:null,4:null};
-        let len = hist.length;
-        for (let i = len-1; i >= 0; i--) {
-            let v = hist[i];
-            if (lastSeen[v] === null) lastSeen[v] = i;
-        }
-        let s = {1:0,2:0,3:0,4:0};
-        for (let n = 1; n <= 4; n++) {
-            let steps = lastSeen[n] !== null ? (len - 1 - lastSeen[n]) : len;
-            s[n] = Math.min(30, steps * 2.5);
-        }
+        if(hist.length<10) return {1:0,2:0,3:0,4:0};
+        let lastSeen={1:null,2:null,3:null,4:null}, len=hist.length;
+        for(let i=len-1;i>=0;i--) if(lastSeen[hist[i]]===null) lastSeen[hist[i]]=i;
+        let s={1:0,2:0,3:0,4:0};
+        for(let n=1;n<=4;n++){ let steps=lastSeen[n]!==null?len-1-lastSeen[n]:len; s[n]=Math.min(30,steps*2.5); }
         return s;
     }
-
     function hotTriple(hist) {
-        if (hist.length < 3) return {1:0,2:0,3:0,4:0};
-        let last2 = `${hist[hist.length-2]},${hist[hist.length-1]}`;
-        let s = {1:0,2:0,3:0,4:0}, pc = {};
-        for (let i = 0; i < hist.length-2; i++) {
-            let key = `${hist[i]},${hist[i+1]}`;
-            let next = hist[i+2];
-            if (!pc[key]) pc[key] = {1:0,2:0,3:0,4:0};
-            pc[key][next]++;
+        if(hist.length<3) return {1:0,2:0,3:0,4:0};
+        let last2=`${hist[hist.length-2]},${hist[hist.length-1]}`;
+        let s={1:0,2:0,3:0,4:0}, pc={};
+        for(let i=0;i<hist.length-2;i++){
+            let k=`${hist[i]},${hist[i+1]}`;
+            if(!pc[k]) pc[k]={1:0,2:0,3:0,4:0};
+            pc[k][hist[i+2]]++;
         }
-        let np = pc[last2];
-        if (!np) return {1:0,2:0,3:0,4:0};
-        let total = np[1] + np[2] + np[3] + np[4];
-        if (total === 0) return {1:0,2:0,3:0,4:0};
-        for (let i = 1; i <= 4; i++) s[i] = (np[i] / total) * 40;
+        let np=pc[last2]; if(!np) return s;
+        let total=np[1]+np[2]+np[3]+np[4]; if(total===0) return s;
+        for(let i=1;i<=4;i++) s[i]=(np[i]/total)*40;
         return s;
     }
-
     function cycleExtended(hist) {
-        if (hist.length < 8) return {1:0,2:0,3:0,4:0};
-        let bestCycle = null, bestScore = 0;
-        for (let c = 2; c <= Math.min(15, Math.floor(hist.length/2)); c++) {
-            let matches = 0, checks = Math.min(40, hist.length - c);
-            for (let i = 0; i < checks; i++)
-                if (hist[hist.length-1-i] === hist[hist.length-1-c-i]) matches++;
-            let score = checks > 0 ? matches / checks : 0;
-            if (score > bestScore && score > 0.5) { bestScore = score; bestCycle = c; }
+        if(hist.length<8) return {1:0,2:0,3:0,4:0};
+        let bestCycle=null, bestScore=0;
+        for(let c=2;c<=Math.min(15,Math.floor(hist.length/2));c++){
+            let matches=0, checks=Math.min(40,hist.length-c);
+            for(let i=0;i<checks;i++) if(hist[hist.length-1-i]===hist[hist.length-1-c-i]) matches++;
+            let score=checks>0?matches/checks:0;
+            if(score>bestScore && score>0.5){ bestScore=score; bestCycle=c; }
         }
-        let s = {1:0,2:0,3:0,4:0};
-        if (bestCycle) { let pred = hist[hist.length - bestCycle]; s[pred] += 25 * bestScore; }
+        let s={1:0,2:0,3:0,4:0};
+        if(bestCycle) s[hist[hist.length-bestCycle]]+=25*bestScore;
+        return s;
+    }
+    function streakMomentum(hist) {
+        if(hist.length<6) return {1:0,2:0,3:0,4:0};
+        let last=hist[hist.length-1], cnt=0;
+        for(let i=hist.length-1;i>=0&&hist[i]===last;i--) cnt++;
+        let s={1:0,2:0,3:0,4:0};
+        if(cnt>=1) s[last]=cnt>=2?30:18;
+        return s;
+    }
+    function adaptiveAbsence(hist) {
+        if(hist.length<8) return {1:0,2:0,3:0,4:0};
+        let lastSeen={1:null,2:null,3:null,4:null}, len=hist.length;
+        for(let i=len-1;i>=0;i--) if(lastSeen[hist[i]]===null) lastSeen[hist[i]]=i;
+        let s={1:0,2:0,3:0,4:0};
+        for(let n=1;n<=4;n++){
+            let steps=lastSeen[n]!==null?len-1-lastSeen[n]:len;
+            s[n]=Math.min(50,Math.pow(steps,1.5)*1.2);
+        }
+        return s;
+    }
+    function trendReversal(hist) {
+        if(hist.length<4) return {1:0,2:0,3:0,4:0};
+        let r=hist.slice(-3);
+        if(r[0]!==r[1] && r[1]!==r[2] && r[0]!==r[2]){
+            let all=[1,2,3,4], missing=all.filter(x=>!r.includes(x));
+            let s={1:0,2:0,3:0,4:0};
+            if(missing.length===1) s[missing[0]]=22;
+            return s;
+        }
+        return {1:0,2:0,3:0,4:0};
+    }
+
+    // 3 thuật toán mới
+    function breakoutReversal(hist) {
+        if(hist.length<5) return {1:0,2:0,3:0,4:0};
+        let last=hist[hist.length-1], prev=hist[hist.length-2], streak=1;
+        for(let i=hist.length-2;i>=0&&hist[i]===prev;i--) streak++;
+        let s={1:0,2:0,3:0,4:0};
+        if(streak>=4 && last!==prev){
+            let recent=hist.slice(-6);
+            for(let n=1;n<=4;n++) if(!recent.includes(n)) s[n]+=20;
+            for(let n=1;n<=4;n++) if(n!==prev) s[n]+=12;
+        }
+        return s;
+    }
+    function harmonicReturn(hist) {
+        if(hist.length<10) return {1:0,2:0,3:0,4:0};
+        let freq={1:0,2:0,3:0,4:0}, total=hist.length;
+        for(let v of hist) freq[v]++;
+        let s={1:0,2:0,3:0,4:0};
+        for(let n=1;n<=4;n++){
+            let rate=freq[n]/total;
+            if(rate<0.20) s[n]+=(0.25-rate)*100;
+        }
+        return s;
+    }
+    function alternatingPair(hist) {
+        if(hist.length<4) return {1:0,2:0,3:0,4:0};
+        let last=hist[hist.length-1], secondLast=hist[hist.length-2];
+        let s={1:0,2:0,3:0,4:0};
+        for(let i=0;i<hist.length-3;i++){
+            if(hist[i]===secondLast && hist[i+1]===last) s[hist[i+2]]+=18;
+        }
+        if(hist.length>=4){
+            let a=hist[hist.length-4], b=hist[hist.length-3], c=hist[hist.length-2], d=hist[hist.length-1];
+            if(a===c && b===d && a!==b) s[a]+=22;
+        }
         return s;
     }
 
     const ALGO_LIST = [
         timeWeightedFreq, patternPrediction, cyclePrediction, hotPair,
-        recentTrend, basicFreq, markov1, markov2,
-        markov3, streakBreak, hotTriple, cycleExtended
+        recentTrend, basicFreq, markov1, markov2, markov3,
+        streakBreak, hotTriple, cycleExtended, streakMomentum,
+        adaptiveAbsence, trendReversal, breakoutReversal,
+        harmonicReturn, alternatingPair
     ];
     const ALGO_NAMES = [
-        "Time decay","Cầu bệt","Chu kỳ","Cặp nóng",
-        "Xu hướng gần","Tần suất","Markov1","Markov2",
-        "Markov3","Số vắng","Bộ ba nóng","Chu kỳ dài"
+        "Time decay","Cầu bệt","Chu kỳ","Cặp nóng","Xu hướng gần",
+        "Tần suất","Markov1","Markov2","Markov3","Số vắng","Bộ ba nóng",
+        "Chu kỳ dài","Streak Momentum","Adaptive Absence","Trend Reversal",
+        "Breakout Reversal","Harmonic Return","Alternating Pair"
     ];
 
-    // ========== HỌC ONLINE HEDGE ==========
     const MIN_TRAIN = 5;
-    let currentWeights = Array(ALGO_LIST.length).fill(1 / ALGO_LIST.length);
+    let currentHistory = loadHistory();
+    let currentWeights = Array(ALGO_LIST.length).fill(1/ALGO_LIST.length);
     let perAlgoCorrect = Array(ALGO_LIST.length).fill(0);
-
-    function loadWeights() {
-        let stored = localStorage.getItem(WEIGHTS_STORAGE_KEY);
-        if (stored) {
-            try {
-                let w = JSON.parse(stored);
-                if (Array.isArray(w) && w.length === ALGO_LIST.length) currentWeights = w;
-            } catch (e) {}
-        }
-    }
-    function saveWeights() { localStorage.setItem(WEIGHTS_STORAGE_KEY, JSON.stringify(currentWeights)); }
-    loadWeights();
 
     function ensembleScores(hist, weights) {
         let final = {1:0,2:0,3:0,4:0};
-        if (hist.length === 0) return final;
-        for (let i = 0; i < ALGO_LIST.length; i++) {
-            let sc = ALGO_LIST[i](hist);
-            let w = weights[i];
-            for (let n = 1; n <= 4; n++) final[n] += (sc[n] || 0) * w;
+        for(let i=0;i<ALGO_LIST.length;i++){
+            let sc=ALGO_LIST[i](hist);
+            for(let n=1;n<=4;n++) final[n]+=(sc[n]||0)*weights[i];
         }
         return final;
     }
-
     function getTop3(scores) {
-        let entries = Object.entries(scores).map(([k, v]) => ({num: parseInt(k), score: v}));
-        entries.sort((a, b) => b.score - a.score);
-        let top3 = entries.slice(0, 3).map(e => e.num);
-        while (top3.length < 3) top3.push((top3.length % 4) + 1);
-        return top3;
+        let entries = Object.entries(scores).map(([k,v])=>({num:parseInt(k),score:v}));
+        entries.sort((a,b)=>b.score-a.score);
+        return entries.slice(0,3).map(e=>e.num);
     }
 
     function updateWeights(hist, actual, weights, step) {
-        let scoresForActual = ALGO_LIST.map(algo => {
-            let s = algo(hist);
-            return s[actual] || 0;
-        });
-        for (let i = 0; i < ALGO_LIST.length; i++) {
-            let s = ALGO_LIST[i](hist);
-            let pred = Object.entries(s).sort((a,b)=>b[1]-a[1])[0];
-            if (pred && parseInt(pred[0]) === actual) perAlgoCorrect[i]++;
+        let scoresForActual = ALGO_LIST.map(algo => (algo(hist)[actual]||0));
+        for(let i=0;i<ALGO_LIST.length;i++){
+            let s=ALGO_LIST[i](hist);
+            let pred=Object.entries(s).sort((a,b)=>b[1]-a[1])[0];
+            if(pred && parseInt(pred[0])===actual) perAlgoCorrect[i]++;
         }
-        let baseLR = 0.8 * Math.pow(1 + step, -0.5);
-        let newWeights = [...weights];
-        for (let j = 0; j < ALGO_LIST.length; j++) {
-            let successRate = step > 0 ? perAlgoCorrect[j] / step : 0;
-            let lr = baseLR * (1 + successRate * 2);
-            newWeights[j] *= Math.exp(lr * scoresForActual[j]);
+        let lastSeen={}, len=hist.length;
+        for(let i=len-1;i>=0;i--) if(lastSeen[hist[i]]===undefined) lastSeen[hist[i]]=i;
+        let isRevival= lastSeen[actual]!==undefined && (len-1-lastSeen[actual])>=8;
+        let baseLR=isRevival?1.5:0.6;
+        baseLR*=Math.pow(1+step,-0.3);
+        let newWeights=[...weights];
+        for(let j=0;j<ALGO_LIST.length;j++){
+            let successRate=step>0?perAlgoCorrect[j]/step:0;
+            let lr=baseLR*(0.8+successRate*3);
+            newWeights[j]*=Math.exp(lr*scoresForActual[j]);
         }
-        let sum = newWeights.reduce((a, b) => a + b, 0);
-        if (sum === 0) return Array(ALGO_LIST.length).fill(1 / ALGO_LIST.length);
-        return newWeights.map(w => w / sum);
+        let sum=newWeights.reduce((a,b)=>a+b,0);
+        newWeights=newWeights.map(w=>Math.max(0.02,w/sum));
+        let sum2=newWeights.reduce((a,b)=>a+b,0);
+        return newWeights.map(w=>w/sum2);
     }
 
     function pureBacktest(fullHist, initialWeights) {
-        let weights = [...initialWeights];
-        let results = [];
-        perAlgoCorrect = Array(ALGO_LIST.length).fill(0);
-        for (let i = MIN_TRAIN; i < fullHist.length; i++) {
-            let trainHist = fullHist.slice(0, i);
-            let actual = fullHist[i];
-            let scores = ensembleScores(trainHist, weights);
-            let top3 = getTop3(scores);
-            let hit = top3.includes(actual);
-            results.push({ step: i + 1, actual, top3, hit });
-            weights = updateWeights(trainHist, actual, weights, i - MIN_TRAIN);
+        let weights=[...initialWeights];
+        let results=[];
+        perAlgoCorrect=Array(ALGO_LIST.length).fill(0);
+        for(let i=MIN_TRAIN;i<fullHist.length;i++){
+            let trainHist=fullHist.slice(0,i);
+            let actual=fullHist[i];
+            let scores=ensembleScores(trainHist,weights);
+            let top3=getTop3(scores);
+            results.push({step:i+1,actual,top3,hit:top3.includes(actual)});
+            weights=updateWeights(trainHist,actual,weights,i-MIN_TRAIN);
         }
-        return { results, finalWeights: weights };
+        return {results,finalWeights:weights};
     }
 
-    // ========== GIAO DIỆN & TỰ ĐỘNG CẬP NHẬT ==========
-    let currentHistory = loadHistory();
+    function omniProfitPrediction(hist,weights){
+        if(hist.length<5) return {1:0,2:0,3:0,4:0};
+        let base=ensembleScores(hist,weights);
+        let sum=base[1]+base[2]+base[3]+base[4];
+        let ev={};
+        for(let n=1;n<=4;n++) ev[n]=(base[n]/sum)*3-(1-base[n]/sum);
+        return ev;
+    }
 
     function updateAll() {
-        // Hiển thị lịch sử
         document.getElementById('historyDisplay').textContent = currentHistory.length ? currentHistory.join(' ') : 'Chưa có dữ liệu';
-        // Lưu lịch sử
         saveHistory(currentHistory);
 
-        if (currentHistory.length < MIN_TRAIN) {
-            document.getElementById('top3Display').innerHTML = '<span>--</span><span>--</span><span>--</span>';
-            document.getElementById('confidenceInfo').innerHTML = 'Cần ít nhất 5 ván để dự đoán';
-            document.getElementById('algoDetails').innerHTML = 'Chưa đủ dữ liệu';
-            document.getElementById('backtestLog').innerHTML = '⏳ Cần ít nhất 6 ván để hiển thị backtest.';
-            document.getElementById('aiStatus').innerHTML = `🧠 Đã có ${currentHistory.length} ván, cần thêm ${MIN_TRAIN - currentHistory.length} ván nữa.`;
+        if(currentHistory.length < MIN_TRAIN){
+            document.getElementById('top3Display').innerHTML='<span>--</span><span>--</span><span>--</span>';
+            document.getElementById('confidenceInfo').innerHTML='Cần ít nhất 5 ván để dự đoán';
+            document.getElementById('algoDetails').innerHTML='Chưa đủ dữ liệu';
+            document.getElementById('backtestLog').innerHTML='⏳ Cần ít nhất 6 ván để hiển thị backtest.';
+            document.getElementById('aiStatus').innerHTML=`🧠 Đã có ${currentHistory.length} ván, cần thêm ${MIN_TRAIN-currentHistory.length} ván nữa.`;
             return;
         }
 
-        // Backtest và cập nhật trọng số
         let backtest = pureBacktest(currentHistory, currentWeights);
         currentWeights = backtest.finalWeights;
-        saveWeights();
+        localStorage.setItem(WEIGHTS_KEY, JSON.stringify(currentWeights));
 
-        // Dự đoán ván kế tiếp
         let nextScores = ensembleScores(currentHistory, currentWeights);
         let nextTop3 = getTop3(nextScores);
         document.getElementById('top3Display').innerHTML = nextTop3.map(n => `<span>🔮 ${n}</span>`).join('');
 
-        let entries = Object.entries(nextScores).sort((a, b) => b[1] - a[1]);
-        let diff = entries[0][1] - entries[1][1];
-        let conf = Math.min(95, Math.floor(50 + diff * 1.5));
-        document.getElementById('confidenceInfo').innerHTML = `📈 Độ tin cậy: ${conf}% (chênh lệch điểm).`;
+        let entries = Object.entries(nextScores).sort((a,b)=>b[1]-a[1]);
+        let diff = entries[0][1]-entries[1][1];
+        let conf = Math.min(95, Math.floor(50+diff*1.5));
 
-        // Backtest log
+        let omniScores = omniProfitPrediction(currentHistory, currentWeights);
+        let omniBest = Object.entries(omniScores).sort((a,b)=>b[1]-a[1])[0];
+        document.getElementById('confidenceInfo').innerHTML =
+            `📈 Độ tin cậy: ${conf}% (chênh lệch điểm).<br><span style="color:#ffb347;">💎 Omni Hedge: Số ${omniBest[0]} (EV=${parseFloat(omniBest[1]).toFixed(3)}) – cửa tối ưu lợi nhuận.</span>`;
+
         let results = backtest.results;
-        let correct = results.filter(r => r.hit).length;
+        let correct = results.filter(r=>r.hit).length;
         let total = results.length;
-        let accuracy = total > 0 ? (correct / total * 100).toFixed(2) : 0;
-        let logHTML = `📊 Backtest (ván ${MIN_TRAIN+1}-${currentHistory.length}): ${correct}/${total} đúng (${accuracy}%)<br>`;
-        logHTML += `📋 10 ván gần nhất:<br>`;
+        let accuracy = total ? (correct/total*100).toFixed(2) : 0;
+        let logHTML = `📊 Backtest (ván ${MIN_TRAIN+1}-${currentHistory.length}): ${correct}/${total} đúng (${accuracy}%)<br>📋 10 ván gần nhất:<br>`;
         let last10 = results.slice(-10);
-        for (let r of last10) {
-            let mark = r.hit ? '✅' : '❌';
-            logHTML += `Ván ${r.step}: ra ${r.actual} | Top3: [${r.top3.join(', ')}] ${mark}<br>`;
-        }
+        for(let r of last10) logHTML += `Ván ${r.step}: ra ${r.actual} | Top3: [${r.top3.join(', ')}] ${r.hit?'✅':'❌'}<br>`;
         document.getElementById('backtestLog').innerHTML = logHTML;
 
-        // Chi tiết thuật toán
-        let totalSteps = currentHistory.length - MIN_TRAIN;
+        let totalSteps = currentHistory.length-MIN_TRAIN;
         let weightHtml = '<div style="display:flex; flex-wrap:wrap; gap:8px;">';
-        for (let i = 0; i < ALGO_NAMES.length; i++) {
-            let acc = totalSteps > 0 ? (perAlgoCorrect[i] / totalSteps * 100).toFixed(1) : 0;
+        for(let i=0;i<ALGO_NAMES.length;i++){
+            let acc = totalSteps>0 ? (perAlgoCorrect[i]/totalSteps*100).toFixed(1) : 0;
             weightHtml += `<div style="background:#02101a; padding:4px 8px; border-radius:12px;">
                 <strong>${ALGO_NAMES[i]}</strong>: ${(currentWeights[i]*100).toFixed(1)}% (đúng ${acc}%)
             </div>`;
         }
         weightHtml += '</div>';
         weightHtml += `<div style="margin-top:8px;"><strong>🎯 Điểm ensemble ván tới:</strong> `;
-        for (let n = 1; n <= 4; n++) weightHtml += `${n}:${nextScores[n].toFixed(2)} `;
+        for(let n=1;n<=4;n++) weightHtml += `${n}:${nextScores[n].toFixed(2)} `;
         weightHtml += `</div>`;
         document.getElementById('algoDetails').innerHTML = weightHtml;
 
         document.getElementById('aiStatus').innerHTML = `🧠 Phân tích ${currentHistory.length} ván. Hedge tự động cập nhật.`;
     }
 
-    // Thêm kết quả mới
+    // ========== THAO TÁC ==========
     function addResult(num) {
         currentHistory.push(num);
-        // Giới hạn tối đa 500 ván để tránh quá tải
-        if (currentHistory.length > 500) currentHistory = currentHistory.slice(-500);
+        if(currentHistory.length>500) currentHistory = currentHistory.slice(-500);
         updateAll();
     }
 
-    // Lùi 1 bước (undo)
     function undoLast() {
-        if (currentHistory.length > 0) {
+        if(currentHistory.length>0){
             currentHistory.pop();
             updateAll();
         }
     }
-
-    // Xóa tất cả
     function clearAll() {
         currentHistory = [];
-        currentWeights = Array(ALGO_LIST.length).fill(1 / ALGO_LIST.length);
+        currentWeights = Array(ALGO_LIST.length).fill(1/ALGO_LIST.length);
         perAlgoCorrect = Array(ALGO_LIST.length).fill(0);
         saveHistory(currentHistory);
-        saveWeights();
+        localStorage.setItem(WEIGHTS_KEY, JSON.stringify(currentWeights));
         updateAll();
     }
 
-    // Gán sự kiện cho các nút số
+    // Gán sự kiện nút số
     document.querySelectorAll('.num-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            let num = parseInt(btn.dataset.num);
-            addResult(num);
-        });
+        btn.addEventListener('click', () => addResult(parseInt(btn.dataset.num)));
     });
-
     document.getElementById('undoBtn').addEventListener('click', undoLast);
     document.getElementById('clearBtn').addEventListener('click', clearAll);
 
-    // Khởi tạo giao diện
+    // Anti-detection nhẹ (chỉ đổi tiêu đề)
+    const fakeTitles = ["📊 Báo cáo hàng ngày", "🧪 Lab Report", "🌌 Star Chart", "📈 Thống kê thị trường"];
+    setInterval(() => {
+        document.title = fakeTitles[Math.floor(Math.random()*fakeTitles.length)];
+    }, 5000);
+
+    document.addEventListener('keydown', (e) => {
+        if(e.ctrlKey && e.key==='b'){
+            e.preventDefault();
+            let top3 = getTop3(ensembleScores(currentHistory, currentWeights));
+            alert(`🔮 Cửa tối ưu: ${top3[0]} – Cân nhắc đặt cược!`);
+        }
+    });
+
+    window.__liveFeed = function(newResult){
+        if([1,2,3,4].includes(newResult)) addResult(newResult);
+    };
+
     updateAll();
 </script>
 </body>
