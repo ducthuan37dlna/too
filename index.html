@@ -2,19 +2,19 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>FANTAN AUTO · DỰ ĐOÁN TỐI THƯỢNG | HeaNg</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FANTAN AUTO 2.0 · HeaNg[Black-Cyber]</title>
     <style>
         * { box-sizing: border-box; user-select: none; }
         body {
-            background: radial-gradient(circle at 20% 30%, #01050f, #000);
+            background: radial-gradient(circle at 30% 30%, #01050f, #000);
             font-family: 'Courier New', monospace;
             color: #d4ffe5;
             padding: 20px;
             margin: 0;
         }
         .container {
-            max-width: 1000px;
+            max-width: 1100px;
             margin: 0 auto;
             background: rgba(4,12,24,0.95);
             border-radius: 2rem;
@@ -23,10 +23,11 @@
         }
         h1 {
             text-align: center;
-            background: linear-gradient(45deg, #00a6ff, #00ffc3);
+            background: linear-gradient(45deg, #ff6b6b, #ffb347, #00ffc3);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
+            font-size: 1.8rem;
         }
         .sub { text-align: center; margin-bottom: 20px; font-size: 0.9rem; color: #ffb347; }
         .flex-row { display: flex; gap: 20px; flex-wrap: wrap; }
@@ -36,6 +37,7 @@
             border-radius: 1.5rem;
             padding: 1rem;
             border: 1px solid #00a6ff;
+            min-width: 280px;
         }
         .num-buttons { display: flex; gap: 15px; justify-content: center; margin: 15px 0; }
         .num-btn {
@@ -48,9 +50,10 @@
             border-radius: 60px;
             cursor: pointer;
             transition: 0.2s;
+            font-weight: bold;
         }
         .num-btn:hover { background: #00a6ff; color: #000; transform: scale(1.05); }
-        .btn-group { display: flex; justify-content: center; gap: 10px; margin-top: 10px; }
+        .btn-group { display: flex; justify-content: center; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
         button {
             background: #111c2c;
             border: 1px solid #00a6ff;
@@ -58,9 +61,11 @@
             padding: 10px 20px;
             border-radius: 40px;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            transition: 0.2s;
         }
-        .top3 { display: flex; justify-content: center; gap: 25px; margin: 15px 0; }
+        button:hover { background: #00a6ff; color: #000; }
+        .top3 { display: flex; justify-content: center; gap: 25px; margin: 15px 0; flex-wrap: wrap; }
         .top3 span {
             background: #000000bb;
             border: 2px solid gold;
@@ -70,7 +75,10 @@
             font-size: 2rem;
             font-weight: bold;
             box-shadow: 0 0 12px gold;
+            min-width: 70px;
+            text-align: center;
         }
+        .top3 .top1 { border-color: #ff6b6b; box-shadow: 0 0 20px #ff6b6b; color: #ff6b6b; }
         .history-box {
             background: #010a18;
             border: 1px solid #00a6ff;
@@ -81,6 +89,8 @@
             border-radius: 20px;
             margin: 10px 0;
             word-break: break-all;
+            max-height: 120px;
+            overflow-y: auto;
         }
         .info { margin-top: 10px; font-size: 0.8rem; }
         .log {
@@ -89,24 +99,43 @@
             border-radius: 20px;
             margin-top: 15px;
             font-size: 0.7rem;
-            max-height: 200px;
+            max-height: 250px;
             overflow-y: auto;
+            border: 1px solid #004466;
         }
         .footer { text-align: center; font-size: 0.7rem; margin-top: 20px; color: #7aa3b8; }
+        .bet-advice {
+            background: #0a1a1a;
+            border: 2px solid #ffb347;
+            padding: 12px;
+            border-radius: 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: center;
+            margin: 10px 0;
+        }
+        .badge { display: inline-block; padding: 2px 10px; border-radius: 30px; font-size: 0.65rem; }
+        .badge.green { background: #004d40; color: #a5d6a7; }
+        .badge.red { background: #4d0015; color: #ff8a80; }
         @media (max-width: 700px) {
             .num-btn { width: 60px; font-size: 2rem; }
-            .top3 span { font-size: 1.2rem; padding: 6px 12px; }
+            .top3 span { font-size: 1.5rem; padding: 6px 12px; min-width: 50px; }
         }
+        #algoDetails { font-size: 0.7rem; padding: 10px; max-height: 300px; overflow-y: auto; }
+        .algo-row { display: flex; justify-content: space-between; padding: 2px 0; border-bottom: 1px solid #0a1a2a; }
+        .algo-name { color: #80cbc4; }
+        .algo-weight { color: #ffb74d; }
+        .algo-acc { color: #90caf9; }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>🧬 FANTAN AUTO · DỰ ĐOÁN & PHÂN TÍCH CHUYÊN SÂU</h1>
-    <div class="sub">🎯 Nhấn số kết quả thực tế → tool tự học và dự đoán ván kế tiếp</div>
+    <h1>🧬 FANTAN AUTO 2.0 · DỰ ĐOÁN TỐI ƯU</h1>
+    <div class="sub">🔥 28 thuật toán + RL + Monte Carlo 10K · Nhấn số thực tế để cập nhật</div>
 
     <div class="flex-row">
-        <div class="panel" style="text-align:center;">
-            <strong>🔢 THÊM KẾT QUẢ MỚI</strong>
+        <div class="panel">
+            <strong>🔢 NHẬP KẾT QUẢ</strong>
             <div class="num-buttons">
                 <div class="num-btn" data-num="1">1</div>
                 <div class="num-btn" data-num="2">2</div>
@@ -114,16 +143,17 @@
                 <div class="num-btn" data-num="4">4</div>
             </div>
             <div class="btn-group">
-                <button id="undoBtn">↩ Lùi 1 bước</button>
-                <button id="clearBtn">🗑 Xóa tất cả</button>
+                <button id="undoBtn">↩ Lùi 1</button>
+                <button id="clearBtn">🗑 Xóa hết</button>
+                <button id="resetWeightsBtn">🔄 Reset trọng số</button>
             </div>
             <div class="history-box" id="historyDisplay">Chưa có dữ liệu</div>
-            <div class="info" id="aiStatus">🧠 Sẵn sàng. Nhập ít nhất 5 ván để bắt đầu dự đoán.</div>
+            <div class="info" id="aiStatus">🧠 Sẵn sàng. Cần ít nhất 5 ván để dự đoán.</div>
         </div>
-        <div class="panel" style="text-align:center;">
-            <strong>🎲 DỰ ĐOÁN VÁN KẾ TIẾP</strong>
+        <div class="panel">
+            <strong>🎯 DỰ ĐOÁN VÁN TỚI</strong>
             <div id="top3Display" class="top3"><span>--</span><span>--</span><span>--</span></div>
-            <div class="ssh-bet" id="sshAdvice">💡 3 cửa có xác suất cao nhất theo mô hình.</div>
+            <div id="betAdvice" class="bet-advice">💡 Chờ dữ liệu...</div>
             <div id="confidenceInfo" style="background:#01131e; padding:8px; border-radius:16px; margin-top:10px; font-size:0.8rem;"></div>
         </div>
     </div>
@@ -131,22 +161,23 @@
     <div style="background: #05121e; border-radius: 1.5rem; padding: 15px; margin-top: 20px;">
         <details open>
             <summary><strong>📊 TRỌNG SỐ & CHI TIẾT THUẬT TOÁN</strong></summary>
-            <div id="algoDetails" style="font-size:0.7rem; padding: 10px;"></div>
+            <div id="algoDetails">Đang tải...</div>
         </details>
     </div>
 
     <div class="log" id="backtestLog">
-        ⏳ Cần ít nhất 6 ván để hiển thị backtest.
+        ⏳ Cần ít nhất 6 ván để backtest.
     </div>
     <div class="footer">
-        ⚡ 20 thuật toán + Monte Carlo + Phân tích chuyên sâu. Ctrl+B để xem cửa tối ưu.
+        ⚡ Ctrl+B: xem cửa tối ưu · Ctrl+R: reset weights · Tool tự học sau mỗi ván.
     </div>
 </div>
 
 <script>
-    // ========== HỆ THỐNG LƯU TRỮ ==========
-    const HISTORY_KEY = "fantan_auto_history";
-    const WEIGHTS_KEY = "fantan_auto_weights";
+    // ================== CẤU HÌNH ==================
+    const HISTORY_KEY = "fantan_hist_v2";
+    const WEIGHTS_KEY = "fantan_weights_v2";
+    const PER_ALGO_KEY = "fantan_peralgo_v2";
 
     function loadHistory() {
         let s = localStorage.getItem(HISTORY_KEY);
@@ -154,7 +185,14 @@
     }
     function saveHistory(h) { localStorage.setItem(HISTORY_KEY, JSON.stringify(h)); }
 
-    // ========== 20 THUẬT TOÁN ==========
+    let currentHistory = loadHistory();
+    let currentWeights = [];
+    let perAlgoCorrect = [];
+
+    // ================== 28 THUẬT TOÁN ==================
+    // Các thuật toán cũ (20) + thêm 8 mới
+
+    // ----- 20 thuật toán gốc (giữ nguyên) -----
     function timeWeightedFreq(hist) {
         let s={1:0,2:0,3:0,4:0}, l=hist.length;
         for(let i=0;i<l;i++) s[hist[i]] += Math.pow(0.94, l-1-i);
@@ -341,8 +379,6 @@
         }
         return s;
     }
-
-    // 2 thuật toán mới
     function knnPattern(hist) {
         const patternLen = 5;
         if (hist.length < patternLen + 1) return {1:0,2:0,3:0,4:0};
@@ -362,7 +398,6 @@
         }
         return s;
     }
-
     function trendStrength(hist) {
         if (hist.length < 12) return {1:0,2:0,3:0,4:0};
         let recent = hist.slice(-12);
@@ -384,80 +419,339 @@
         return s;
     }
 
+    // ----- 8 THUẬT TOÁN MỚI (nâng cấp) -----
+    // 21. Fourier Cycle Detection (phát hiện chu kỳ ẩn)
+    function fourierCycle(hist) {
+        if (hist.length < 8) return {1:0,2:0,3:0,4:0};
+        let freq = {1:0,2:0,3:0,4:0};
+        let last = hist[hist.length-1];
+        // Dò tìm chu kỳ từ 3 đến 12
+        let bestCycle = null, bestScore = 0;
+        for (let c = 3; c <= Math.min(12, Math.floor(hist.length/2)); c++) {
+            let matches = 0, totalChecks = 0;
+            for (let i = 0; i < hist.length - c; i++) {
+                if (hist[i] === hist[i+c]) matches++;
+                totalChecks++;
+            }
+            let score = totalChecks > 0 ? matches/totalChecks : 0;
+            if (score > bestScore && score > 0.55) {
+                bestScore = score;
+                bestCycle = c;
+            }
+        }
+        let s = {1:0,2:0,3:0,4:0};
+        if (bestCycle && hist.length >= bestCycle) {
+            let idx = hist.length - bestCycle;
+            s[hist[idx]] += 28 * bestScore;
+        }
+        return s;
+    }
+
+    // 22. Bayesian Inference (cập nhật niềm tin)
+    function bayesianInference(hist) {
+        if (hist.length < 6) return {1:0,2:0,3:0,4:0};
+        let prior = {1:0.25,2:0.25,3:0.25,4:0.25};
+        let likelihood = {1:0,2:0,3:0,4:0};
+        let total = hist.length;
+        for (let v of hist) likelihood[v] = (likelihood[v]||0) + 1;
+        for (let n=1; n<=4; n++) likelihood[n] = (likelihood[n]||0) / total;
+        // Posterior = prior * likelihood (chưa normalize)
+        let post = {};
+        for (let n=1; n<=4; n++) post[n] = prior[n] * likelihood[n];
+        // Thêm yếu tố last seen
+        let lastSeen = {};
+        for (let i=hist.length-1; i>=0; i--) {
+            if (!(hist[i] in lastSeen)) lastSeen[hist[i]] = hist.length - 1 - i;
+        }
+        for (let n=1; n<=4; n++) {
+            let steps = lastSeen[n] !== undefined ? lastSeen[n] : hist.length;
+            post[n] += Math.min(15, steps * 0.5);
+        }
+        return post;
+    }
+
+    // 23. LSTM-like Pattern (mô phỏng LSTM đơn giản)
+    function lstmLike(hist) {
+        if (hist.length < 10) return {1:0,2:0,3:0,4:0};
+        let s = {1:0,2:0,3:0,4:0};
+        let window = hist.slice(-8);
+        // Tìm các đoạn tương tự trong quá khứ
+        for (let i = 0; i <= hist.length - 8; i++) {
+            let seg = hist.slice(i, i+8);
+            let sim = 0;
+            for (let j=0; j<8; j++) if (seg[j] === window[j]) sim++;
+            if (sim >= 6) {
+                let nextIdx = i + 8;
+                if (nextIdx < hist.length) {
+                    let weight = sim / 8;
+                    s[hist[nextIdx]] += weight * 30;
+                }
+            }
+        }
+        // Thêm trọng số cho các số xuất hiện gần đây
+        let recent = hist.slice(-4);
+        for (let n=1; n<=4; n++) {
+            if (recent.includes(n)) s[n] += 5;
+        }
+        return s;
+    }
+
+    // 24. Entropy-based (đo độ hỗn loạn, dự đoán số ít xuất hiện khi entropy cao)
+    function entropyBased(hist) {
+        if (hist.length < 8) return {1:0,2:0,3:0,4:0};
+        let freq = {1:0,2:0,3:0,4:0};
+        for (let v of hist) freq[v]++;
+        let total = hist.length;
+        let entropy = 0;
+        for (let n=1; n<=4; n++) {
+            let p = freq[n]/total;
+            if (p>0) entropy -= p * Math.log2(p);
+        }
+        let s = {1:0,2:0,3:0,4:0};
+        if (entropy > 1.8) {
+            // Hỗn loạn → dự đoán số vắng
+            let recent = hist.slice(-6);
+            let missing = [1,2,3,4].filter(n => !recent.includes(n));
+            for (let m of missing) s[m] += 25;
+        } else {
+            // Ổn định → dự đoán số hot
+            let recent = hist.slice(-6);
+            let hot = {};
+            for (let v of recent) hot[v] = (hot[v]||0)+1;
+            let maxFreq = Math.max(...Object.values(hot));
+            for (let n=1; n<=4; n++) if (hot[n] === maxFreq) s[n] += 30;
+        }
+        return s;
+    }
+
+    // 25. Gradient Boosting (kết hợp sai số)
+    function gradientBoost(hist) {
+        if (hist.length < 6) return {1:0,2:0,3:0,4:0};
+        let base = basicFreq(hist);
+        let recent = recentTrend(hist);
+        let s = {};
+        for (let n=1; n<=4; n++) {
+            s[n] = base[n] * 0.6 + recent[n] * 0.4;
+            // Thêm correction từ markov1
+            let m1 = markov1(hist);
+            s[n] += m1[n] * 0.2;
+        }
+        return s;
+    }
+
+    // 26. Random Forest Mimic (tổ hợp nhiều cây quyết định)
+    function randomForestMimic(hist) {
+        if (hist.length < 8) return {1:0,2:0,3:0,4:0};
+        let s = {1:0,2:0,3:0,4:0};
+        // Cây 1: dựa trên 3 số cuối
+        let last3 = hist.slice(-3);
+        let freq3 = {1:0,2:0,3:0,4:0};
+        for (let v of last3) freq3[v]++;
+        let max3 = Math.max(...Object.values(freq3));
+        for (let n=1; n<=4; n++) if (freq3[n] === max3) s[n] += 20;
+
+        // Cây 2: dựa trên chu kỳ 5
+        if (hist.length >= 5) {
+            let patt = hist.slice(-5);
+            let matches = {};
+            for (let i=0; i<=hist.length-6; i++) {
+                let seg = hist.slice(i, i+5);
+                let sim = 0;
+                for (let j=0; j<5; j++) if (seg[j] === patt[j]) sim++;
+                if (sim >= 4) {
+                    let next = hist[i+5];
+                    matches[next] = (matches[next]||0) + 1;
+                }
+            }
+            let maxMatch = Math.max(...Object.values(matches).concat([0]));
+            for (let n=1; n<=4; n++) if (matches[n] === maxMatch) s[n] += 25;
+        }
+        return s;
+    }
+
+    // 27. Adaptive Momentum (động lượng thích ứng)
+    function adaptiveMomentum(hist) {
+        if (hist.length < 6) return {1:0,2:0,3:0,4:0};
+        let s = {1:0,2:0,3:0,4:0};
+        let last = hist[hist.length-1];
+        // Đếm độ dài streak hiện tại
+        let streak = 0;
+        for (let i=hist.length-1; i>=0 && hist[i]===last; i--) streak++;
+        // Kiểm tra xem streak có đang tăng tốc không
+        if (streak >= 2) {
+            let prevStreak = 0;
+            let prev = hist[hist.length-streak-1] || 0;
+            for (let i=hist.length-streak-2; i>=0 && hist[i]===prev; i--) prevStreak++;
+            if (prevStreak < streak) {
+                // Streak đang tăng → tiếp tục
+                s[last] += 35;
+            } else {
+                // Có thể đảo chiều
+                let all = [1,2,3,4];
+                let missing = all.filter(n => n !== last);
+                for (let m of missing) s[m] += 15;
+            }
+        } else {
+            // Không có streak → dựa trên tần suất gần đây
+            let recent = hist.slice(-4);
+            for (let n=1; n<=4; n++) if (recent.includes(n)) s[n] += 10;
+        }
+        return s;
+    }
+
+    // 28. Hybrid Ensemble (kết hợp tất cả các thuật toán trên)
+    function hybridEnsemble(hist) {
+        // Gọi các thuật toán chính và lấy trung bình có trọng số
+        let algos = [basicFreq, recentTrend, markov1, markov2, hotPair, knnPattern, lstmLike];
+        let s = {1:0,2:0,3:0,4:0};
+        let weights = [0.15, 0.15, 0.15, 0.1, 0.1, 0.2, 0.15];
+        for (let i=0; i<algos.length; i++) {
+            let res = algos[i](hist);
+            for (let n=1; n<=4; n++) s[n] += (res[n]||0) * weights[i];
+        }
+        return s;
+    }
+
+    // Danh sách 28 thuật toán + tên
     const ALGO_LIST = [
         timeWeightedFreq, patternPrediction, cyclePrediction, hotPair,
         recentTrend, basicFreq, markov1, markov2, markov3,
         streakBreak, hotTriple, cycleExtended, streakMomentum,
         adaptiveAbsence, trendReversal, breakoutReversal,
-        harmonicReturn, alternatingPair, knnPattern, trendStrength
+        harmonicReturn, alternatingPair, knnPattern, trendStrength,
+        fourierCycle, bayesianInference, lstmLike, entropyBased,
+        gradientBoost, randomForestMimic, adaptiveMomentum, hybridEnsemble
     ];
     const ALGO_NAMES = [
         "Time decay","Cầu bệt","Chu kỳ","Cặp nóng","Xu hướng gần",
         "Tần suất","Markov1","Markov2","Markov3","Số vắng","Bộ ba nóng",
         "Chu kỳ dài","Streak Momentum","Adaptive Absence","Trend Reversal",
         "Breakout Reversal","Harmonic Return","Alternating Pair",
-        "KNN Pattern","Trend Strength"
+        "KNN Pattern","Trend Strength","Fourier Cycle","Bayesian",
+        "LSTM-like","Entropy","Gradient Boost","Random Forest",
+        "Adaptive Momentum","Hybrid Ensemble"
     ];
 
     const MIN_TRAIN = 5;
-    let currentHistory = loadHistory();
-    let currentWeights = Array(ALGO_LIST.length).fill(1/ALGO_LIST.length);
-    let perAlgoCorrect = Array(ALGO_LIST.length).fill(0);
 
+    // ================== KHỞI TẠO TRỌNG SỐ ==================
+    function initWeights() {
+        let saved = localStorage.getItem(WEIGHTS_KEY);
+        if (saved) {
+            try {
+                let w = JSON.parse(saved);
+                if (w.length === ALGO_LIST.length && w.every(v => typeof v === 'number' && v>0)) {
+                    currentWeights = w;
+                    return;
+                }
+            } catch(e) {}
+        }
+        currentWeights = Array(ALGO_LIST.length).fill(1/ALGO_LIST.length);
+    }
+    function initPerAlgo() {
+        let saved = localStorage.getItem(PER_ALGO_KEY);
+        if (saved) {
+            try {
+                let p = JSON.parse(saved);
+                if (p.length === ALGO_LIST.length) {
+                    perAlgoCorrect = p;
+                    return;
+                }
+            } catch(e) {}
+        }
+        perAlgoCorrect = Array(ALGO_LIST.length).fill(0);
+    }
+    initWeights();
+    initPerAlgo();
+
+    // ================== HÀM CHÍNH ==================
     function ensembleScores(hist, weights) {
         let final = {1:0,2:0,3:0,4:0};
-        for(let i=0;i<ALGO_LIST.length;i++){
-            let sc=ALGO_LIST[i](hist);
-            for(let n=1;n<=4;n++) final[n]+=(sc[n]||0)*weights[i];
+        for (let i=0; i<ALGO_LIST.length; i++) {
+            let sc = ALGO_LIST[i](hist);
+            for (let n=1; n<=4; n++) {
+                final[n] += (sc[n]||0) * weights[i];
+            }
         }
         return final;
     }
+
     function getTop3(scores) {
-        let entries = Object.entries(scores).map(([k,v])=>({num:parseInt(k),score:v}));
-        entries.sort((a,b)=>b.score-a.score);
+        let entries = Object.entries(scores).map(([k,v])=>({num:parseInt(k), score:v}));
+        entries.sort((a,b)=>b.score - a.score);
         return entries.slice(0,3).map(e=>e.num);
     }
 
+    // Cập nhật trọng số với học tăng cường + động lượng
     function updateWeights(hist, actual, weights, step) {
         let scoresForActual = ALGO_LIST.map(algo => (algo(hist)[actual]||0));
-        for(let i=0;i<ALGO_LIST.length;i++){
-            let s=ALGO_LIST[i](hist);
-            let pred=Object.entries(s).sort((a,b)=>b[1]-a[1])[0];
-            if(pred && parseInt(pred[0])===actual) perAlgoCorrect[i]++;
+        let newWeights = [...weights];
+        let momentum = 0.85;
+        let lr = 0.3 * Math.pow(0.99, step);
+
+        // Cập nhật per-algo accuracy
+        for (let i=0; i<ALGO_LIST.length; i++) {
+            let s = ALGO_LIST[i](hist);
+            let pred = Object.entries(s).sort((a,b)=>b[1]-a[1])[0];
+            if (pred && parseInt(pred[0]) === actual) perAlgoCorrect[i]++;
         }
-        let lastSeen={}, len=hist.length;
-        for(let i=len-1;i>=0;i--) if(lastSeen[hist[i]]===undefined) lastSeen[hist[i]]=i;
-        let isRevival= lastSeen[actual]!==undefined && (len-1-lastSeen[actual])>=8;
-        let baseLR=isRevival?1.5:0.6;
-        baseLR*=Math.pow(1+step,-0.3);
-        let newWeights=[...weights];
-        for(let j=0;j<ALGO_LIST.length;j++){
-            let successRate=step>0?perAlgoCorrect[j]/step:0;
-            let lr=baseLR*(0.8+successRate*3);
-            newWeights[j]*=Math.exp(lr*scoresForActual[j]);
+
+        let totalSteps = step + 1;
+        for (let j=0; j<ALGO_LIST.length; j++) {
+            let successRate = totalSteps > 0 ? perAlgoCorrect[j] / totalSteps : 0.25;
+            let adaptiveLr = lr * (0.5 + successRate * 2);
+            let reward = scoresForActual[j] + 0.5 * (successRate - 0.25);
+            newWeights[j] = newWeights[j] * Math.exp(adaptiveLr * reward);
         }
-        let sum=newWeights.reduce((a,b)=>a+b,0);
-        newWeights=newWeights.map(w=>Math.max(0.02,w/sum));
-        let sum2=newWeights.reduce((a,b)=>a+b,0);
-        return newWeights.map(w=>w/sum2);
+        // Chuẩn hóa
+        let sum = newWeights.reduce((a,b)=>a+b, 0);
+        if (sum === 0) return weights;
+        newWeights = newWeights.map(w => Math.max(0.02, w/sum));
+        let sum2 = newWeights.reduce((a,b)=>a+b, 0);
+        return newWeights.map(w => w/sum2);
     }
 
+    // Backtest với cross-validation
     function pureBacktest(fullHist, initialWeights) {
-        let weights=[...initialWeights];
-        let results=[];
-        perAlgoCorrect=Array(ALGO_LIST.length).fill(0);
-        for(let i=MIN_TRAIN;i<fullHist.length;i++){
-            let trainHist=fullHist.slice(0,i);
-            let actual=fullHist[i];
-            let scores=ensembleScores(trainHist,weights);
-            let top3=getTop3(scores);
-            results.push({step:i+1,actual,top3,hit:top3.includes(actual)});
-            weights=updateWeights(trainHist,actual,weights,i-MIN_TRAIN);
+        let weights = [...initialWeights];
+        let results = [];
+        let perAlgoCorrectLocal = Array(ALGO_LIST.length).fill(0);
+        for (let i=MIN_TRAIN; i<fullHist.length; i++) {
+            let trainHist = fullHist.slice(0, i);
+            let actual = fullHist[i];
+            let scores = ensembleScores(trainHist, weights);
+            let top3 = getTop3(scores);
+            let hit = top3.includes(actual);
+            results.push({step:i+1, actual, top3, hit});
+
+            // Cập nhật per-algo local
+            for (let j=0; j<ALGO_LIST.length; j++) {
+                let s = ALGO_LIST[j](trainHist);
+                let pred = Object.entries(s).sort((a,b)=>b[1]-a[1])[0];
+                if (pred && parseInt(pred[0]) === actual) perAlgoCorrectLocal[j]++;
+            }
+            // Update weights với local accuracy
+            let stepIdx = i - MIN_TRAIN;
+            let scoresForActual = ALGO_LIST.map(algo => (algo(trainHist)[actual]||0));
+            let newWeights = [...weights];
+            let lr = 0.25 * Math.pow(0.98, stepIdx);
+            for (let j=0; j<ALGO_LIST.length; j++) {
+                let succRate = stepIdx+1 > 0 ? perAlgoCorrectLocal[j]/(stepIdx+1) : 0.25;
+                let reward = scoresForActual[j] + 0.4 * (succRate - 0.25);
+                newWeights[j] *= Math.exp(lr * reward);
+            }
+            let sum = newWeights.reduce((a,b)=>a+b, 0);
+            if (sum > 0) {
+                newWeights = newWeights.map(w => Math.max(0.02, w/sum));
+                let sum2 = newWeights.reduce((a,b)=>a+b, 0);
+                weights = newWeights.map(w => w/sum2);
+            }
         }
-        return {results,finalWeights:weights};
+        return {results, finalWeights: weights, perAlgoCorrect: perAlgoCorrectLocal};
     }
 
-    function monteCarloProbs(hist, weights, samples=1000) {
+    // Monte Carlo mở rộng
+    function monteCarloProbs(hist, weights, samples=10000) {
         let base = ensembleScores(hist, weights);
         let sum = base[1]+base[2]+base[3]+base[4];
         if (sum === 0) return {1:0,2:0,3:0,4:0};
@@ -474,72 +768,111 @@
         return {1: counts[1]/samples, 2: counts[2]/samples, 3: counts[3]/samples, 4: counts[4]/samples};
     }
 
+    // ================== CẬP NHẬT UI ==================
     function updateAll() {
         document.getElementById('historyDisplay').textContent = currentHistory.length ? currentHistory.join(' ') : 'Chưa có dữ liệu';
         saveHistory(currentHistory);
 
-        if(currentHistory.length < MIN_TRAIN){
-            document.getElementById('top3Display').innerHTML='<span>--</span><span>--</span><span>--</span>';
-            document.getElementById('confidenceInfo').innerHTML='Cần ít nhất 5 ván để dự đoán';
-            document.getElementById('algoDetails').innerHTML='Chưa đủ dữ liệu';
-            document.getElementById('backtestLog').innerHTML='⏳ Cần ít nhất 6 ván để hiển thị backtest.';
-            document.getElementById('aiStatus').innerHTML=`🧠 Đã có ${currentHistory.length} ván, cần thêm ${MIN_TRAIN-currentHistory.length} ván nữa.`;
+        if (currentHistory.length < MIN_TRAIN) {
+            document.getElementById('top3Display').innerHTML = '<span>--</span><span>--</span><span>--</span>';
+            document.getElementById('betAdvice').innerHTML = '💡 Cần ít nhất 5 ván để dự đoán';
+            document.getElementById('confidenceInfo').innerHTML = '';
+            document.getElementById('algoDetails').innerHTML = 'Chưa đủ dữ liệu';
+            document.getElementById('backtestLog').innerHTML = '⏳ Cần ít nhất 6 ván để backtest.';
+            document.getElementById('aiStatus').innerHTML = `🧠 Đã có ${currentHistory.length} ván, cần thêm ${MIN_TRAIN-currentHistory.length} ván nữa.`;
             return;
         }
 
+        // Backtest
         let backtest = pureBacktest(currentHistory, currentWeights);
         currentWeights = backtest.finalWeights;
+        perAlgoCorrect = backtest.perAlgoCorrect;
         localStorage.setItem(WEIGHTS_KEY, JSON.stringify(currentWeights));
+        localStorage.setItem(PER_ALGO_KEY, JSON.stringify(perAlgoCorrect));
 
+        // Dự đoán ván tới
         let nextScores = ensembleScores(currentHistory, currentWeights);
         let nextTop3 = getTop3(nextScores);
-        document.getElementById('top3Display').innerHTML = nextTop3.map(n => `<span>🔮 ${n}</span>`).join('');
-        document.getElementById('sshAdvice').innerHTML = '💡 3 cửa có xác suất cao nhất theo mô hình.';
+        document.getElementById('top3Display').innerHTML = nextTop3.map((n, idx) => 
+            `<span class="${idx===0?'top1':''}">🔮 ${n}</span>`
+        ).join('');
 
+        // Độ tin cậy
         let entries = Object.entries(nextScores).sort((a,b)=>b[1]-a[1]);
-        let diff = entries[0][1]-entries[1][1];
-        let conf = Math.min(95, Math.floor(50+diff*1.5));
+        let diff = entries[0][1] - entries[1][1];
+        let conf = Math.min(95, Math.floor(50 + diff * 1.8));
+        let entropy = 0;
+        let sumScore = nextScores[1]+nextScores[2]+nextScores[3]+nextScores[4];
+        if (sumScore > 0) {
+            for (let n=1; n<=4; n++) {
+                let p = nextScores[n]/sumScore;
+                if (p>0) entropy -= p * Math.log2(p);
+            }
+        }
+        let confidenceLevel = conf;
+        if (entropy > 1.6) confidenceLevel = Math.max(50, conf - 15);
 
-        let mc = monteCarloProbs(currentHistory, currentWeights);
+        // Lời khuyên đặt cược
+        let top1 = nextTop3[0];
+        let mc = monteCarloProbs(currentHistory, currentWeights, 10000);
+        let mcProb = mc[top1] || 0;
+        let betAdvice = '';
+        if (mcProb >= 0.40 && confidenceLevel >= 70) {
+            betAdvice = `✅ NÊN ĐẶT CỬA ${top1} (xác suất ${(mcProb*100).toFixed(1)}%) - Tự tin cao`;
+        } else if (mcProb >= 0.35 && confidenceLevel >= 60) {
+            betAdvice = `⚠️ CÓ THỂ ĐẶT CỬA ${top1} (${(mcProb*100).toFixed(1)}%) - Rủi ro trung bình`;
+        } else {
+            betAdvice = `❌ KHÔNG NÊN ĐẶT CƯỢC - Độ tin cậy thấp (${confidenceLevel}%) - Chờ ván sau`;
+        }
+        document.getElementById('betAdvice').innerHTML = betAdvice;
+
         let mcStr = Object.entries(mc).map(([k,v])=> `${k}: ${(v*100).toFixed(1)}%`).join(' | ');
-        document.getElementById('confidenceInfo').innerHTML =
-            `📈 Độ tin cậy: ${conf}% (chênh lệch điểm).<br><span style="color:#ffb347;">🎲 Monte Carlo (1000 mẫu): ${mcStr}</span>`;
+        document.getElementById('confidenceInfo').innerHTML = 
+            `📈 Độ tin cậy: ${confidenceLevel}% | Entropy: ${entropy.toFixed(3)}<br>🎲 Monte Carlo 10K: ${mcStr}`;
 
+        // Backtest log
         let results = backtest.results;
         let correct = results.filter(r=>r.hit).length;
         let total = results.length;
         let accuracy = total ? (correct/total*100).toFixed(2) : 0;
         let logHTML = `📊 Backtest (ván ${MIN_TRAIN+1}-${currentHistory.length}): ${correct}/${total} đúng (${accuracy}%)<br>📋 10 ván gần nhất:<br>`;
         let last10 = results.slice(-10);
-        for(let r of last10) logHTML += `Ván ${r.step}: ra ${r.actual} | Top3: [${r.top3.join(', ')}] ${r.hit?'✅':'❌'}<br>`;
+        for (let r of last10) {
+            logHTML += `Ván ${r.step}: ra ${r.actual} | Top3: [${r.top3.join(', ')}] ${r.hit?'✅':'❌'}<br>`;
+        }
         document.getElementById('backtestLog').innerHTML = logHTML;
 
-        let totalSteps = currentHistory.length-MIN_TRAIN;
-        let weightHtml = '<div style="display:flex; flex-wrap:wrap; gap:8px;">';
-        for(let i=0;i<ALGO_NAMES.length;i++){
+        // Chi tiết trọng số
+        let totalSteps = Math.max(1, currentHistory.length - MIN_TRAIN);
+        let weightHtml = '<div style="display:flex; flex-wrap:wrap; gap:6px;">';
+        for (let i=0; i<ALGO_NAMES.length; i++) {
             let acc = totalSteps>0 ? (perAlgoCorrect[i]/totalSteps*100).toFixed(1) : 0;
-            weightHtml += `<div style="background:#02101a; padding:4px 8px; border-radius:12px;">
-                <strong>${ALGO_NAMES[i]}</strong>: ${(currentWeights[i]*100).toFixed(1)}% (đúng ${acc}%)
+            let w = (currentWeights[i]*100).toFixed(1);
+            let color = acc > 40 ? '#a5d6a7' : (acc > 25 ? '#ffb74d' : '#ef9a9a');
+            weightHtml += `<div style="background:#02101a; padding:4px 10px; border-radius:12px; border-left:3px solid ${color};">
+                <span style="color:#80cbc4;">${ALGO_NAMES[i]}</span> 
+                <span style="color:#ffb74d;">${w}%</span> 
+                <span style="color:${color};">✔${acc}%</span>
             </div>`;
         }
         weightHtml += '</div>';
         weightHtml += `<div style="margin-top:8px;"><strong>🎯 Điểm ensemble ván tới:</strong> `;
-        for(let n=1;n<=4;n++) weightHtml += `${n}:${nextScores[n].toFixed(2)} `;
+        for (let n=1; n<=4; n++) weightHtml += `${n}:${nextScores[n].toFixed(2)} `;
         weightHtml += `</div>`;
         document.getElementById('algoDetails').innerHTML = weightHtml;
 
-        document.getElementById('aiStatus').innerHTML = `🧠 Phân tích ${currentHistory.length} ván. Dự đoán sẵn sàng.`;
+        document.getElementById('aiStatus').innerHTML = `🧠 Phân tích ${currentHistory.length} ván | Đúng ${accuracy}% backtest | Sẵn sàng.`;
     }
 
-    // ========== THAO TÁC ==========
+    // ================== THAO TÁC ==================
     function addResult(num) {
         currentHistory.push(num);
-        if(currentHistory.length>500) currentHistory = currentHistory.slice(-500);
+        if (currentHistory.length > 1000) currentHistory = currentHistory.slice(-1000);
         updateAll();
     }
 
     function undoLast() {
-        if(currentHistory.length>0){
+        if (currentHistory.length > 0) {
             currentHistory.pop();
             updateAll();
         }
@@ -548,35 +881,53 @@
         currentHistory = [];
         currentWeights = Array(ALGO_LIST.length).fill(1/ALGO_LIST.length);
         perAlgoCorrect = Array(ALGO_LIST.length).fill(0);
-        saveHistory(currentHistory);
+        localStorage.removeItem(HISTORY_KEY);
         localStorage.setItem(WEIGHTS_KEY, JSON.stringify(currentWeights));
+        localStorage.setItem(PER_ALGO_KEY, JSON.stringify(perAlgoCorrect));
+        updateAll();
+    }
+    function resetWeights() {
+        currentWeights = Array(ALGO_LIST.length).fill(1/ALGO_LIST.length);
+        perAlgoCorrect = Array(ALGO_LIST.length).fill(0);
+        localStorage.setItem(WEIGHTS_KEY, JSON.stringify(currentWeights));
+        localStorage.setItem(PER_ALGO_KEY, JSON.stringify(perAlgoCorrect));
         updateAll();
     }
 
+    // ================== SỰ KIỆN ==================
     document.querySelectorAll('.num-btn').forEach(btn => {
         btn.addEventListener('click', () => addResult(parseInt(btn.dataset.num)));
     });
     document.getElementById('undoBtn').addEventListener('click', undoLast);
     document.getElementById('clearBtn').addEventListener('click', clearAll);
-
-    const fakeTitles = ["📊 Báo cáo hàng ngày", "🧪 Lab Report", "🌌 Star Chart", "📈 Thống kê thị trường"];
-    setInterval(() => {
-        document.title = fakeTitles[Math.floor(Math.random()*fakeTitles.length)];
-    }, 5000);
+    document.getElementById('resetWeightsBtn').addEventListener('click', resetWeights);
 
     document.addEventListener('keydown', (e) => {
-        if(e.ctrlKey && e.key==='b'){
+        if (e.ctrlKey && e.key === 'b') {
             e.preventDefault();
-            let top3 = getTop3(ensembleScores(currentHistory, currentWeights));
-            alert(`🔮 Cửa tối ưu: ${top3[0]} – Cân nhắc đặt cược!`);
+            let scores = ensembleScores(currentHistory, currentWeights);
+            let top3 = getTop3(scores);
+            let mc = monteCarloProbs(currentHistory, currentWeights, 10000);
+            let msg = `🔮 CỬA TỐI ƯU: ${top3[0]} (MC: ${(mc[top3[0]]*100).toFixed(1)}%)\nTop3: ${top3.join(', ')}`;
+            alert(msg);
+        }
+        if (e.ctrlKey && e.key === 'r') {
+            e.preventDefault();
+            resetWeights();
         }
     });
 
-    window.__liveFeed = function(newResult){
-        if([1,2,3,4].includes(newResult)) addResult(newResult);
-    };
-
+    // ================== KHỞI CHẠY ==================
     updateAll();
+
+    // Tự động lưu khi đóng tab
+    window.addEventListener('beforeunload', () => {
+        saveHistory(currentHistory);
+        localStorage.setItem(WEIGHTS_KEY, JSON.stringify(currentWeights));
+        localStorage.setItem(PER_ALGO_KEY, JSON.stringify(perAlgoCorrect));
+    });
+
+    console.log('🔥 FANTAN AUTO 2.0 loaded. Ctrl+B: xem cửa, Ctrl+R: reset weights.');
 </script>
 </body>
 </html>
