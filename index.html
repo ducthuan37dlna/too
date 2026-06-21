@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>FANTAN AUTO · PHÂN TÍCH CAO CẤP | HeaNg</title>
+    <title>FANTAN AUTO · DỰ ĐOÁN TỐI THƯỢNG | HeaNg</title>
     <style>
         * { box-sizing: border-box; user-select: none; }
         body {
@@ -101,8 +101,8 @@
 </head>
 <body>
 <div class="container">
-    <h1>🧬 FANTAN AUTO · PHÂN TÍCH & DỰ ĐOÁN</h1>
-    <div class="sub">🎯 Nhấn số kết quả thực tế → tool tự cập nhật lịch sử & dự đoán ván tiếp theo</div>
+    <h1>🧬 FANTAN AUTO · DỰ ĐOÁN & PHÂN TÍCH CHUYÊN SÂU</h1>
+    <div class="sub">🎯 Nhấn số kết quả thực tế → tool tự học và dự đoán ván kế tiếp</div>
 
     <div class="flex-row">
         <div class="panel" style="text-align:center;">
@@ -123,7 +123,7 @@
         <div class="panel" style="text-align:center;">
             <strong>🎲 DỰ ĐOÁN VÁN KẾ TIẾP</strong>
             <div id="top3Display" class="top3"><span>--</span><span>--</span><span>--</span></div>
-            <div class="ssh-bet" id="sshAdvice">💡 Đây là 3 cửa có xác suất cao nhất theo mô hình.</div>
+            <div class="ssh-bet" id="sshAdvice">💡 3 cửa có xác suất cao nhất theo mô hình.</div>
             <div id="confidenceInfo" style="background:#01131e; padding:8px; border-radius:16px; margin-top:10px; font-size:0.8rem;"></div>
         </div>
     </div>
@@ -139,7 +139,7 @@
         ⏳ Cần ít nhất 6 ván để hiển thị backtest.
     </div>
     <div class="footer">
-        ⚡ 18 thuật toán + Hedge thông minh. Chống trượt streak. Nhấn Ctrl+B để xem cửa tối ưu.
+        ⚡ 20 thuật toán + Monte Carlo + Phân tích chuyên sâu. Ctrl+B để xem cửa tối ưu.
     </div>
 </div>
 
@@ -154,7 +154,7 @@
     }
     function saveHistory(h) { localStorage.setItem(HISTORY_KEY, JSON.stringify(h)); }
 
-    // ========== 18 THUẬT TOÁN ==========
+    // ========== 20 THUẬT TOÁN ==========
     function timeWeightedFreq(hist) {
         let s={1:0,2:0,3:0,4:0}, l=hist.length;
         for(let i=0;i<l;i++) s[hist[i]] += Math.pow(0.94, l-1-i);
@@ -305,8 +305,6 @@
         }
         return {1:0,2:0,3:0,4:0};
     }
-
-    // 3 thuật toán mới
     function breakoutReversal(hist) {
         if(hist.length<5) return {1:0,2:0,3:0,4:0};
         let last=hist[hist.length-1], prev=hist[hist.length-2], streak=1;
@@ -344,18 +342,61 @@
         return s;
     }
 
+    // 2 thuật toán mới
+    function knnPattern(hist) {
+        const patternLen = 5;
+        if (hist.length < patternLen + 1) return {1:0,2:0,3:0,4:0};
+        let lastPattern = hist.slice(-patternLen);
+        let s = {1:0,2:0,3:0,4:0};
+        for (let i = 0; i <= hist.length - patternLen - 1; i++) {
+            let candidate = hist.slice(i, i + patternLen);
+            let matches = 0;
+            for (let j = 0; j < patternLen; j++) if (candidate[j] === lastPattern[j]) matches++;
+            if (matches >= patternLen - 1) {
+                let nextIdx = i + patternLen;
+                if (nextIdx < hist.length) {
+                    let weight = matches / patternLen;
+                    s[hist[nextIdx]] += weight * 25;
+                }
+            }
+        }
+        return s;
+    }
+
+    function trendStrength(hist) {
+        if (hist.length < 12) return {1:0,2:0,3:0,4:0};
+        let recent = hist.slice(-12);
+        let changes = 0;
+        for (let i = 1; i < recent.length; i++) if (recent[i] !== recent[i-1]) changes++;
+        let s = {1:0,2:0,3:0,4:0};
+        let avgChanges = changes / 11;
+        if (avgChanges < 0.4) {
+            let last6 = recent.slice(-6);
+            let freq = {1:0,2:0,3:0,4:0};
+            for (let v of last6) freq[v]++;
+            let maxFreq = Math.max(...Object.values(freq));
+            for (let n=1;n<=4;n++) if (freq[n] === maxFreq) s[n] += 30;
+        } else if (avgChanges > 0.7) {
+            let last6 = recent.slice(-6);
+            let missing = [1,2,3,4].filter(n => !last6.includes(n));
+            for (let m of missing) s[m] += 20;
+        }
+        return s;
+    }
+
     const ALGO_LIST = [
         timeWeightedFreq, patternPrediction, cyclePrediction, hotPair,
         recentTrend, basicFreq, markov1, markov2, markov3,
         streakBreak, hotTriple, cycleExtended, streakMomentum,
         adaptiveAbsence, trendReversal, breakoutReversal,
-        harmonicReturn, alternatingPair
+        harmonicReturn, alternatingPair, knnPattern, trendStrength
     ];
     const ALGO_NAMES = [
         "Time decay","Cầu bệt","Chu kỳ","Cặp nóng","Xu hướng gần",
         "Tần suất","Markov1","Markov2","Markov3","Số vắng","Bộ ba nóng",
         "Chu kỳ dài","Streak Momentum","Adaptive Absence","Trend Reversal",
-        "Breakout Reversal","Harmonic Return","Alternating Pair"
+        "Breakout Reversal","Harmonic Return","Alternating Pair",
+        "KNN Pattern","Trend Strength"
     ];
 
     const MIN_TRAIN = 5;
@@ -416,13 +457,21 @@
         return {results,finalWeights:weights};
     }
 
-    function omniProfitPrediction(hist,weights){
-        if(hist.length<5) return {1:0,2:0,3:0,4:0};
-        let base=ensembleScores(hist,weights);
-        let sum=base[1]+base[2]+base[3]+base[4];
-        let ev={};
-        for(let n=1;n<=4;n++) ev[n]=(base[n]/sum)*3-(1-base[n]/sum);
-        return ev;
+    function monteCarloProbs(hist, weights, samples=1000) {
+        let base = ensembleScores(hist, weights);
+        let sum = base[1]+base[2]+base[3]+base[4];
+        if (sum === 0) return {1:0,2:0,3:0,4:0};
+        let probs = {1: base[1]/sum, 2: base[2]/sum, 3: base[3]/sum, 4: base[4]/sum};
+        let counts = {1:0,2:0,3:0,4:0};
+        for (let i=0; i<samples; i++) {
+            let r = Math.random();
+            let cumulative = 0;
+            for (let n=1; n<=4; n++) {
+                cumulative += probs[n];
+                if (r <= cumulative) { counts[n]++; break; }
+            }
+        }
+        return {1: counts[1]/samples, 2: counts[2]/samples, 3: counts[3]/samples, 4: counts[4]/samples};
     }
 
     function updateAll() {
@@ -445,15 +494,16 @@
         let nextScores = ensembleScores(currentHistory, currentWeights);
         let nextTop3 = getTop3(nextScores);
         document.getElementById('top3Display').innerHTML = nextTop3.map(n => `<span>🔮 ${n}</span>`).join('');
+        document.getElementById('sshAdvice').innerHTML = '💡 3 cửa có xác suất cao nhất theo mô hình.';
 
         let entries = Object.entries(nextScores).sort((a,b)=>b[1]-a[1]);
         let diff = entries[0][1]-entries[1][1];
         let conf = Math.min(95, Math.floor(50+diff*1.5));
 
-        let omniScores = omniProfitPrediction(currentHistory, currentWeights);
-        let omniBest = Object.entries(omniScores).sort((a,b)=>b[1]-a[1])[0];
+        let mc = monteCarloProbs(currentHistory, currentWeights);
+        let mcStr = Object.entries(mc).map(([k,v])=> `${k}: ${(v*100).toFixed(1)}%`).join(' | ');
         document.getElementById('confidenceInfo').innerHTML =
-            `📈 Độ tin cậy: ${conf}% (chênh lệch điểm).<br><span style="color:#ffb347;">💎 Omni Hedge: Số ${omniBest[0]} (EV=${parseFloat(omniBest[1]).toFixed(3)}) – cửa tối ưu lợi nhuận.</span>`;
+            `📈 Độ tin cậy: ${conf}% (chênh lệch điểm).<br><span style="color:#ffb347;">🎲 Monte Carlo (1000 mẫu): ${mcStr}</span>`;
 
         let results = backtest.results;
         let correct = results.filter(r=>r.hit).length;
@@ -478,7 +528,7 @@
         weightHtml += `</div>`;
         document.getElementById('algoDetails').innerHTML = weightHtml;
 
-        document.getElementById('aiStatus').innerHTML = `🧠 Phân tích ${currentHistory.length} ván. Hedge tự động cập nhật.`;
+        document.getElementById('aiStatus').innerHTML = `🧠 Phân tích ${currentHistory.length} ván. Dự đoán sẵn sàng.`;
     }
 
     // ========== THAO TÁC ==========
@@ -503,14 +553,12 @@
         updateAll();
     }
 
-    // Gán sự kiện nút số
     document.querySelectorAll('.num-btn').forEach(btn => {
         btn.addEventListener('click', () => addResult(parseInt(btn.dataset.num)));
     });
     document.getElementById('undoBtn').addEventListener('click', undoLast);
     document.getElementById('clearBtn').addEventListener('click', clearAll);
 
-    // Anti-detection nhẹ (chỉ đổi tiêu đề)
     const fakeTitles = ["📊 Báo cáo hàng ngày", "🧪 Lab Report", "🌌 Star Chart", "📈 Thống kê thị trường"];
     setInterval(() => {
         document.title = fakeTitles[Math.floor(Math.random()*fakeTitles.length)];
