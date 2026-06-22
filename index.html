@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FANTAN AUTO 4.1 · HeaNg[Black-Cyber]</title>
+    <title>FANTAN AUTO 4.2 · HeaNg[Black-Cyber]</title>
     <style>
         * { box-sizing: border-box; user-select: none; }
         body {
@@ -114,18 +114,6 @@
             text-align: center;
             margin: 10px 0;
         }
-        .badge { display: inline-block; padding: 2px 10px; border-radius: 30px; font-size: 0.65rem; }
-        .badge.green { background: #004d40; color: #a5d6a7; }
-        .badge.red { background: #4d0015; color: #ff8a80; }
-        @media (max-width: 700px) {
-            .num-btn { width: 60px; font-size: 2rem; }
-            .top3 span { font-size: 1.5rem; padding: 6px 12px; min-width: 50px; }
-        }
-        #algoDetails { font-size: 0.7rem; padding: 10px; max-height: 300px; overflow-y: auto; }
-        .algo-row { display: flex; justify-content: space-between; padding: 2px 0; border-bottom: 1px solid #0a1a2a; }
-        .algo-name { color: #80cbc4; }
-        .algo-weight { color: #ffb74d; }
-        .algo-acc { color: #90caf9; }
         .regime-badge {
             display: inline-block;
             padding: 4px 12px;
@@ -137,13 +125,17 @@
         .regime-trend { background: #1a3a1a; color: #8bc34a; }
         .regime-choas { background: #3a1a1a; color: #ff8a80; }
         .regime-neutral { background: #1a2a3a; color: #90caf9; }
-        .stop-loss { border-color: #ff1744; background: #2a0a0a; }
+        #algoDetails { font-size: 0.7rem; padding: 10px; max-height: 300px; overflow-y: auto; }
+        @media (max-width: 700px) {
+            .num-btn { width: 60px; font-size: 2rem; }
+            .top3 span { font-size: 1.5rem; padding: 6px 12px; min-width: 50px; }
+        }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>🧬 FANTAN AUTO 4.1 · THÍCH ỨNG THÔNG MINH</h1>
-    <div class="sub">🔥 36 thuật toán + RL thích ứng + Phát hiện chế độ + Monte Carlo 10K + Stop‑Loss</div>
+    <h1>🧬 FANTAN AUTO 4.2 · DỰ ĐOÁN LIÊN TỤC</h1>
+    <div class="sub">🔥 36 thuật toán + RL thích ứng + Phát hiện chế độ + Monte Carlo 10K (không nghỉ)</div>
 
     <div class="flex-row">
         <div class="panel">
@@ -160,7 +152,7 @@
                 <button id="resetWeightsBtn">🔄 Reset trọng số</button>
             </div>
             <div class="history-box" id="historyDisplay">Chưa có dữ liệu</div>
-            <div class="info" id="aiStatus">🧠 Sẵn sàng. Cần ít nhất 5 ván để dự đoán.</div>
+            <div class="info" id="aiStatus">🧠 Sẵn sàng. Cần ít nhất 6 ván để dự đoán.</div>
         </div>
         <div class="panel">
             <strong>🎯 DỰ ĐOÁN VÁN TỚI</strong>
@@ -168,7 +160,6 @@
             <div id="betAdvice" class="bet-advice">💡 Chờ dữ liệu...</div>
             <div id="confidenceInfo" style="background:#01131e; padding:8px; border-radius:16px; margin-top:10px; font-size:0.8rem;"></div>
             <div id="regimeDisplay" class="regime-badge regime-neutral">🔍 Chế độ: Đang phân tích...</div>
-            <div id="stopLossDisplay" style="margin-top:6px; font-size:0.8rem; color:#ff8a80;"></div>
         </div>
     </div>
 
@@ -189,10 +180,10 @@
 
 <script>
     // ================== CẤU HÌNH ==================
-    const HISTORY_KEY = "fantan_hist_v41";
-    const WEIGHTS_KEY = "fantan_weights_v41";
-    const PER_ALGO_KEY = "fantan_peralgo_v41";
-    const WINDOW_SIZE = 25; // Cửa sổ lớn hơn cho ổn định
+    const HISTORY_KEY = "fantan_hist_v42";
+    const WEIGHTS_KEY = "fantan_weights_v42";
+    const PER_ALGO_KEY = "fantan_peralgo_v42";
+    const WINDOW_SIZE = 25;
 
     function loadHistory() {
         let s = localStorage.getItem(HISTORY_KEY);
@@ -205,10 +196,8 @@
     let perAlgoCorrect = [];
     let perAlgoTotal = [];
     let errorStreak = 0;
-    let consecutiveLosses = 0; // dùng cho stop-loss
 
-    // ================== 36 THUẬT TOÁN ==================
-    // (giữ nguyên toàn bộ danh sách ALGO_LIST và ALGO_NAMES như cũ)
+    // ================== 36 THUẬT TOÁN (giữ nguyên) ==================
     function timeWeightedFreq(hist) {
         let s={1:0,2:0,3:0,4:0}, l=hist.length;
         for(let i=0;i<l;i++) s[hist[i]] += Math.pow(0.94, l-1-i);
@@ -747,7 +736,7 @@
         "Extreme Streak","Reversal","Pair Rev.","Weighted Freq"
     ];
 
-    const MIN_TRAIN = 6; // tăng lên 6 để ổn định hơn
+    const MIN_TRAIN = 6;
 
     // ================== KHỞI TẠO ==================
     function initWeights() {
@@ -781,8 +770,7 @@
     initWeights();
     initPerAlgo();
 
-    // ================== HÀM CHÍNH (NÂNG CẤP) ==================
-    // --- Normalised ensemble ---
+    // ================== HÀM CHÍNH (có nâng cấp) ==================
     function ensembleScores(hist, weights) {
         let final = {1:0,2:0,3:0,4:0};
         let algoScores = [];
@@ -800,7 +788,6 @@
                 final[n] += norm[n] * w;
             }
         }
-        // Smoothing with recent frequency
         let freq = {1:0,2:0,3:0,4:0};
         let recent = hist.slice(-10);
         for (let v of recent) freq[v] = (freq[v]||0)+1;
@@ -817,7 +804,6 @@
         return entries.slice(0,3).map(e=>e.num);
     }
 
-    // --- Smart weight update ---
     function updateWeightsAdaptive(hist, actual, weights, step, isError) {
         let lrBase = 0.4;
         if (isError) {
@@ -861,7 +847,6 @@
         return newWeights.map(w => w/sum2);
     }
 
-    // --- Monte Carlo ---
     function monteCarloProbs(hist, weights, samples=10000) {
         let base = ensembleScores(hist, weights);
         let sum = base[1]+base[2]+base[3]+base[4];
@@ -879,7 +864,6 @@
         return {1: counts[1]/samples, 2: counts[2]/samples, 3: counts[3]/samples, 4: counts[4]/samples};
     }
 
-    // --- Regime detection (cải tiến) ---
     function detectRegime(hist) {
         if (hist.length < 12) return 'neutral';
         let recent = hist.slice(-12);
@@ -903,11 +887,9 @@
         else return 'neutral';
     }
 
-    // --- Betting advice with stop-loss ---
+    // ===== ĐÃ XOÁ CƠ CHẾ NGHỈ (không còn stop-loss) =====
     function getBetAdvice(top1, mcProb, confidence, gap, regime) {
-        if (consecutiveLosses >= 3) {
-            return { action: 'skip', reason: '🛑 Đã thua 3 ván liên tiếp – nghỉ 1 ván để reset' };
-        }
+        // Luôn đưa ra khuyến nghị, không bao giờ bỏ qua
         let thresholdProb = 0.52;
         let thresholdConf = 80;
         let thresholdGap = 0.15;
@@ -927,9 +909,10 @@
         } else {
             return { action: 'skip', reason: `⚠️ Độ tin cậy thấp (${confidence}%, ${(mcProb*100).toFixed(0)}%)` };
         }
+        // Lưu ý: dù có 'skip' thì tool vẫn hiển thị dự đoán, nhưng khuyến cáo không nên cược.
+        // Người dùng muốn "dự đoán liên tục" nên vẫn có Top3 và lời khuyên.
     }
 
-    // --- Backtest (cải tiến với Top1) ---
     function pureBacktest(fullHist, initialWeights) {
         let weights = [...initialWeights];
         let results = [];
@@ -945,7 +928,6 @@
             let hit = top3.includes(actual);
             results.push({step:i+1, actual, top3, hit});
 
-            // Cập nhật per-algo
             for (let j=0; j<ALGO_LIST.length; j++) {
                 let s = ALGO_LIST[j](trainHist);
                 let pred = Object.entries(s).sort((a,b)=>b[1]-a[1])[0];
@@ -957,7 +939,6 @@
                 }
             }
 
-            // Cập nhật weights (dùng hàm updateWeightsAdaptive nhưng với tham số)
             let lrBase = 0.4;
             let isError = !hit;
             if (isError) {
@@ -1003,11 +984,9 @@
             document.getElementById('backtestLog').innerHTML = '⏳ Cần ít nhất 6 ván để backtest.';
             document.getElementById('aiStatus').innerHTML = `🧠 Đã có ${currentHistory.length} ván, cần thêm ${MIN_TRAIN-currentHistory.length} ván nữa.`;
             document.getElementById('regimeDisplay').textContent = '🔍 Chế độ: Đang phân tích...';
-            document.getElementById('stopLossDisplay').textContent = '';
             return;
         }
 
-        // Backtest
         let backtest = pureBacktest(currentHistory, currentWeights);
         currentWeights = backtest.finalWeights;
         perAlgoCorrect = backtest.perAlgoCorrect;
@@ -1015,7 +994,6 @@
         localStorage.setItem(WEIGHTS_KEY, JSON.stringify(currentWeights));
         localStorage.setItem(PER_ALGO_KEY, JSON.stringify(perAlgoCorrect));
 
-        // Dự đoán ván tới
         let nextScores = ensembleScores(currentHistory, currentWeights);
         let nextTop3 = getTop3(nextScores);
         let top1 = nextTop3[0];
@@ -1039,12 +1017,10 @@
         let regime = detectRegime(currentHistory);
         let advice = getBetAdvice(top1, mcProb, confidence, gap, regime);
 
-        // Update Top3
         document.getElementById('top3Display').innerHTML = nextTop3.map((n, idx) =>
             `<span class="${idx===0?'top1':''}">🔮 ${n}</span>`
         ).join('');
 
-        // Bet advice
         let betHTML = '';
         if (advice.action === 'bet') {
             betHTML = `✅ NÊN ĐẶT CỬA ${advice.number} (${(advice.prob*100).toFixed(1)}%) - Rủi ro ${advice.risk}`;
@@ -1053,12 +1029,10 @@
         }
         document.getElementById('betAdvice').innerHTML = betHTML;
 
-        // Confidence & MC
         let mcStr = Object.entries(mc).map(([k,v])=> `${k}: ${(v*100).toFixed(1)}%`).join(' | ');
         document.getElementById('confidenceInfo').innerHTML =
             `📈 Độ tin cậy: ${confidence}% | Entropy: ${entropy.toFixed(3)} | Gap: ${(gap*100).toFixed(0)}%<br>🎲 Monte Carlo 10K: ${mcStr}`;
 
-        // Regime
         let regimeText = '';
         let regimeClass = '';
         if (regime === 'trend') { regimeText = '📈 BỆT – Ưu tiên theo xu hướng'; regimeClass = 'regime-trend'; }
@@ -1067,11 +1041,6 @@
         document.getElementById('regimeDisplay').textContent = regimeText;
         document.getElementById('regimeDisplay').className = 'regime-badge ' + regimeClass;
 
-        // Stop-loss display
-        let stopMsg = consecutiveLosses >= 3 ? '⚠️ ĐANG NGHỈ (thua 3 ván liên tiếp)' : `Sai liên tiếp: ${consecutiveLosses}`;
-        document.getElementById('stopLossDisplay').textContent = stopMsg;
-
-        // Backtest log (with Top1 accuracy)
         let results = backtest.results;
         let top3Correct = results.filter(r=>r.hit).length;
         let total = results.length;
@@ -1085,20 +1054,6 @@
         }
         document.getElementById('backtestLog').innerHTML = logHTML;
 
-        // Update consecutiveLosses based on last actual vs top1
-        if (currentHistory.length >= 2) {
-            let lastActual = currentHistory[currentHistory.length-1];
-            let prevScores = ensembleScores(currentHistory.slice(0,-1), currentWeights);
-            let prevTop3 = getTop3(prevScores);
-            let prevTop1 = prevTop3[0];
-            if (prevTop1 === lastActual) {
-                consecutiveLosses = 0;
-            } else {
-                consecutiveLosses++;
-            }
-        }
-
-        // Algo weights
         let weightHtml = '<div style="display:flex; flex-wrap:wrap; gap:6px;">';
         for (let i=0; i<ALGO_NAMES.length; i++) {
             let acc = perAlgoTotal[i] > 0 ? (perAlgoCorrect[i]/perAlgoTotal[i]*100).toFixed(1) : 0;
@@ -1117,7 +1072,7 @@
         document.getElementById('algoDetails').innerHTML = weightHtml;
 
         document.getElementById('aiStatus').innerHTML =
-            `🧠 ${currentHistory.length} ván | Top1 acc: ${top1Acc}% | Top3 acc: ${top3Acc}% | Sai liên tiếp: ${consecutiveLosses}`;
+            `🧠 ${currentHistory.length} ván | Top1 acc: ${top1Acc}% | Top3 acc: ${top3Acc}% | Sai streak: ${errorStreak}`;
     }
 
     // ================== THAO TÁC ==================
@@ -1154,7 +1109,6 @@
         perAlgoCorrect = Array(ALGO_LIST.length).fill(0);
         perAlgoTotal = Array(ALGO_LIST.length).fill(0);
         errorStreak = 0;
-        consecutiveLosses = 0;
         localStorage.removeItem(HISTORY_KEY);
         localStorage.setItem(WEIGHTS_KEY, JSON.stringify(currentWeights));
         localStorage.setItem(PER_ALGO_KEY, JSON.stringify(perAlgoCorrect));
@@ -1165,7 +1119,6 @@
         perAlgoCorrect = Array(ALGO_LIST.length).fill(0);
         perAlgoTotal = Array(ALGO_LIST.length).fill(0);
         errorStreak = 0;
-        consecutiveLosses = 0;
         localStorage.setItem(WEIGHTS_KEY, JSON.stringify(currentWeights));
         localStorage.setItem(PER_ALGO_KEY, JSON.stringify(perAlgoCorrect));
         updateAll();
@@ -1209,7 +1162,7 @@
         localStorage.setItem(PER_ALGO_KEY, JSON.stringify(perAlgoCorrect));
     });
 
-    console.log('🔥 FANTAN AUTO 4.1 loaded. Ctrl+B: xem cửa, Ctrl+R: reset weights, Ctrl+Shift+R: xóa toàn bộ.');
+    console.log('🔥 FANTAN AUTO 4.2 loaded (không stop-loss). Ctrl+B: xem cửa, Ctrl+R: reset weights, Ctrl+Shift+R: xóa toàn bộ.');
 </script>
 </body>
 </html>
