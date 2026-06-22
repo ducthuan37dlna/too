@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FANTAN AUTO 2.0 · HeaNg[Black-Cyber]</title>
+    <title>FANTAN AUTO 3.0 · HeaNg[Black-Cyber]</title>
     <style>
         * { box-sizing: border-box; user-select: none; }
         body {
@@ -130,8 +130,8 @@
 </head>
 <body>
 <div class="container">
-    <h1>🧬 FANTAN AUTO 2.0 · DỰ ĐOÁN TỐI ƯU</h1>
-    <div class="sub">🔥 28 thuật toán + RL + Monte Carlo 10K · Nhấn số thực tế để cập nhật</div>
+    <h1>🧬 FANTAN AUTO 3.0 · DỰ ĐOÁN THÔNG MINH</h1>
+    <div class="sub">🔥 32 thuật toán + RL cửa sổ trượt + Monte Carlo 10K · Nhấn số thực tế để cập nhật</div>
 
     <div class="flex-row">
         <div class="panel">
@@ -169,15 +169,16 @@
         ⏳ Cần ít nhất 6 ván để backtest.
     </div>
     <div class="footer">
-        ⚡ Ctrl+B: xem cửa tối ưu · Ctrl+R: reset weights · Tool tự học sau mỗi ván.
+        ⚡ Ctrl+B: xem cửa tối ưu · Ctrl+R: reset weights · Ctrl+Shift+R: xóa toàn bộ dữ liệu
     </div>
 </div>
 
 <script>
     // ================== CẤU HÌNH ==================
-    const HISTORY_KEY = "fantan_hist_v2";
-    const WEIGHTS_KEY = "fantan_weights_v2";
-    const PER_ALGO_KEY = "fantan_peralgo_v2";
+    const HISTORY_KEY = "fantan_hist_v3";
+    const WEIGHTS_KEY = "fantan_weights_v3";
+    const PER_ALGO_KEY = "fantan_peralgo_v3";
+    const WINDOW_SIZE = 20; // cửa sổ trượt cho độ chính xác
 
     function loadHistory() {
         let s = localStorage.getItem(HISTORY_KEY);
@@ -187,10 +188,11 @@
 
     let currentHistory = loadHistory();
     let currentWeights = [];
-    let perAlgoCorrect = [];
+    let perAlgoCorrect = []; // lưu số lần đúng trong cửa sổ gần nhất
+    let perAlgoTotal = []; // tổng số lần dự đoán trong cửa sổ
 
-    // ================== 28 THUẬT TOÁN ==================
-    // Các thuật toán cũ (20) + thêm 8 mới
+    // ================== 32 THUẬT TOÁN ==================
+    // Các thuật toán cũ (20) + 8 mới từ v2 + 4 thuật toán mới
 
     // ----- 20 thuật toán gốc (giữ nguyên) -----
     function timeWeightedFreq(hist) {
@@ -419,13 +421,9 @@
         return s;
     }
 
-    // ----- 8 THUẬT TOÁN MỚI (nâng cấp) -----
-    // 21. Fourier Cycle Detection (phát hiện chu kỳ ẩn)
+    // ----- 8 thuật toán từ v2 -----
     function fourierCycle(hist) {
         if (hist.length < 8) return {1:0,2:0,3:0,4:0};
-        let freq = {1:0,2:0,3:0,4:0};
-        let last = hist[hist.length-1];
-        // Dò tìm chu kỳ từ 3 đến 12
         let bestCycle = null, bestScore = 0;
         for (let c = 3; c <= Math.min(12, Math.floor(hist.length/2)); c++) {
             let matches = 0, totalChecks = 0;
@@ -446,8 +444,6 @@
         }
         return s;
     }
-
-    // 22. Bayesian Inference (cập nhật niềm tin)
     function bayesianInference(hist) {
         if (hist.length < 6) return {1:0,2:0,3:0,4:0};
         let prior = {1:0.25,2:0.25,3:0.25,4:0.25};
@@ -455,10 +451,8 @@
         let total = hist.length;
         for (let v of hist) likelihood[v] = (likelihood[v]||0) + 1;
         for (let n=1; n<=4; n++) likelihood[n] = (likelihood[n]||0) / total;
-        // Posterior = prior * likelihood (chưa normalize)
         let post = {};
         for (let n=1; n<=4; n++) post[n] = prior[n] * likelihood[n];
-        // Thêm yếu tố last seen
         let lastSeen = {};
         for (let i=hist.length-1; i>=0; i--) {
             if (!(hist[i] in lastSeen)) lastSeen[hist[i]] = hist.length - 1 - i;
@@ -469,13 +463,10 @@
         }
         return post;
     }
-
-    // 23. LSTM-like Pattern (mô phỏng LSTM đơn giản)
     function lstmLike(hist) {
         if (hist.length < 10) return {1:0,2:0,3:0,4:0};
         let s = {1:0,2:0,3:0,4:0};
         let window = hist.slice(-8);
-        // Tìm các đoạn tương tự trong quá khứ
         for (let i = 0; i <= hist.length - 8; i++) {
             let seg = hist.slice(i, i+8);
             let sim = 0;
@@ -488,15 +479,12 @@
                 }
             }
         }
-        // Thêm trọng số cho các số xuất hiện gần đây
         let recent = hist.slice(-4);
         for (let n=1; n<=4; n++) {
             if (recent.includes(n)) s[n] += 5;
         }
         return s;
     }
-
-    // 24. Entropy-based (đo độ hỗn loạn, dự đoán số ít xuất hiện khi entropy cao)
     function entropyBased(hist) {
         if (hist.length < 8) return {1:0,2:0,3:0,4:0};
         let freq = {1:0,2:0,3:0,4:0};
@@ -509,12 +497,10 @@
         }
         let s = {1:0,2:0,3:0,4:0};
         if (entropy > 1.8) {
-            // Hỗn loạn → dự đoán số vắng
             let recent = hist.slice(-6);
             let missing = [1,2,3,4].filter(n => !recent.includes(n));
             for (let m of missing) s[m] += 25;
         } else {
-            // Ổn định → dự đoán số hot
             let recent = hist.slice(-6);
             let hot = {};
             for (let v of recent) hot[v] = (hot[v]||0)+1;
@@ -523,8 +509,6 @@
         }
         return s;
     }
-
-    // 25. Gradient Boosting (kết hợp sai số)
     function gradientBoost(hist) {
         if (hist.length < 6) return {1:0,2:0,3:0,4:0};
         let base = basicFreq(hist);
@@ -532,25 +516,19 @@
         let s = {};
         for (let n=1; n<=4; n++) {
             s[n] = base[n] * 0.6 + recent[n] * 0.4;
-            // Thêm correction từ markov1
             let m1 = markov1(hist);
             s[n] += m1[n] * 0.2;
         }
         return s;
     }
-
-    // 26. Random Forest Mimic (tổ hợp nhiều cây quyết định)
     function randomForestMimic(hist) {
         if (hist.length < 8) return {1:0,2:0,3:0,4:0};
         let s = {1:0,2:0,3:0,4:0};
-        // Cây 1: dựa trên 3 số cuối
         let last3 = hist.slice(-3);
         let freq3 = {1:0,2:0,3:0,4:0};
         for (let v of last3) freq3[v]++;
         let max3 = Math.max(...Object.values(freq3));
         for (let n=1; n<=4; n++) if (freq3[n] === max3) s[n] += 20;
-
-        // Cây 2: dựa trên chu kỳ 5
         if (hist.length >= 5) {
             let patt = hist.slice(-5);
             let matches = {};
@@ -568,40 +546,30 @@
         }
         return s;
     }
-
-    // 27. Adaptive Momentum (động lượng thích ứng)
     function adaptiveMomentum(hist) {
         if (hist.length < 6) return {1:0,2:0,3:0,4:0};
         let s = {1:0,2:0,3:0,4:0};
         let last = hist[hist.length-1];
-        // Đếm độ dài streak hiện tại
         let streak = 0;
         for (let i=hist.length-1; i>=0 && hist[i]===last; i--) streak++;
-        // Kiểm tra xem streak có đang tăng tốc không
         if (streak >= 2) {
             let prevStreak = 0;
             let prev = hist[hist.length-streak-1] || 0;
             for (let i=hist.length-streak-2; i>=0 && hist[i]===prev; i--) prevStreak++;
             if (prevStreak < streak) {
-                // Streak đang tăng → tiếp tục
                 s[last] += 35;
             } else {
-                // Có thể đảo chiều
                 let all = [1,2,3,4];
                 let missing = all.filter(n => n !== last);
                 for (let m of missing) s[m] += 15;
             }
         } else {
-            // Không có streak → dựa trên tần suất gần đây
             let recent = hist.slice(-4);
             for (let n=1; n<=4; n++) if (recent.includes(n)) s[n] += 10;
         }
         return s;
     }
-
-    // 28. Hybrid Ensemble (kết hợp tất cả các thuật toán trên)
     function hybridEnsemble(hist) {
-        // Gọi các thuật toán chính và lấy trung bình có trọng số
         let algos = [basicFreq, recentTrend, markov1, markov2, hotPair, knnPattern, lstmLike];
         let s = {1:0,2:0,3:0,4:0};
         let weights = [0.15, 0.15, 0.15, 0.1, 0.1, 0.2, 0.15];
@@ -612,7 +580,83 @@
         return s;
     }
 
-    // Danh sách 28 thuật toán + tên
+    // ----- 4 THUẬT TOÁN MỚI (v3) -----
+    // 29. Streak Continuation: nếu 2 số cuối giống nhau, mạnh tay dự đoán số đó
+    function streakContinuation(hist) {
+        if (hist.length < 2) return {1:0,2:0,3:0,4:0};
+        let last = hist[hist.length-1];
+        let prev = hist[hist.length-2];
+        let s = {1:0,2:0,3:0,4:0};
+        if (last === prev) {
+            // đếm độ dài streak hiện tại
+            let streak = 2;
+            for (let i=hist.length-3; i>=0 && hist[i]===last; i--) streak++;
+            let bonus = Math.min(40, 15 + streak * 4);
+            s[last] += bonus;
+        } else {
+            // nếu không có streak, dự đoán số gần nhất xuất hiện
+            s[last] += 8;
+        }
+        return s;
+    }
+
+    // 30. Mean Reversion: dự đoán số lâu chưa về
+    function meanReversion(hist) {
+        if (hist.length < 8) return {1:0,2:0,3:0,4:0};
+        let lastSeen = {1: -1, 2: -1, 3: -1, 4: -1};
+        for (let i=hist.length-1; i>=0; i--) {
+            if (lastSeen[hist[i]] === -1) lastSeen[hist[i]] = i;
+        }
+        let s = {1:0,2:0,3:0,4:0};
+        let len = hist.length;
+        for (let n=1; n<=4; n++) {
+            let steps = lastSeen[n] === -1 ? len : len - 1 - lastSeen[n];
+            if (steps >= 3) {
+                s[n] += Math.min(35, steps * 2.5);
+            }
+        }
+        return s;
+    }
+
+    // 31. Weighted Moving Average (WMA) – gần đây trọng số cao
+    function weightedMA(hist) {
+        if (hist.length < 5) return {1:0,2:0,3:0,4:0};
+        let s = {1:0,2:0,3:0,4:0};
+        let n = Math.min(10, hist.length);
+        let recent = hist.slice(-n);
+        for (let i=0; i<recent.length; i++) {
+            s[recent[i]] += (i+1) * 1.2;
+        }
+        return s;
+    }
+
+    // 32. Pattern Match with Sliding Window (window=7)
+    function patternMatch7(hist) {
+        if (hist.length < 8) return {1:0,2:0,3:0,4:0};
+        let window = hist.slice(-7);
+        let s = {1:0,2:0,3:0,4:0};
+        for (let i=0; i<=hist.length-8; i++) {
+            let seg = hist.slice(i, i+7);
+            let sim = 0;
+            for (let j=0; j<7; j++) if (seg[j] === window[j]) sim++;
+            if (sim >= 5) {
+                let nextIdx = i+7;
+                if (nextIdx < hist.length) {
+                    let weight = sim / 7;
+                    s[hist[nextIdx]] += weight * 32;
+                }
+            }
+        }
+        // Bổ sung: nếu không tìm thấy, dùng tần suất gần đây
+        let total = s[1]+s[2]+s[3]+s[4];
+        if (total === 0) {
+            let recent = hist.slice(-4);
+            for (let n=1; n<=4; n++) if (recent.includes(n)) s[n] += 10;
+        }
+        return s;
+    }
+
+    // Danh sách 32 thuật toán + tên
     const ALGO_LIST = [
         timeWeightedFreq, patternPrediction, cyclePrediction, hotPair,
         recentTrend, basicFreq, markov1, markov2, markov3,
@@ -620,7 +664,8 @@
         adaptiveAbsence, trendReversal, breakoutReversal,
         harmonicReturn, alternatingPair, knnPattern, trendStrength,
         fourierCycle, bayesianInference, lstmLike, entropyBased,
-        gradientBoost, randomForestMimic, adaptiveMomentum, hybridEnsemble
+        gradientBoost, randomForestMimic, adaptiveMomentum, hybridEnsemble,
+        streakContinuation, meanReversion, weightedMA, patternMatch7
     ];
     const ALGO_NAMES = [
         "Time decay","Cầu bệt","Chu kỳ","Cặp nóng","Xu hướng gần",
@@ -629,12 +674,13 @@
         "Breakout Reversal","Harmonic Return","Alternating Pair",
         "KNN Pattern","Trend Strength","Fourier Cycle","Bayesian",
         "LSTM-like","Entropy","Gradient Boost","Random Forest",
-        "Adaptive Momentum","Hybrid Ensemble"
+        "Adaptive Momentum","Hybrid Ensemble",
+        "Streak Cont.","Mean Rev.","WMA","Pattern7"
     ];
 
     const MIN_TRAIN = 5;
 
-    // ================== KHỞI TẠO TRỌNG SỐ ==================
+    // ================== KHỞI TẠO ==================
     function initWeights() {
         let saved = localStorage.getItem(WEIGHTS_KEY);
         if (saved) {
@@ -655,11 +701,13 @@
                 let p = JSON.parse(saved);
                 if (p.length === ALGO_LIST.length) {
                     perAlgoCorrect = p;
+                    perAlgoTotal = Array(ALGO_LIST.length).fill(WINDOW_SIZE); // giả định đã có WINDOW_SIZE lần
                     return;
                 }
             } catch(e) {}
         }
         perAlgoCorrect = Array(ALGO_LIST.length).fill(0);
+        perAlgoTotal = Array(ALGO_LIST.length).fill(0);
     }
     initWeights();
     initPerAlgo();
@@ -682,40 +730,50 @@
         return entries.slice(0,3).map(e=>e.num);
     }
 
-    // Cập nhật trọng số với học tăng cường + động lượng
-    function updateWeights(hist, actual, weights, step) {
-        let scoresForActual = ALGO_LIST.map(algo => (algo(hist)[actual]||0));
-        let newWeights = [...weights];
-        let momentum = 0.85;
-        let lr = 0.3 * Math.pow(0.99, step);
-
-        // Cập nhật per-algo accuracy
+    // Cập nhật trọng số với cửa sổ trượt
+    function updateWeightsWithWindow(hist, actual, weights, step) {
+        // Dự đoán từng thuật toán, cập nhật perAlgoCorrect/Total với cửa sổ
         for (let i=0; i<ALGO_LIST.length; i++) {
             let s = ALGO_LIST[i](hist);
             let pred = Object.entries(s).sort((a,b)=>b[1]-a[1])[0];
-            if (pred && parseInt(pred[0]) === actual) perAlgoCorrect[i]++;
+            if (pred && parseInt(pred[0]) === actual) {
+                perAlgoCorrect[i]++;
+            }
+            perAlgoTotal[i]++;
+            // Giữ kích thước cửa sổ
+            if (perAlgoTotal[i] > WINDOW_SIZE) {
+                // Cần loại bỏ các mục cũ, nhưng không lưu lịch sử chi tiết; ta sẽ giảm dần
+                // Đơn giản: giữ nguyên tổng, nhưng đẩy mới vào, không loại bỏ chính xác -> dùng weighted avg
+                // Ta sẽ dùng cách khác: tính tỷ lệ trượt bằng cách giảm dần
+                // Thay vì giữ chính xác, ta sẽ nhân đôi với hệ số giảm dần
+                perAlgoCorrect[i] = perAlgoCorrect[i] * 0.9;
+                perAlgoTotal[i] = perAlgoTotal[i] * 0.9;
+            }
         }
 
-        let totalSteps = step + 1;
+        let newWeights = [...weights];
+        let lr = 0.35 * Math.pow(0.99, step);
         for (let j=0; j<ALGO_LIST.length; j++) {
-            let successRate = totalSteps > 0 ? perAlgoCorrect[j] / totalSteps : 0.25;
-            let adaptiveLr = lr * (0.5 + successRate * 2);
-            let reward = scoresForActual[j] + 0.5 * (successRate - 0.25);
-            newWeights[j] = newWeights[j] * Math.exp(adaptiveLr * reward);
+            let successRate = perAlgoTotal[j] > 0 ? perAlgoCorrect[j] / perAlgoTotal[j] : 0.25;
+            let scoresForActual = ALGO_LIST[j](hist)[actual] || 0;
+            let reward = scoresForActual + 0.6 * (successRate - 0.25);
+            newWeights[j] *= Math.exp(lr * reward);
         }
         // Chuẩn hóa
         let sum = newWeights.reduce((a,b)=>a+b, 0);
         if (sum === 0) return weights;
-        newWeights = newWeights.map(w => Math.max(0.02, w/sum));
+        newWeights = newWeights.map(w => Math.max(0.01, w/sum));
         let sum2 = newWeights.reduce((a,b)=>a+b, 0);
         return newWeights.map(w => w/sum2);
     }
 
-    // Backtest với cross-validation
+    // Backtest cũng sử dụng cửa sổ trượt
     function pureBacktest(fullHist, initialWeights) {
         let weights = [...initialWeights];
         let results = [];
-        let perAlgoCorrectLocal = Array(ALGO_LIST.length).fill(0);
+        let perAlgoCorr = Array(ALGO_LIST.length).fill(0);
+        let perAlgoTot = Array(ALGO_LIST.length).fill(0);
+
         for (let i=MIN_TRAIN; i<fullHist.length; i++) {
             let trainHist = fullHist.slice(0, i);
             let actual = fullHist[i];
@@ -724,33 +782,36 @@
             let hit = top3.includes(actual);
             results.push({step:i+1, actual, top3, hit});
 
-            // Cập nhật per-algo local
+            // Cập nhật per-algo với cửa sổ
             for (let j=0; j<ALGO_LIST.length; j++) {
                 let s = ALGO_LIST[j](trainHist);
                 let pred = Object.entries(s).sort((a,b)=>b[1]-a[1])[0];
-                if (pred && parseInt(pred[0]) === actual) perAlgoCorrectLocal[j]++;
+                if (pred && parseInt(pred[0]) === actual) perAlgoCorr[j]++;
+                perAlgoTot[j]++;
+                if (perAlgoTot[j] > WINDOW_SIZE) {
+                    perAlgoCorr[j] *= 0.9;
+                    perAlgoTot[j] *= 0.9;
+                }
             }
-            // Update weights với local accuracy
-            let stepIdx = i - MIN_TRAIN;
-            let scoresForActual = ALGO_LIST.map(algo => (algo(trainHist)[actual]||0));
+            // Cập nhật weights
+            let lr = 0.3 * Math.pow(0.98, i - MIN_TRAIN);
             let newWeights = [...weights];
-            let lr = 0.25 * Math.pow(0.98, stepIdx);
             for (let j=0; j<ALGO_LIST.length; j++) {
-                let succRate = stepIdx+1 > 0 ? perAlgoCorrectLocal[j]/(stepIdx+1) : 0.25;
-                let reward = scoresForActual[j] + 0.4 * (succRate - 0.25);
+                let succRate = perAlgoTot[j] > 0 ? perAlgoCorr[j] / perAlgoTot[j] : 0.25;
+                let scoresForActual = ALGO_LIST[j](trainHist)[actual] || 0;
+                let reward = scoresForActual + 0.5 * (succRate - 0.25);
                 newWeights[j] *= Math.exp(lr * reward);
             }
             let sum = newWeights.reduce((a,b)=>a+b, 0);
             if (sum > 0) {
-                newWeights = newWeights.map(w => Math.max(0.02, w/sum));
+                newWeights = newWeights.map(w => Math.max(0.01, w/sum));
                 let sum2 = newWeights.reduce((a,b)=>a+b, 0);
                 weights = newWeights.map(w => w/sum2);
             }
         }
-        return {results, finalWeights: weights, perAlgoCorrect: perAlgoCorrectLocal};
+        return {results, finalWeights: weights, perAlgoCorrect: perAlgoCorr, perAlgoTotal: perAlgoTot};
     }
 
-    // Monte Carlo mở rộng
     function monteCarloProbs(hist, weights, samples=10000) {
         let base = ensembleScores(hist, weights);
         let sum = base[1]+base[2]+base[3]+base[4];
@@ -768,7 +829,7 @@
         return {1: counts[1]/samples, 2: counts[2]/samples, 3: counts[3]/samples, 4: counts[4]/samples};
     }
 
-    // ================== CẬP NHẬT UI ==================
+    // ================== UI UPDATE ==================
     function updateAll() {
         document.getElementById('historyDisplay').textContent = currentHistory.length ? currentHistory.join(' ') : 'Chưa có dữ liệu';
         saveHistory(currentHistory);
@@ -786,7 +847,9 @@
         // Backtest
         let backtest = pureBacktest(currentHistory, currentWeights);
         currentWeights = backtest.finalWeights;
+        // Gán perAlgoCorrect, perAlgoTotal từ backtest
         perAlgoCorrect = backtest.perAlgoCorrect;
+        perAlgoTotal = backtest.perAlgoTotal;
         localStorage.setItem(WEIGHTS_KEY, JSON.stringify(currentWeights));
         localStorage.setItem(PER_ALGO_KEY, JSON.stringify(perAlgoCorrect));
 
@@ -800,7 +863,7 @@
         // Độ tin cậy
         let entries = Object.entries(nextScores).sort((a,b)=>b[1]-a[1]);
         let diff = entries[0][1] - entries[1][1];
-        let conf = Math.min(95, Math.floor(50 + diff * 1.8));
+        let conf = Math.min(95, Math.floor(50 + diff * 2.0));
         let entropy = 0;
         let sumScore = nextScores[1]+nextScores[2]+nextScores[3]+nextScores[4];
         if (sumScore > 0) {
@@ -812,14 +875,16 @@
         let confidenceLevel = conf;
         if (entropy > 1.6) confidenceLevel = Math.max(50, conf - 15);
 
-        // Lời khuyên đặt cược
-        let top1 = nextTop3[0];
+        // Monte Carlo
         let mc = monteCarloProbs(currentHistory, currentWeights, 10000);
+        let top1 = nextTop3[0];
         let mcProb = mc[top1] || 0;
+
+        // Lời khuyên cược – ngưỡng cao hơn
         let betAdvice = '';
-        if (mcProb >= 0.40 && confidenceLevel >= 70) {
+        if (mcProb >= 0.48 && confidenceLevel >= 75) {
             betAdvice = `✅ NÊN ĐẶT CỬA ${top1} (xác suất ${(mcProb*100).toFixed(1)}%) - Tự tin cao`;
-        } else if (mcProb >= 0.35 && confidenceLevel >= 60) {
+        } else if (mcProb >= 0.42 && confidenceLevel >= 65) {
             betAdvice = `⚠️ CÓ THỂ ĐẶT CỬA ${top1} (${(mcProb*100).toFixed(1)}%) - Rủi ro trung bình`;
         } else {
             betAdvice = `❌ KHÔNG NÊN ĐẶT CƯỢC - Độ tin cậy thấp (${confidenceLevel}%) - Chờ ván sau`;
@@ -842,11 +907,11 @@
         }
         document.getElementById('backtestLog').innerHTML = logHTML;
 
-        // Chi tiết trọng số
+        // Trọng số
         let totalSteps = Math.max(1, currentHistory.length - MIN_TRAIN);
         let weightHtml = '<div style="display:flex; flex-wrap:wrap; gap:6px;">';
         for (let i=0; i<ALGO_NAMES.length; i++) {
-            let acc = totalSteps>0 ? (perAlgoCorrect[i]/totalSteps*100).toFixed(1) : 0;
+            let acc = perAlgoTotal[i] > 0 ? (perAlgoCorrect[i]/perAlgoTotal[i]*100).toFixed(1) : 0;
             let w = (currentWeights[i]*100).toFixed(1);
             let color = acc > 40 ? '#a5d6a7' : (acc > 25 ? '#ffb74d' : '#ef9a9a');
             weightHtml += `<div style="background:#02101a; padding:4px 10px; border-radius:12px; border-left:3px solid ${color};">
@@ -881,6 +946,7 @@
         currentHistory = [];
         currentWeights = Array(ALGO_LIST.length).fill(1/ALGO_LIST.length);
         perAlgoCorrect = Array(ALGO_LIST.length).fill(0);
+        perAlgoTotal = Array(ALGO_LIST.length).fill(0);
         localStorage.removeItem(HISTORY_KEY);
         localStorage.setItem(WEIGHTS_KEY, JSON.stringify(currentWeights));
         localStorage.setItem(PER_ALGO_KEY, JSON.stringify(perAlgoCorrect));
@@ -889,6 +955,7 @@
     function resetWeights() {
         currentWeights = Array(ALGO_LIST.length).fill(1/ALGO_LIST.length);
         perAlgoCorrect = Array(ALGO_LIST.length).fill(0);
+        perAlgoTotal = Array(ALGO_LIST.length).fill(0);
         localStorage.setItem(WEIGHTS_KEY, JSON.stringify(currentWeights));
         localStorage.setItem(PER_ALGO_KEY, JSON.stringify(perAlgoCorrect));
         updateAll();
@@ -915,19 +982,22 @@
             e.preventDefault();
             resetWeights();
         }
+        if (e.ctrlKey && e.shiftKey && e.key === 'R') {
+            e.preventDefault();
+            clearAll();
+        }
     });
 
     // ================== KHỞI CHẠY ==================
     updateAll();
 
-    // Tự động lưu khi đóng tab
     window.addEventListener('beforeunload', () => {
         saveHistory(currentHistory);
         localStorage.setItem(WEIGHTS_KEY, JSON.stringify(currentWeights));
         localStorage.setItem(PER_ALGO_KEY, JSON.stringify(perAlgoCorrect));
     });
 
-    console.log('🔥 FANTAN AUTO 2.0 loaded. Ctrl+B: xem cửa, Ctrl+R: reset weights.');
+    console.log('🔥 FANTAN AUTO 3.0 loaded. Ctrl+B: xem cửa, Ctrl+R: reset weights, Ctrl+Shift+R: xóa toàn bộ.');
 </script>
 </body>
 </html>
