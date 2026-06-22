@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FANTAN AUTO 4.0 · HeaNg[Black-Cyber]</title>
+    <title>FANTAN AUTO 4.1 · HeaNg[Black-Cyber]</title>
     <style>
         * { box-sizing: border-box; user-select: none; }
         body {
@@ -137,12 +137,13 @@
         .regime-trend { background: #1a3a1a; color: #8bc34a; }
         .regime-choas { background: #3a1a1a; color: #ff8a80; }
         .regime-neutral { background: #1a2a3a; color: #90caf9; }
+        .stop-loss { border-color: #ff1744; background: #2a0a0a; }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>🧬 FANTAN AUTO 4.0 · THÍCH ỨNG THÔNG MINH</h1>
-    <div class="sub">🔥 36 thuật toán + RL thích ứng + Phát hiện chế độ + Monte Carlo 10K</div>
+    <h1>🧬 FANTAN AUTO 4.1 · THÍCH ỨNG THÔNG MINH</h1>
+    <div class="sub">🔥 36 thuật toán + RL thích ứng + Phát hiện chế độ + Monte Carlo 10K + Stop‑Loss</div>
 
     <div class="flex-row">
         <div class="panel">
@@ -167,6 +168,7 @@
             <div id="betAdvice" class="bet-advice">💡 Chờ dữ liệu...</div>
             <div id="confidenceInfo" style="background:#01131e; padding:8px; border-radius:16px; margin-top:10px; font-size:0.8rem;"></div>
             <div id="regimeDisplay" class="regime-badge regime-neutral">🔍 Chế độ: Đang phân tích...</div>
+            <div id="stopLossDisplay" style="margin-top:6px; font-size:0.8rem; color:#ff8a80;"></div>
         </div>
     </div>
 
@@ -187,10 +189,10 @@
 
 <script>
     // ================== CẤU HÌNH ==================
-    const HISTORY_KEY = "fantan_hist_v4";
-    const WEIGHTS_KEY = "fantan_weights_v4";
-    const PER_ALGO_KEY = "fantan_peralgo_v4";
-    const WINDOW_SIZE = 10; // Cửa sổ trượt nhỏ hơn để bắt kịp nhanh
+    const HISTORY_KEY = "fantan_hist_v41";
+    const WEIGHTS_KEY = "fantan_weights_v41";
+    const PER_ALGO_KEY = "fantan_peralgo_v41";
+    const WINDOW_SIZE = 25; // Cửa sổ lớn hơn cho ổn định
 
     function loadHistory() {
         let s = localStorage.getItem(HISTORY_KEY);
@@ -202,12 +204,11 @@
     let currentWeights = [];
     let perAlgoCorrect = [];
     let perAlgoTotal = [];
-    let errorStreak = 0; // Số ván sai liên tiếp
+    let errorStreak = 0;
+    let consecutiveLosses = 0; // dùng cho stop-loss
 
     // ================== 36 THUẬT TOÁN ==================
-    // Bao gồm 28 cũ + 4 của v3 + 4 mới (streak boost, reversal detection, etc.)
-
-    // ----- 20 thuật toán gốc (giữ nguyên) -----
+    // (giữ nguyên toàn bộ danh sách ALGO_LIST và ALGO_NAMES như cũ)
     function timeWeightedFreq(hist) {
         let s={1:0,2:0,3:0,4:0}, l=hist.length;
         for(let i=0;i<l;i++) s[hist[i]] += Math.pow(0.94, l-1-i);
@@ -433,8 +434,6 @@
         }
         return s;
     }
-
-    // ----- 8 thuật toán từ v2 -----
     function fourierCycle(hist) {
         if (hist.length < 8) return {1:0,2:0,3:0,4:0};
         let bestCycle = null, bestScore = 0;
@@ -592,8 +591,6 @@
         }
         return s;
     }
-
-    // ----- 4 thuật toán từ v3 -----
     function streakContinuation(hist) {
         if (hist.length < 2) return {1:0,2:0,3:0,4:0};
         let last = hist[hist.length-1];
@@ -658,9 +655,6 @@
         }
         return s;
     }
-
-    // ----- 4 THUẬT TOÁN MỚI (v4) -----
-    // 33. Extreme Streak Boost: nếu streak dài >= 4, tăng mạnh dự đoán tiếp tục
     function extremeStreakBoost(hist) {
         if (hist.length < 4) return {1:0,2:0,3:0,4:0};
         let last = hist[hist.length-1];
@@ -674,8 +668,6 @@
         }
         return s;
     }
-
-    // 34. Reversal after streak: nếu streak dài >= 3, dự đoán số khác
     function reversalAfterStreak(hist) {
         if (hist.length < 4) return {1:0,2:0,3:0,4:0};
         let last = hist[hist.length-1];
@@ -683,11 +675,9 @@
         for (let i=hist.length-1; i>=0 && hist[i]===last; i--) streak++;
         let s = {1:0,2:0,3:0,4:0};
         if (streak >= 3) {
-            // Dự đoán các số khác với số đang bệt
             let all = [1,2,3,4];
             let others = all.filter(n => n !== last);
             for (let o of others) s[o] += 20;
-            // Thêm trọng số cho số xuất hiện nhiều nhất trong 6 ván trước streak
             if (hist.length >= 6) {
                 let before = hist.slice(-6-streak, -streak);
                 if (before.length > 0) {
@@ -700,35 +690,28 @@
         }
         return s;
     }
-
-    // 35. Pair Reversal: nếu cặp số cuối là AB và trước đó là AB, dự đoán A
     function pairReversal(hist) {
         if (hist.length < 4) return {1:0,2:0,3:0,4:0};
         let last = hist[hist.length-1];
         let prev = hist[hist.length-2];
         let s = {1:0,2:0,3:0,4:0};
-        // Tìm cặp AB trước đó
         let pattern = `${prev},${last}`;
         let matches = 0;
         for (let i=0; i<hist.length-2; i++) {
             let pair = `${hist[i]},${hist[i+1]}`;
             if (pair === pattern) {
                 matches++;
-                // Dự đoán số sau cặp đó
                 let next = hist[i+2];
                 if (next !== undefined) s[next] += 18;
             }
         }
         if (matches > 0) {
-            // Thêm trọng số cho số đối diện
             let all = [1,2,3,4];
             let others = all.filter(n => n !== last && n !== prev);
             for (let o of others) s[o] += 8;
         }
         return s;
     }
-
-    // 36. Weighted Recent Frequency with decay
     function weightedRecentFreq(hist) {
         if (hist.length < 5) return {1:0,2:0,3:0,4:0};
         let s = {1:0,2:0,3:0,4:0};
@@ -741,7 +724,6 @@
         return s;
     }
 
-    // Danh sách 36 thuật toán + tên
     const ALGO_LIST = [
         timeWeightedFreq, patternPrediction, cyclePrediction, hotPair,
         recentTrend, basicFreq, markov1, markov2, markov3,
@@ -765,7 +747,7 @@
         "Extreme Streak","Reversal","Pair Rev.","Weighted Freq"
     ];
 
-    const MIN_TRAIN = 5;
+    const MIN_TRAIN = 6; // tăng lên 6 để ổn định hơn
 
     // ================== KHỞI TẠO ==================
     function initWeights() {
@@ -799,24 +781,32 @@
     initWeights();
     initPerAlgo();
 
-    // ================== HÀM CHÍNH ==================
+    // ================== HÀM CHÍNH (NÂNG CẤP) ==================
+    // --- Normalised ensemble ---
     function ensembleScores(hist, weights) {
         let final = {1:0,2:0,3:0,4:0};
-        // Tính độ chính xác gần đây cho từng thuật toán
-        let recentAcc = {};
-        for (let i=0; i<ALGO_LIST.length; i++) {
-            let acc = perAlgoTotal[i] > 0 ? perAlgoCorrect[i] / perAlgoTotal[i] : 0.25;
-            recentAcc[i] = acc;
-        }
+        let algoScores = [];
         for (let i=0; i<ALGO_LIST.length; i++) {
             let sc = ALGO_LIST[i](hist);
-            // Nhân thêm hệ số dựa trên độ chính xác gần đây
-            let boost = 1 + (recentAcc[i] - 0.25) * 1.5;
-            if (boost < 0.5) boost = 0.5;
-            let weight = weights[i] * boost;
+            let sum = sc[1]+sc[2]+sc[3]+sc[4] || 1;
+            let norm = {};
+            for (let n=1; n<=4; n++) norm[n] = sc[n]/sum;
+            algoScores.push(norm);
+        }
+        for (let i=0; i<ALGO_LIST.length; i++) {
+            let w = weights[i];
+            let norm = algoScores[i];
             for (let n=1; n<=4; n++) {
-                final[n] += (sc[n]||0) * weight;
+                final[n] += norm[n] * w;
             }
+        }
+        // Smoothing with recent frequency
+        let freq = {1:0,2:0,3:0,4:0};
+        let recent = hist.slice(-10);
+        for (let v of recent) freq[v] = (freq[v]||0)+1;
+        let total = recent.length || 1;
+        for (let n=1; n<=4; n++) {
+            final[n] += 0.05 * (freq[n]/total);
         }
         return final;
     }
@@ -827,19 +817,17 @@
         return entries.slice(0,3).map(e=>e.num);
     }
 
-    // Cập nhật trọng số với tốc độ học thích ứng
+    // --- Smart weight update ---
     function updateWeightsAdaptive(hist, actual, weights, step, isError) {
-        // Nếu có sai số, tăng learning rate
-        let lrBase = 0.35;
+        let lrBase = 0.4;
         if (isError) {
             errorStreak++;
-            lrBase += Math.min(0.3, errorStreak * 0.03);
+            lrBase += Math.min(0.5, errorStreak * 0.08);
         } else {
             errorStreak = 0;
         }
-        let lr = lrBase * Math.pow(0.99, step);
+        let lr = lrBase * Math.pow(0.985, step);
 
-        // Cập nhật per-algo với cửa sổ
         for (let i=0; i<ALGO_LIST.length; i++) {
             let s = ALGO_LIST[i](hist);
             let pred = Object.entries(s).sort((a,b)=>b[1]-a[1])[0];
@@ -848,22 +836,21 @@
             }
             perAlgoTotal[i]++;
             if (perAlgoTotal[i] > WINDOW_SIZE) {
-                perAlgoCorrect[i] *= 0.9;
-                perAlgoTotal[i] *= 0.9;
+                perAlgoCorrect[i] *= 0.95;
+                perAlgoTotal[i] *= 0.95;
             }
         }
 
         let newWeights = [...weights];
         for (let j=0; j<ALGO_LIST.length; j++) {
             let successRate = perAlgoTotal[j] > 0 ? perAlgoCorrect[j] / perAlgoTotal[j] : 0.25;
-            let scoresForActual = ALGO_LIST[j](hist)[actual] || 0;
-            let reward = scoresForActual + 0.7 * (successRate - 0.25);
-            // Nếu đang sai liên tiếp, tăng cường phạt cho thuật toán dự đoán sai
+            let scores = ALGO_LIST[j](hist);
+            let sum = scores[1]+scores[2]+scores[3]+scores[4] || 1;
+            let probActual = scores[actual] / sum;
+            let reward = probActual * 0.6 + (successRate - 0.25) * 0.4;
             if (isError) {
-                let pred = Object.entries(ALGO_LIST[j](hist)).sort((a,b)=>b[1]-a[1])[0];
-                if (pred && parseInt(pred[0]) !== actual) {
-                    reward -= 0.2; // phạt thêm
-                }
+                let pred = Object.entries(scores).sort((a,b)=>b[1]-a[1])[0];
+                if (pred && parseInt(pred[0]) !== actual) reward -= 0.15;
             }
             newWeights[j] *= Math.exp(lr * reward);
         }
@@ -874,7 +861,75 @@
         return newWeights.map(w => w/sum2);
     }
 
-    // Backtest với cơ chế thích ứng
+    // --- Monte Carlo ---
+    function monteCarloProbs(hist, weights, samples=10000) {
+        let base = ensembleScores(hist, weights);
+        let sum = base[1]+base[2]+base[3]+base[4];
+        if (sum === 0) return {1:0,2:0,3:0,4:0};
+        let probs = {1: base[1]/sum, 2: base[2]/sum, 3: base[3]/sum, 4: base[4]/sum};
+        let counts = {1:0,2:0,3:0,4:0};
+        for (let i=0; i<samples; i++) {
+            let r = Math.random();
+            let cumulative = 0;
+            for (let n=1; n<=4; n++) {
+                cumulative += probs[n];
+                if (r <= cumulative) { counts[n]++; break; }
+            }
+        }
+        return {1: counts[1]/samples, 2: counts[2]/samples, 3: counts[3]/samples, 4: counts[4]/samples};
+    }
+
+    // --- Regime detection (cải tiến) ---
+    function detectRegime(hist) {
+        if (hist.length < 12) return 'neutral';
+        let recent = hist.slice(-12);
+        let freq = {1:0,2:0,3:0,4:0};
+        for (let v of recent) freq[v]++;
+        let entropy = 0;
+        for (let n=1; n<=4; n++) {
+            let p = freq[n]/12;
+            if (p>0) entropy -= p * Math.log2(p);
+        }
+        let maxStreak = 1, cur = 1;
+        for (let i=1; i<recent.length; i++) {
+            if (recent[i] === recent[i-1]) { cur++; maxStreak = Math.max(maxStreak, cur); }
+            else cur = 1;
+        }
+        let changes = 0;
+        for (let i=1; i<recent.length; i++) if (recent[i] !== recent[i-1]) changes++;
+        let changeRate = changes / 11;
+        if (maxStreak >= 5) return 'trend';
+        else if (entropy > 1.85 || changeRate > 0.7) return 'chaos';
+        else return 'neutral';
+    }
+
+    // --- Betting advice with stop-loss ---
+    function getBetAdvice(top1, mcProb, confidence, gap, regime) {
+        if (consecutiveLosses >= 3) {
+            return { action: 'skip', reason: '🛑 Đã thua 3 ván liên tiếp – nghỉ 1 ván để reset' };
+        }
+        let thresholdProb = 0.52;
+        let thresholdConf = 80;
+        let thresholdGap = 0.15;
+        if (regime === 'chaos') {
+            thresholdProb = 0.58;
+            thresholdConf = 85;
+            thresholdGap = 0.20;
+        } else if (regime === 'trend') {
+            thresholdProb = 0.50;
+            thresholdConf = 75;
+            thresholdGap = 0.12;
+        }
+        if (mcProb >= thresholdProb && confidence >= thresholdConf && gap > thresholdGap) {
+            let risk = 'thấp';
+            if (mcProb > 0.65 && confidence > 90) risk = 'rất thấp';
+            return { action: 'bet', number: top1, prob: mcProb, risk: risk };
+        } else {
+            return { action: 'skip', reason: `⚠️ Độ tin cậy thấp (${confidence}%, ${(mcProb*100).toFixed(0)}%)` };
+        }
+    }
+
+    // --- Backtest (cải tiến với Top1) ---
     function pureBacktest(fullHist, initialWeights) {
         let weights = [...initialWeights];
         let results = [];
@@ -897,26 +952,30 @@
                 if (pred && parseInt(pred[0]) === actual) perAlgoCorr[j]++;
                 perAlgoTot[j]++;
                 if (perAlgoTot[j] > WINDOW_SIZE) {
-                    perAlgoCorr[j] *= 0.9;
-                    perAlgoTot[j] *= 0.9;
+                    perAlgoCorr[j] *= 0.95;
+                    perAlgoTot[j] *= 0.95;
                 }
             }
 
-            // Cập nhật weights
-            let lr = 0.3 * Math.pow(0.98, i - MIN_TRAIN);
-            if (!hit) {
+            // Cập nhật weights (dùng hàm updateWeightsAdaptive nhưng với tham số)
+            let lrBase = 0.4;
+            let isError = !hit;
+            if (isError) {
                 localErrorStreak++;
-                lr += Math.min(0.25, localErrorStreak * 0.02);
+                lrBase += Math.min(0.5, localErrorStreak * 0.08);
             } else {
                 localErrorStreak = 0;
             }
+            let lr = lrBase * Math.pow(0.985, i - MIN_TRAIN);
             let newWeights = [...weights];
             for (let j=0; j<ALGO_LIST.length; j++) {
                 let succRate = perAlgoTot[j] > 0 ? perAlgoCorr[j] / perAlgoTot[j] : 0.25;
-                let scoresForActual = ALGO_LIST[j](trainHist)[actual] || 0;
-                let reward = scoresForActual + 0.6 * (succRate - 0.25);
-                if (!hit) {
-                    let pred = Object.entries(ALGO_LIST[j](trainHist)).sort((a,b)=>b[1]-a[1])[0];
+                let scoresAlgo = ALGO_LIST[j](trainHist);
+                let sum = scoresAlgo[1]+scoresAlgo[2]+scoresAlgo[3]+scoresAlgo[4] || 1;
+                let probActual = scoresAlgo[actual] / sum;
+                let reward = probActual * 0.6 + (succRate - 0.25) * 0.4;
+                if (isError) {
+                    let pred = Object.entries(scoresAlgo).sort((a,b)=>b[1]-a[1])[0];
                     if (pred && parseInt(pred[0]) !== actual) reward -= 0.15;
                 }
                 newWeights[j] *= Math.exp(lr * reward);
@@ -931,50 +990,6 @@
         return {results, finalWeights: weights, perAlgoCorrect: perAlgoCorr, perAlgoTotal: perAlgoTot};
     }
 
-    function monteCarloProbs(hist, weights, samples=10000) {
-        let base = ensembleScores(hist, weights);
-        let sum = base[1]+base[2]+base[3]+base[4];
-        if (sum === 0) return {1:0,2:0,3:0,4:0};
-        let probs = {1: base[1]/sum, 2: base[2]/sum, 3: base[3]/sum, 4: base[4]/sum};
-        let counts = {1:0,2:0,3:0,4:0};
-        for (let i=0; i<samples; i++) {
-            let r = Math.random();
-            let cumulative = 0;
-            for (let n=1; n<=4; n++) {
-                cumulative += probs[n];
-                if (r <= cumulative) { counts[n]++; break; }
-            }
-        }
-        return {1: counts[1]/samples, 2: counts[2]/samples, 3: counts[3]/samples, 4: counts[4]/samples};
-    }
-
-    // Phát hiện chế độ
-    function detectRegime(hist) {
-        if (hist.length < 10) return 'neutral';
-        let recent = hist.slice(-10);
-        // Tính entropy
-        let freq = {1:0,2:0,3:0,4:0};
-        for (let v of recent) freq[v]++;
-        let entropy = 0;
-        for (let n=1; n<=4; n++) {
-            let p = freq[n]/10;
-            if (p>0) entropy -= p * Math.log2(p);
-        }
-        // Đếm streak
-        let maxStreak = 1, currentStreak = 1;
-        for (let i=1; i<recent.length; i++) {
-            if (recent[i] === recent[i-1]) {
-                currentStreak++;
-                if (currentStreak > maxStreak) maxStreak = currentStreak;
-            } else {
-                currentStreak = 1;
-            }
-        }
-        if (maxStreak >= 4) return 'trend';
-        else if (entropy > 1.8) return 'chaos';
-        else return 'neutral';
-    }
-
     // ================== UI UPDATE ==================
     function updateAll() {
         document.getElementById('historyDisplay').textContent = currentHistory.length ? currentHistory.join(' ') : 'Chưa có dữ liệu';
@@ -982,12 +997,13 @@
 
         if (currentHistory.length < MIN_TRAIN) {
             document.getElementById('top3Display').innerHTML = '<span>--</span><span>--</span><span>--</span>';
-            document.getElementById('betAdvice').innerHTML = '💡 Cần ít nhất 5 ván để dự đoán';
+            document.getElementById('betAdvice').innerHTML = '💡 Cần ít nhất 6 ván để dự đoán';
             document.getElementById('confidenceInfo').innerHTML = '';
             document.getElementById('algoDetails').innerHTML = 'Chưa đủ dữ liệu';
             document.getElementById('backtestLog').innerHTML = '⏳ Cần ít nhất 6 ván để backtest.';
             document.getElementById('aiStatus').innerHTML = `🧠 Đã có ${currentHistory.length} ván, cần thêm ${MIN_TRAIN-currentHistory.length} ván nữa.`;
             document.getElementById('regimeDisplay').textContent = '🔍 Chế độ: Đang phân tích...';
+            document.getElementById('stopLossDisplay').textContent = '';
             return;
         }
 
@@ -1002,14 +1018,10 @@
         // Dự đoán ván tới
         let nextScores = ensembleScores(currentHistory, currentWeights);
         let nextTop3 = getTop3(nextScores);
-        document.getElementById('top3Display').innerHTML = nextTop3.map((n, idx) => 
-            `<span class="${idx===0?'top1':''}">🔮 ${n}</span>`
-        ).join('');
-
-        // Độ tin cậy
+        let top1 = nextTop3[0];
         let entries = Object.entries(nextScores).sort((a,b)=>b[1]-a[1]);
         let diff = entries[0][1] - entries[1][1];
-        let conf = Math.min(95, Math.floor(50 + diff * 2.2));
+        let gap = diff / (entries[0][1] + 0.001);
         let entropy = 0;
         let sumScore = nextScores[1]+nextScores[2]+nextScores[3]+nextScores[4];
         if (sumScore > 0) {
@@ -1018,60 +1030,75 @@
                 if (p>0) entropy -= p * Math.log2(p);
             }
         }
-        let confidenceLevel = conf;
-        if (entropy > 1.6) confidenceLevel = Math.max(50, conf - 15);
+        let confidence = Math.min(95, Math.floor(50 + diff * 2.5));
+        if (entropy > 1.6) confidence = Math.max(50, confidence - 15);
 
-        // Monte Carlo
         let mc = monteCarloProbs(currentHistory, currentWeights, 10000);
-        let top1 = nextTop3[0];
         let mcProb = mc[top1] || 0;
 
-        // Phát hiện chế độ
         let regime = detectRegime(currentHistory);
+        let advice = getBetAdvice(top1, mcProb, confidence, gap, regime);
+
+        // Update Top3
+        document.getElementById('top3Display').innerHTML = nextTop3.map((n, idx) =>
+            `<span class="${idx===0?'top1':''}">🔮 ${n}</span>`
+        ).join('');
+
+        // Bet advice
+        let betHTML = '';
+        if (advice.action === 'bet') {
+            betHTML = `✅ NÊN ĐẶT CỬA ${advice.number} (${(advice.prob*100).toFixed(1)}%) - Rủi ro ${advice.risk}`;
+        } else {
+            betHTML = `❌ KHÔNG NÊN ĐẶT CƯỢC – ${advice.reason}`;
+        }
+        document.getElementById('betAdvice').innerHTML = betHTML;
+
+        // Confidence & MC
+        let mcStr = Object.entries(mc).map(([k,v])=> `${k}: ${(v*100).toFixed(1)}%`).join(' | ');
+        document.getElementById('confidenceInfo').innerHTML =
+            `📈 Độ tin cậy: ${confidence}% | Entropy: ${entropy.toFixed(3)} | Gap: ${(gap*100).toFixed(0)}%<br>🎲 Monte Carlo 10K: ${mcStr}`;
+
+        // Regime
         let regimeText = '';
         let regimeClass = '';
-        if (regime === 'trend') {
-            regimeText = '📈 Chế độ BỆT (Streak) – Ưu tiên số đang bệt';
-            regimeClass = 'regime-trend';
-        } else if (regime === 'chaos') {
-            regimeText = '🎲 Chế độ HỖN LOẠN – Ưu tiên số vắng, hạn chế cược';
-            regimeClass = 'regime-choas';
-        } else {
-            regimeText = '⚖️ Chế độ TRUNG TÍNH – Cân bằng các thuật toán';
-            regimeClass = 'regime-neutral';
-        }
+        if (regime === 'trend') { regimeText = '📈 BỆT – Ưu tiên theo xu hướng'; regimeClass = 'regime-trend'; }
+        else if (regime === 'chaos') { regimeText = '🎲 HỖN LOẠN – Hạn chế cược'; regimeClass = 'regime-choas'; }
+        else { regimeText = '⚖️ TRUNG TÍNH – Cân bằng'; regimeClass = 'regime-neutral'; }
         document.getElementById('regimeDisplay').textContent = regimeText;
         document.getElementById('regimeDisplay').className = 'regime-badge ' + regimeClass;
 
-        // Lời khuyên cược – ngưỡng cao hơn và xem xét gap
-        let gap = diff / (entries[0][1] + 0.001);
-        let betAdvice = '';
-        if (mcProb >= 0.52 && confidenceLevel >= 80 && gap > 0.15) {
-            betAdvice = `✅ NÊN ĐẶT CỬA ${top1} (xác suất ${(mcProb*100).toFixed(1)}%) - Tự tin rất cao`;
-        } else if (mcProb >= 0.45 && confidenceLevel >= 70 && gap > 0.10) {
-            betAdvice = `⚠️ CÓ THỂ ĐẶT CỬA ${top1} (${(mcProb*100).toFixed(1)}%) - Rủi ro chấp nhận được`;
-        } else {
-            betAdvice = `❌ KHÔNG NÊN ĐẶT CƯỢC - Độ tin cậy thấp (${confidenceLevel}%) hoặc gap nhỏ - Chờ ván sau`;
-        }
-        document.getElementById('betAdvice').innerHTML = betAdvice;
+        // Stop-loss display
+        let stopMsg = consecutiveLosses >= 3 ? '⚠️ ĐANG NGHỈ (thua 3 ván liên tiếp)' : `Sai liên tiếp: ${consecutiveLosses}`;
+        document.getElementById('stopLossDisplay').textContent = stopMsg;
 
-        let mcStr = Object.entries(mc).map(([k,v])=> `${k}: ${(v*100).toFixed(1)}%`).join(' | ');
-        document.getElementById('confidenceInfo').innerHTML = 
-            `📈 Độ tin cậy: ${confidenceLevel}% | Entropy: ${entropy.toFixed(3)} | Gap: ${(gap*100).toFixed(0)}%<br>🎲 Monte Carlo 10K: ${mcStr}`;
-
-        // Backtest log
+        // Backtest log (with Top1 accuracy)
         let results = backtest.results;
-        let correct = results.filter(r=>r.hit).length;
+        let top3Correct = results.filter(r=>r.hit).length;
         let total = results.length;
-        let accuracy = total ? (correct/total*100).toFixed(2) : 0;
-        let logHTML = `📊 Backtest (ván ${MIN_TRAIN+1}-${currentHistory.length}): ${correct}/${total} đúng (${accuracy}%)<br>📋 10 ván gần nhất:<br>`;
+        let top3Acc = total ? (top3Correct/total*100).toFixed(2) : 0;
+        let top1Correct = results.filter(r => r.top3[0] === r.actual).length;
+        let top1Acc = total ? (top1Correct/total*100).toFixed(2) : 0;
+        let logHTML = `📊 Backtest (ván ${MIN_TRAIN+1}-${currentHistory.length}):<br>Top3: ${top3Correct}/${total} (${top3Acc}%) | Top1: ${top1Correct}/${total} (${top1Acc}%)<br>📋 10 ván gần nhất:<br>`;
         let last10 = results.slice(-10);
         for (let r of last10) {
-            logHTML += `Ván ${r.step}: ra ${r.actual} | Top3: [${r.top3.join(', ')}] ${r.hit?'✅':'❌'}<br>`;
+            logHTML += `Ván ${r.step}: ra ${r.actual} | Top3: [${r.top3.join(', ')}] ${r.hit?'✅':'❌'} | Top1: ${r.top3[0]} ${r.top3[0]===r.actual?'✅':'❌'}<br>`;
         }
         document.getElementById('backtestLog').innerHTML = logHTML;
 
-        // Trọng số
+        // Update consecutiveLosses based on last actual vs top1
+        if (currentHistory.length >= 2) {
+            let lastActual = currentHistory[currentHistory.length-1];
+            let prevScores = ensembleScores(currentHistory.slice(0,-1), currentWeights);
+            let prevTop3 = getTop3(prevScores);
+            let prevTop1 = prevTop3[0];
+            if (prevTop1 === lastActual) {
+                consecutiveLosses = 0;
+            } else {
+                consecutiveLosses++;
+            }
+        }
+
+        // Algo weights
         let weightHtml = '<div style="display:flex; flex-wrap:wrap; gap:6px;">';
         for (let i=0; i<ALGO_NAMES.length; i++) {
             let acc = perAlgoTotal[i] > 0 ? (perAlgoCorrect[i]/perAlgoTotal[i]*100).toFixed(1) : 0;
@@ -1089,12 +1116,12 @@
         weightHtml += `</div>`;
         document.getElementById('algoDetails').innerHTML = weightHtml;
 
-        document.getElementById('aiStatus').innerHTML = `🧠 Phân tích ${currentHistory.length} ván | Đúng ${accuracy}% backtest | Sai liên tiếp: ${errorStreak}`;
+        document.getElementById('aiStatus').innerHTML =
+            `🧠 ${currentHistory.length} ván | Top1 acc: ${top1Acc}% | Top3 acc: ${top3Acc}% | Sai liên tiếp: ${consecutiveLosses}`;
     }
 
     // ================== THAO TÁC ==================
     function addResult(num) {
-        // Kiểm tra xem ván trước có đúng không để cập nhật errorStreak
         let wasCorrect = false;
         if (currentHistory.length >= MIN_TRAIN) {
             let scores = ensembleScores(currentHistory, currentWeights);
@@ -1103,7 +1130,6 @@
         }
         currentHistory.push(num);
         if (currentHistory.length > 1000) currentHistory = currentHistory.slice(-1000);
-        // Cập nhật weights ngay sau khi có kết quả mới
         if (currentHistory.length >= MIN_TRAIN+1) {
             let hist = currentHistory.slice(0, -1);
             let actual = num;
@@ -1128,6 +1154,7 @@
         perAlgoCorrect = Array(ALGO_LIST.length).fill(0);
         perAlgoTotal = Array(ALGO_LIST.length).fill(0);
         errorStreak = 0;
+        consecutiveLosses = 0;
         localStorage.removeItem(HISTORY_KEY);
         localStorage.setItem(WEIGHTS_KEY, JSON.stringify(currentWeights));
         localStorage.setItem(PER_ALGO_KEY, JSON.stringify(perAlgoCorrect));
@@ -1138,6 +1165,7 @@
         perAlgoCorrect = Array(ALGO_LIST.length).fill(0);
         perAlgoTotal = Array(ALGO_LIST.length).fill(0);
         errorStreak = 0;
+        consecutiveLosses = 0;
         localStorage.setItem(WEIGHTS_KEY, JSON.stringify(currentWeights));
         localStorage.setItem(PER_ALGO_KEY, JSON.stringify(perAlgoCorrect));
         updateAll();
@@ -1154,11 +1182,13 @@
     document.addEventListener('keydown', (e) => {
         if (e.ctrlKey && e.key === 'b') {
             e.preventDefault();
-            let scores = ensembleScores(currentHistory, currentWeights);
-            let top3 = getTop3(scores);
-            let mc = monteCarloProbs(currentHistory, currentWeights, 10000);
-            let msg = `🔮 CỬA TỐI ƯU: ${top3[0]} (MC: ${(mc[top3[0]]*100).toFixed(1)}%)\nTop3: ${top3.join(', ')}`;
-            alert(msg);
+            if (currentHistory.length >= MIN_TRAIN) {
+                let scores = ensembleScores(currentHistory, currentWeights);
+                let top3 = getTop3(scores);
+                let mc = monteCarloProbs(currentHistory, currentWeights, 10000);
+                let msg = `🔮 CỬA TỐI ƯU: ${top3[0]} (MC: ${(mc[top3[0]]*100).toFixed(1)}%)\nTop3: ${top3.join(', ')}`;
+                alert(msg);
+            } else alert('Chưa đủ dữ liệu!');
         }
         if (e.ctrlKey && e.key === 'r') {
             e.preventDefault();
@@ -1179,7 +1209,7 @@
         localStorage.setItem(PER_ALGO_KEY, JSON.stringify(perAlgoCorrect));
     });
 
-    console.log('🔥 FANTAN AUTO 4.0 loaded. Ctrl+B: xem cửa, Ctrl+R: reset weights, Ctrl+Shift+R: xóa toàn bộ.');
+    console.log('🔥 FANTAN AUTO 4.1 loaded. Ctrl+B: xem cửa, Ctrl+R: reset weights, Ctrl+Shift+R: xóa toàn bộ.');
 </script>
 </body>
 </html>
