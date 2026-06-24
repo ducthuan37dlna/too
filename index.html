@@ -28,6 +28,21 @@
         .set-prob { color: #ffb74d; font-size: 1.1rem; }
         .detail { font-size: 0.8rem; background: #01131e; padding: 8px; border-radius: 16px; margin-top: 10px; }
         .footer { text-align: center; font-size: 0.7rem; margin-top: 20px; color: #7aa3b8; }
+
+        /* Random section style */
+        .random-section { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 10px 0; }
+        .random-result { font-size: 2rem; font-weight: bold; color: gold; min-width: 50px; text-align: center; }
+
+        /* Animation spinning */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .spinner {
+            display: inline-block;
+            font-size: 2rem;
+            animation: spin 1s linear infinite;
+        }
     </style>
 </head>
 <body>
@@ -44,6 +59,14 @@
                 <div class="num-btn" data-num="3">3</div>
                 <div class="num-btn" data-num="4">4</div>
             </div>
+
+            <!-- ====== MỤC RANDOM CÓ HIỆU ỨNG QUAY ====== -->
+            <div class="random-section">
+                <button id="randomBtn">🎲 Random</button>
+                <span id="randomDisplay" class="random-result">-</span>
+            </div>
+            <!-- ====== KẾT THÚC MỤC RANDOM ====== -->
+
             <button id="undoBtn">↩ Lùi 1</button>
             <button id="clearBtn">🗑 Xóa hết</button>
             <div class="history-box" id="historyDisplay">(trống)</div>
@@ -221,14 +244,12 @@
 
         let numberProbs = ensembleNumberProbs(currentHistory, top5);
 
-        // 4 cách chọn bộ 3 số (loại bỏ 1 số)
         const sets = [
             { omit: 1, numbers: [2,3,4], prob: numberProbs[2]+numberProbs[3]+numberProbs[4] },
             { omit: 2, numbers: [1,3,4], prob: numberProbs[1]+numberProbs[3]+numberProbs[4] },
             { omit: 3, numbers: [1,2,4], prob: numberProbs[1]+numberProbs[2]+numberProbs[4] },
             { omit: 4, numbers: [1,2,3], prob: numberProbs[1]+numberProbs[2]+numberProbs[3] }
         ];
-        // Sắp xếp theo xác suất giảm dần
         sets.sort((a,b) => b.prob - a.prob);
 
         let bestSet = sets[0];
@@ -240,7 +261,6 @@
         `;
         document.getElementById('adviceContainer').innerHTML = recommendationHTML;
 
-        // Hiển thị bảng 4 lựa chọn
         let setCardsHTML = sets.map(s => {
             let active = (s.omit === bestSet.omit) ? 'active' : '';
             return `
@@ -253,7 +273,6 @@
         }).join('');
         document.getElementById('setProbTable').innerHTML = setCardsHTML;
 
-        // Chi tiết xác suất từng số
         document.getElementById('numberDetail').innerHTML = `
             🔢 Xác suất từng số: 
             ① ${(numberProbs[1]*100).toFixed(1)}%  ·  
@@ -282,6 +301,30 @@
     });
     document.getElementById('clearBtn').addEventListener('click', ()=>{
         currentHistory = []; saveHistory(); updateAll();
+    });
+
+    // ================== XỬ LÝ NÚT RANDOM CÓ HIỆU ỨNG QUAY 2S ==================
+    let isRandomInProgress = false;
+    document.getElementById('randomBtn').addEventListener('click', () => {
+        if (isRandomInProgress) return; // Ngăn click liên tục khi đang quay
+        isRandomInProgress = true;
+        const btn = document.getElementById('randomBtn');
+        const display = document.getElementById('randomDisplay');
+
+        btn.disabled = true;
+        // Hiển thị biểu tượng quay
+        display.innerHTML = '<span class="spinner">🎲</span>';
+
+        let randomNum = Math.floor(Math.random() * 4) + 1;
+
+        setTimeout(() => {
+            // Sau 2 giây hiển thị số và kích hoạt lại nút
+            display.textContent = randomNum;
+            btn.disabled = false;
+            isRandomInProgress = false;
+            // Nếu muốn tự động thêm vào lịch sử, bỏ comment dòng dưới:
+            // addNumber(randomNum);
+        }, 2000);
     });
 
     // Khởi tạo
