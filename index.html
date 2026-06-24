@@ -29,11 +29,9 @@
         .detail { font-size: 0.8rem; background: #01131e; padding: 8px; border-radius: 16px; margin-top: 10px; }
         .footer { text-align: center; font-size: 0.7rem; margin-top: 20px; color: #7aa3b8; }
 
-        /* Random section style */
         .random-section { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 10px 0; }
         .random-result { font-size: 2rem; font-weight: bold; color: gold; min-width: 50px; text-align: center; }
 
-        /* Animation spinning */
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -48,7 +46,7 @@
 <body>
 <div class="container">
     <h1>🎯 FANTAN 3 SỐ TỐI ƯU</h1>
-    <div class="sub">⚡ 61 thuật toán · Tự động chọn Top 5 · Dự đoán bộ 3 có xác suất thắng cao nhất</div>
+    <div class="sub">⚡ 61 thuật toán · Tự động chọn Top 20 · Dự đoán bộ 3 có xác suất thắng cao nhất</div>
 
     <div class="flex-row">
         <div class="panel">
@@ -60,12 +58,10 @@
                 <div class="num-btn" data-num="4">4</div>
             </div>
 
-            <!-- ====== MỤC RANDOM CÓ HIỆU ỨNG QUAY ====== -->
             <div class="random-section">
                 <button id="randomBtn">🎲 Random</button>
                 <span id="randomDisplay" class="random-result">-</span>
             </div>
-            <!-- ====== KẾT THÚC MỤC RANDOM ====== -->
 
             <button id="undoBtn">↩ Lùi 1</button>
             <button id="clearBtn">🗑 Xóa hết</button>
@@ -84,7 +80,7 @@
     </div>
 
     <details style="margin-top:20px;">
-        <summary><strong>📊 THUẬT TOÁN ĐƯỢC CHỌN (Top 5)</strong></summary>
+        <summary><strong>📊 THUẬT TOÁN ĐƯỢC CHỌN (Top 20)</strong></summary>
         <div id="topAlgoInfo" style="font-size:0.8rem; background:#02101a; padding:10px; border-radius:16px;">Đang chờ dữ liệu...</div>
     </details>
     <div class="footer">⚡ Bấm số → Auto cập nhật dự đoán · HeaNg[Black-Cyber]</div>
@@ -234,15 +230,16 @@
         }
 
         let scores = evaluateAlgorithms(currentHistory);
-        let top5 = scores.slice(0,5).filter(a => a.accuracy>0);
-        if (top5.length === 0) {
+        // Lấy top 20 (thay vì 5)
+        let topAlgos = scores.slice(0, 20).filter(a => a.accuracy > 0);
+        if (topAlgos.length === 0) {
             document.getElementById('adviceContainer').innerHTML = `<div class="advice-box"><div class="advice-main">⚠️ Không đủ thuật toán tốt</div></div>`;
             return;
         }
-        let weightSum = top5.reduce((s,a)=>s+a.accuracy*a.accuracy, 0);
-        top5.forEach(a => a.weight = a.accuracy*a.accuracy / weightSum);
+        let weightSum = topAlgos.reduce((s, a) => s + a.accuracy * a.accuracy, 0);
+        topAlgos.forEach(a => a.weight = (a.accuracy * a.accuracy) / weightSum);
 
-        let numberProbs = ensembleNumberProbs(currentHistory, top5);
+        let numberProbs = ensembleNumberProbs(currentHistory, topAlgos);
 
         const sets = [
             { omit: 1, numbers: [2,3,4], prob: numberProbs[2]+numberProbs[3]+numberProbs[4] },
@@ -280,7 +277,7 @@
             ③ ${(numberProbs[3]*100).toFixed(1)}%  ·  
             ④ ${(numberProbs[4]*100).toFixed(1)}%
         `;
-        document.getElementById('topAlgoInfo').innerHTML = top5.map((a,i) => `${i+1}. ${a.name} (${(a.accuracy*100).toFixed(1)}%)`).join(' · ');
+        document.getElementById('topAlgoInfo').innerHTML = topAlgos.map((a,i) => `${i+1}. ${a.name} (${(a.accuracy*100).toFixed(1)}%)`).join(' · ');
     }
 
     // ================== XỬ LÝ SỰ KIỆN ==================
@@ -306,24 +303,21 @@
     // ================== XỬ LÝ NÚT RANDOM CÓ HIỆU ỨNG QUAY 2S ==================
     let isRandomInProgress = false;
     document.getElementById('randomBtn').addEventListener('click', () => {
-        if (isRandomInProgress) return; // Ngăn click liên tục khi đang quay
+        if (isRandomInProgress) return;
         isRandomInProgress = true;
         const btn = document.getElementById('randomBtn');
         const display = document.getElementById('randomDisplay');
 
         btn.disabled = true;
-        // Hiển thị biểu tượng quay
         display.innerHTML = '<span class="spinner">🎲</span>';
 
         let randomNum = Math.floor(Math.random() * 4) + 1;
 
         setTimeout(() => {
-            // Sau 2 giây hiển thị số và kích hoạt lại nút
             display.textContent = randomNum;
             btn.disabled = false;
             isRandomInProgress = false;
-            // Nếu muốn tự động thêm vào lịch sử, bỏ comment dòng dưới:
-            // addNumber(randomNum);
+            // addNumber(randomNum); // Uncomment nếu muốn tự động thêm kết quả
         }, 2000);
     });
 
