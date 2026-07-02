@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FAN‑TAN ULTIMATE v4.2 | HeaNg[Black-Cyber] – Chống Thua Chuỗi</title>
+    <title>FAN‑TAN ULTIMATE v5.0 PRO | HeaNg[Black-Cyber]</title>
     <style>
         *{margin:0;padding:0;box-sizing:border-box;font-family:'Courier New',monospace}
         body{background:#010314;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:1rem}
@@ -47,8 +47,8 @@
 </head>
 <body>
 <div class="container">
-    <div class="title">🏆 FAN‑TAN ULTIMATE v4.2 🏆</div>
-    <div class="subtitle">61 THUẬT TOÁN · CHỐNG THUA CHUỖI TỰ ĐỘNG · DỰ ĐOÁN LIÊN TỤC</div>
+    <div class="title">🏆 FAN‑TAN ULTIMATE v5.0 PRO 🏆</div>
+    <div class="subtitle">AI ENGINE · HMM · BAYESIAN · MARKOV 4 · MONTE CARLO 100K · 8 REGIMES</div>
 
     <div class="row">
         <div class="history-section">
@@ -106,34 +106,25 @@
     </div>
 
     <div id="algoDetail" class="algo-detail"></div>
-    <div class="footer">HeaNg[Black-Cyber] · Refactored v4.2 · Dự đoán liên tục, không khóa</div>
+    <div class="footer">HeaNg[Black-Cyber] · v5.0 PRO · Full code 61 thuật toán</div>
 </div>
 
 <script>
 // ====================== CONFIG ======================
 const CONFIG = {
-    MAX_HISTORY: 300,
-    MIN_HISTORY_FOR_PREDICTION: 6,
-    BACKTEST_MIN_SAMPLES: 10,
-    CONFIDENCE_THRESHOLD_LOW: 18,
-    LEARNING_RATE_BASE: 0.15,
-    LEARNING_RATE_PER_LOSS: 0.04,
-    MAX_LEARNING_RATE: 0.5,
-    PRUNE_ACC_THRESHOLD: 0.30,
-    PRUNE_MIN_SAMPLES: 15,
-    WEIGHT_MIN: 0.001,
-    WEIGHT_MAX: 0.25,
-    MONTE_CARLO_SAMPLES: 25000,
-    MONTE_CARLO_MULTI_STEP: 4,
-    STORAGE_VERSION: 5,
+    MAX_HISTORY: 500,
+    MIN_HISTORY_FOR_PREDICTION: 8,
+    BACKTEST_MIN_SAMPLES: 12,
+    MONTE_CARLO_SAMPLES: 100000,
+    MONTE_CARLO_MULTI_STEP: 5,
+    STORAGE_VERSION: 6,
     DEBOUNCE_SAVE_MS: 300,
-    LOG_ENABLED: false,
-    PERF_MONITOR: false,
-    STREAK_ADJUST_STRENGTH: 0.3,
-    STREAK_ADJUST_STRENGTH_HIGH: 0.6,
-    REVERSAL_WEIGHT_BOOST: 2.5,
-    TREND_WEIGHT_REDUCTION: 0.3,
-    PRUNE_INTERVAL: 8
+    DEV_MODE: false,
+    PRUNE_ACC_THRESHOLD: 0.30,
+    PRUNE_MIN_SAMPLES: 50,
+    PRUNE_RECOVER_THRESHOLD: 0.40,
+    LEARNING_RATE: 0.1,
+    WEIGHT_DECAY: 0.99
 };
 
 // ====================== UTILS ======================
@@ -149,16 +140,53 @@ const Utils = {
         let e=0; for(let n=1;n<=4;n++){ const p=f[n]/h.length; if(p>0) e-=p*Math.log2(p); }
         return e;
     },
+    variance(probs) {
+        const mean = (probs[1]+probs[2]+probs[3]+probs[4])/4;
+        return probs.reduce((s,p)=>s+(p-mean)**2,0)/4;
+    },
+    skewness(probs) {
+        const mean = (probs[1]+probs[2]+probs[3]+probs[4])/4;
+        const variance = this.variance(probs);
+        if (!variance) return 0;
+        const m3 = probs.reduce((s,p)=>s+(p-mean)**3,0)/4;
+        return m3 / Math.pow(variance, 1.5);
+    },
+    kurtosis(probs) {
+        const mean = (probs[1]+probs[2]+probs[3]+probs[4])/4;
+        const variance = this.variance(probs);
+        if (!variance) return 0;
+        const m4 = probs.reduce((s,p)=>s+(p-mean)**4,0)/4;
+        return m4 / (variance**2) - 3;
+    },
+    autocorrelation(hist, lag=1) {
+        if (hist.length <= lag) return 0;
+        let n = hist.length - lag;
+        let mean = hist.reduce((a,b)=>a+b,0)/hist.length;
+        let num=0, den=0;
+        for (let i=0; i<n; i++) {
+            num += (hist[i]-mean)*(hist[i+lag]-mean);
+        }
+        for (let i=0; i<hist.length; i++) den += (hist[i]-mean)**2;
+        return den ? num/den : 0;
+    },
     detectRegime(h) {
         if(h.length<12) return 'neutral';
-        const r=h.slice(-12); let ms=1,cur=1;
-        for(let i=1;i<r.length;i++){ if(r[i]===r[i-1]){cur++;ms=Math.max(ms,cur);} else cur=1; }
+        const r=h.slice(-12); let ms=1,cur=1, changes=0;
+        for(let i=1;i<r.length;i++){ if(r[i]===r[i-1]){cur++;ms=Math.max(ms,cur);} else {cur=1; changes++;} }
         const ent=this.entropy(r);
-        if(ms>=5) return 'trend';
-        if(ent>1.85) return 'chaos';
+        const autocorr = this.autocorrelation(r,1);
+        if(ms>=6) return 'trend';
+        if(changes>=8 && ent>1.9) return 'chaos';
+        if(changes>=8) return 'alternating';
+        if(autocorr > 0.3 && ent<1.8) return 'repeating';
+        if(ent<1.6) return 'mean_reversion';
+        if(ms>=3 && changes<=4) return 'transition';
+        if(ent>1.85) return 'breakout';
         return 'neutral';
     },
-    debounce(fn,delay){ let t; return(...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),delay); }; }
+    debounce(fn,delay){ let t; return(...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),delay); }; },
+    range(n){ return Array.from({length:n},(_,i)=>i); },
+    setUnion(a,b){ return new Set([...a,...b]); }
 };
 
 // ====================== STORAGE ======================
@@ -168,262 +196,445 @@ class StorageManager {
     save(key,data){ try{ localStorage.setItem(key,JSON.stringify(data)); }catch(e){} }
     scheduleSave(key,getFn){ this._pending=this._pending||{}; this._pending[key]=getFn; this.saveDebounced(); }
     _saveAll(){ if(!this._pending) return; Object.entries(this._pending).forEach(([k,fn])=>this.save(k,fn())); this._pending={}; }
-    clearAll(){ ['fan_hist_v3','fan_wl_v3','fan_weights_v3','fan_algo_stats_v5','fan_config_v5'].forEach(k=>localStorage.removeItem(k)); }
+    clearAll(){ ['fan_hist_v6','fan_wl_v6','fan_weights_v6','fan_algo_stats_v6'].forEach(k=>localStorage.removeItem(k)); }
 }
 
 // ====================== ALGORITHM CLASS ======================
 class Algorithm {
-    constructor(id,name,cat,fn){ this.id=id; this.name=name; this.category=cat; this._predict=fn; this.total=0; this.correct=0; this.weight=1; }
+    constructor(id,name,category,fn){ 
+        this.id=id; this.name=name; this.category=category; this._predict=fn;
+        this.total=0; this.correct=0; this.weight=0.01; this.accuracy30=0; this.accuracy100=0; this.accuracyAll=0;
+        this.recentWin=0; this.recentLose=0; this.confidence=0.5; this.importance=1;
+        this.enabled=true;
+    }
     predict(h){ return this._predict(h); }
-    updateStats(ok){ this.total++; if(ok) this.correct++; }
-    get accuracy(){ return this.total?this.correct/this.total:0; }
-    shouldPrune(){ return this.total>=CONFIG.PRUNE_MIN_SAMPLES && this.accuracy<CONFIG.PRUNE_ACC_THRESHOLD; }
+    updateStats(correct){
+        this.total++; 
+        if(correct) this.correct++;
+        this.accuracyAll = this.total ? this.correct/this.total : 0;
+    }
+    updateRolling(window, results){
+        if(results.length < window) return;
+        const slice = results.slice(-window);
+        const correctCount = slice.filter(r=>r).length;
+        if(window===30) this.accuracy30 = correctCount / window;
+        else if(window===100) this.accuracy100 = correctCount / window;
+    }
+    setConfidence(conf){ this.confidence = conf; }
 }
 
-// ====================== 61 THUẬT TOÁN ======================
+// ====================== 61 THUẬT TOÁN (chuyển về xác suất) ======================
 function createAlgorithms(){
-    return [
-        // 1-5: Frequency based
-        new Algorithm(1,'basicFreq','frequency',h=>{let f={1:0,2:0,3:0,4:0};h.forEach(v=>f[v]++);let t=h.length||1,s={};for(let i=1;i<=4;i++)s[i]=(f[i]/t)*25;return s;}),
-        new Algorithm(2,'recentTrend','frequency',h=>{let r=h.slice(-6),s={1:0,2:0,3:0,4:0};r.forEach((v,i)=>s[v]+=1+i*0.3);return s;}),
-        new Algorithm(3,'timeWeightedFreq','frequency',h=>{let s={1:0,2:0,3:0,4:0},l=h.length;for(let i=0;i<l;i++)s[h[i]]+=Math.pow(0.94,l-1-i);return s;}),
-        new Algorithm(4,'weightedMA','frequency',h=>{if(h.length<5)return{1:0,2:0,3:0,4:0};let s={1:0,2:0,3:0,4:0},n=Math.min(10,h.length),r=h.slice(-n);for(let i=0;i<r.length;i++)s[r[i]]+=(i+1)*1.2;return s;}),
-        new Algorithm(5,'weightedRecentFreq','frequency',h=>{if(h.length<5)return{1:0,2:0,3:0,4:0};let s={1:0,2:0,3:0,4:0},n=Math.min(8,h.length),r=h.slice(-n);for(let i=0;i<r.length;i++)s[r[i]]+=(1+i*0.4)*2.5;return s;}),
-        // 6-8: Markov
-        new Algorithm(6,'markov1','markov',h=>{if(h.length<2)return{1:0,2:0,3:0,4:0};let t={1:{1:0,2:0,3:0,4:0},2:{1:0,2:0,3:0,4:0},3:{1:0,2:0,3:0,4:0},4:{1:0,2:0,3:0,4:0}};for(let i=0;i<h.length-1;i++)t[h[i]][h[i+1]]++;let l=h[h.length-1],x=t[l],s=0;for(let i=1;i<=4;i++)s+=x[i];if(!s)return{1:0,2:0,3:0,4:0};let o={};for(let i=1;i<=4;i++)o[i]=(x[i]/s)*30;return o;}),
-        new Algorithm(7,'markov2','markov',h=>{if(h.length<3)return{1:0,2:0,3:0,4:0};let last2=h[h.length-2]+','+h[h.length-1],trans={};for(let i=0;i<h.length-2;i++){let k=h[i]+','+h[i+1];if(!trans[k])trans[k]={1:0,2:0,3:0,4:0};trans[k][h[i+2]]++;}let np=trans[last2];if(!np)return{1:0,2:0,3:0,4:0};let total=np[1]+np[2]+np[3]+np[4];if(!total)return{1:0,2:0,3:0,4:0};let s={};for(let i=1;i<=4;i++)s[i]=(np[i]/total)*35;return s;}),
-        new Algorithm(8,'markov3','markov',h=>{if(h.length<4)return{1:0,2:0,3:0,4:0};let last3=h[h.length-3]+','+h[h.length-2]+','+h[h.length-1],trans={};for(let i=0;i<h.length-3;i++){let k=h[i]+','+h[i+1]+','+h[i+2];if(!trans[k])trans[k]={1:0,2:0,3:0,4:0};trans[k][h[i+3]]++;}let np=trans[last3];if(!np)return{1:0,2:0,3:0,4:0};let total=np[1]+np[2]+np[3]+np[4];if(!total)return{1:0,2:0,3:0,4:0};let s={};for(let i=1;i<=4;i++)s[i]=(np[i]/total)*42;return s;}),
-        // 9-12: Pair / Triple
-        new Algorithm(9,'hotPair','pair',h=>{if(h.length<2)return{1:0,2:0,3:0,4:0};let last=h[h.length-1],s={1:0,2:0,3:0,4:0},pc={};for(let i=0;i<h.length-1;i++){let k=h[i]+'-'+h[i+1];pc[k]=(pc[k]||0)+1;}for(let n=1;n<=4;n++)s[n]+=Math.min(22,(pc[last+'-'+n]||0)*4.5);return s;}),
-        new Algorithm(10,'hotTriple','pair',h=>{if(h.length<3)return{1:0,2:0,3:0,4:0};let last2=h[h.length-2]+','+h[h.length-1],s={1:0,2:0,3:0,4:0},pc={};for(let i=0;i<h.length-2;i++){let k=h[i]+','+h[i+1];if(!pc[k])pc[k]={1:0,2:0,3:0,4:0};pc[k][h[i+2]]++;}let np=pc[last2];if(!np)return s;let total=np[1]+np[2]+np[3]+np[4];if(!total)return s;for(let i=1;i<=4;i++)s[i]=(np[i]/total)*40;return s;}),
-        new Algorithm(11,'pairContinuation','pattern',h=>{if(h.length<3)return{1:0,2:0,3:0,4:0};let last=h[h.length-1],prev=h[h.length-2],s={1:0,2:0,3:0,4:0};if(last===prev)s[last]+=25;else s[last]+=10;return s;}),
-        new Algorithm(12,'delayedReaction','pattern',h=>{if(h.length<5)return{1:0,2:0,3:0,4:0};let last2=h.slice(-2),s={1:0,2:0,3:0,4:0};for(let i=0;i<h.length-4;i++){if(h[i]===last2[0]&&h[i+1]===last2[1]){let next=h[i+2];if(next!==undefined)s[next]+=15;}}return s;}),
-        // 13-16: Cycle
-        new Algorithm(13,'cyclePrediction','cycle',h=>{if(h.length<6)return{1:0,2:0,3:0,4:0};let bestCycle=null,bestScore=0;for(let c=2;c<=Math.min(10,Math.floor(h.length/2));c++){let matches=0,checks=Math.min(30,h.length-c);for(let i=0;i<checks;i++)if(h[h.length-1-i]===h[h.length-1-c-i])matches++;let score=checks?matches/checks:0;if(score>bestScore&&score>0.55){bestScore=score;bestCycle=c;}}let s={1:0,2:0,3:0,4:0};if(bestCycle)s[h[h.length-bestCycle]]+=22*bestScore;return s;}),
-        new Algorithm(14,'cycleExtended','cycle',h=>{if(h.length<8)return{1:0,2:0,3:0,4:0};let bestCycle=null,bestScore=0;for(let c=2;c<=Math.min(15,Math.floor(h.length/2));c++){let matches=0,checks=Math.min(40,h.length-c);for(let i=0;i<checks;i++)if(h[h.length-1-i]===h[h.length-1-c-i])matches++;let score=checks?matches/checks:0;if(score>bestScore&&score>0.5){bestScore=score;bestCycle=c;}}let s={1:0,2:0,3:0,4:0};if(bestCycle)s[h[h.length-bestCycle]]+=25*bestScore;return s;}),
-        new Algorithm(15,'fourierCycle','cycle',h=>{if(h.length<8)return{1:0,2:0,3:0,4:0};let bestCycle=null,bestScore=0;for(let c=3;c<=Math.min(12,Math.floor(h.length/2));c++){let matches=0,total=0;for(let i=0;i<h.length-c;i++){if(h[i]===h[i+c])matches++;total++;}let score=total?matches/total:0;if(score>bestScore&&score>0.55){bestScore=score;bestCycle=c;}}let s={1:0,2:0,3:0,4:0};if(bestCycle&&h.length>=bestCycle)s[h[h.length-bestCycle]]+=28*bestScore;return s;}),
-        new Algorithm(16,'fourierExtend','cycle',h=>{if(h.length<12)return{1:0,2:0,3:0,4:0};let bestCycle=null,bestScore=0;for(let c=3;c<=Math.min(20,Math.floor(h.length/2));c++){let matches=0,total=0;for(let i=0;i<h.length-c;i++){if(h[i]===h[i+c])matches++;total++;}let score=total?matches/total:0;if(score>bestScore&&score>0.55){bestScore=score;bestCycle=c;}}let s={1:0,2:0,3:0,4:0};if(bestCycle&&h.length>=bestCycle)s[h[h.length-bestCycle]]+=35*bestScore;return s;}),
-        // 17-19: Pattern matching
-        new Algorithm(17,'patternPrediction','pattern',h=>{if(h.length<4)return{1:0,2:0,3:0,4:0};let last=h[h.length-1],prev=h[h.length-2],pprev=h[h.length-3],s={1:0,2:0,3:0,4:0};if(last===prev){s[last]+=28;if(prev===pprev)s[last]+=15;}else{if(prev===pprev&&prev!==last)s[prev]+=20;if(h.length>=5&&h[h.length-5]===h[h.length-3]&&h[h.length-4]===h[h.length-2])s[h[h.length-4]]+=18;}return s;}),
-        new Algorithm(18,'knnPattern','pattern',h=>{const pl=5;if(h.length<pl+1)return{1:0,2:0,3:0,4:0};let lp=h.slice(-pl),s={1:0,2:0,3:0,4:0};for(let i=0;i<=h.length-pl-1;i++){let c=h.slice(i,i+pl),m=0;for(let j=0;j<pl;j++)if(c[j]===lp[j])m++;if(m>=pl-1){let ni=i+pl;if(ni<h.length)s[h[ni]]+=(m/pl)*25;}}return s;}),
-        new Algorithm(19,'patternMatch7','pattern',h=>{if(h.length<8)return{1:0,2:0,3:0,4:0};let w=h.slice(-7),s={1:0,2:0,3:0,4:0};for(let i=0;i<=h.length-8;i++){let seg=h.slice(i,i+7),sim=0;for(let j=0;j<7;j++)if(seg[j]===w[j])sim++;if(sim>=5){let ni=i+7;if(ni<h.length)s[h[ni]]+=(sim/7)*32;}}return s;}),
-        // 20-21: Alternating / Pair reversal
-        new Algorithm(20,'alternatingPair','alternating',h=>{if(h.length<4)return{1:0,2:0,3:0,4:0};let last=h[h.length-1],slast=h[h.length-2],s={1:0,2:0,3:0,4:0};for(let i=0;i<h.length-3;i++){if(h[i]===slast&&h[i+1]===last)s[h[i+2]]+=18;}if(h.length>=4){let a=h[h.length-4],b=h[h.length-3],c=h[h.length-2],d=h[h.length-1];if(a===c&&b===d&&a!==b)s[a]+=22;}return s;}),
-        new Algorithm(21,'pairReversal','reversal',h=>{if(h.length<4)return{1:0,2:0,3:0,4:0};let last=h[h.length-1],prev=h[h.length-2],s={1:0,2:0,3:0,4:0},pat=prev+','+last;for(let i=0;i<h.length-2;i++){if(h[i]+','+h[i+1]===pat){let next=h[i+2];if(next!==undefined)s[next]+=18;}}return s;}),
-        // 22-26: Streak / Reversal
-        new Algorithm(22,'streakReversal','reversal',h=>{if(h.length<4)return{1:0,2:0,3:0,4:0};let last=h[h.length-1],streak=0;for(let i=h.length-1;i>=0&&h[i]===last;i--)streak++;let s={1:0,2:0,3:0,4:0};if(streak>=2){let others=[1,2,3,4].filter(n=>n!==last);others.forEach(o=>s[o]+=15+streak*2);}return s;}),
-        new Algorithm(23,'streakMomentum','streak',h=>{if(h.length<6)return{1:0,2:0,3:0,4:0};let last=h[h.length-1],cnt=0;for(let i=h.length-1;i>=0&&h[i]===last;i--)cnt++;let s={1:0,2:0,3:0,4:0};if(cnt>=1)s[last]=cnt>=2?30:18;return s;}),
-        new Algorithm(24,'streakContinuation','streak',h=>{if(h.length<2)return{1:0,2:0,3:0,4:0};let last=h[h.length-1],prev=h[h.length-2],s={1:0,2:0,3:0,4:0};if(last===prev){let streak=2;for(let i=h.length-3;i>=0&&h[i]===last;i--)streak++;s[last]+=Math.min(40,15+streak*4);}else s[last]+=8;return s;}),
-        new Algorithm(25,'extremeStreakBoost','streak',h=>{if(h.length<4)return{1:0,2:0,3:0,4:0};let last=h[h.length-1],streak=0;for(let i=h.length-1;i>=0&&h[i]===last;i--)streak++;let s={1:0,2:0,3:0,4:0};if(streak>=4)s[last]+=Math.min(50,20+streak*5);else if(streak>=2)s[last]+=15;return s;}),
-        new Algorithm(26,'adaptiveMomentum','momentum',h=>{if(h.length<6)return{1:0,2:0,3:0,4:0};let s={1:0,2:0,3:0,4:0},last=h[h.length-1],streak=0;for(let i=h.length-1;i>=0&&h[i]===last;i--)streak++;if(streak>=2){let prev=h[h.length-streak-1]||0,prevStreak=0;for(let i=h.length-streak-2;i>=0&&h[i]===prev;i--)prevStreak++;if(prevStreak<streak)s[last]+=35;else{let missing=[1,2,3,4].filter(n=>n!==last);missing.forEach(m=>s[m]+=15);}}else{let recent=h.slice(-4);for(let n=1;n<=4;n++)if(recent.includes(n))s[n]+=10;}return s;}),
-        // 27-33: Trend / Reversal / Streak breaker
-        new Algorithm(27,'trendStrength','trend',h=>{if(h.length<12)return{1:0,2:0,3:0,4:0};let recent=h.slice(-12),changes=0;for(let i=1;i<recent.length;i++)if(recent[i]!==recent[i-1])changes++;let s={1:0,2:0,3:0,4:0},avg=changes/11;if(avg<0.4){let l6=recent.slice(-6),f={1:0,2:0,3:0,4:0};l6.forEach(v=>f[v]++);let maxF=Math.max(...Object.values(f));for(let n=1;n<=4;n++)if(f[n]===maxF)s[n]+=30;}else if(avg>0.7){let l6=recent.slice(-6),missing=[1,2,3,4].filter(n=>!l6.includes(n));missing.forEach(m=>s[m]+=20);}return s;}),
-        new Algorithm(28,'trendReversal','reversal',h=>{if(h.length<4)return{1:0,2:0,3:0,4:0};let r=h.slice(-3);if(r[0]!==r[1]&&r[1]!==r[2]&&r[0]!==r[2]){let missing=[1,2,3,4].find(x=>!r.includes(x));let s={1:0,2:0,3:0,4:0};s[missing]=22;return s;}return{1:0,2:0,3:0,4:0};}),
-        new Algorithm(29,'breakoutReversal','reversal',h=>{if(h.length<5)return{1:0,2:0,3:0,4:0};let last=h[h.length-1],prev=h[h.length-2],streak=1;for(let i=h.length-2;i>=0&&h[i]===prev;i--)streak++;let s={1:0,2:0,3:0,4:0};if(streak>=4&&last!==prev){let recent=h.slice(-6);for(let n=1;n<=4;n++)if(!recent.includes(n))s[n]+=20;for(let n=1;n<=4;n++)if(n!==prev)s[n]+=12;}return s;}),
-        new Algorithm(30,'reversalAfterStreak','reversal',h=>{if(h.length<4)return{1:0,2:0,3:0,4:0};let last=h[h.length-1],streak=0;for(let i=h.length-1;i>=0&&h[i]===last;i--)streak++;let s={1:0,2:0,3:0,4:0};if(streak>=3){let others=[1,2,3,4].filter(n=>n!==last);others.forEach(o=>s[o]+=20);if(h.length>=6){let before=h.slice(-6-streak,-streak);if(before.length){let freq={};before.forEach(v=>freq[v]=(freq[v]||0)+1);let maxF=Math.max(...Object.values(freq));for(let n=1;n<=4;n++)if(freq[n]===maxF)s[n]+=12;}}}return s;}),
-        new Algorithm(31,'streakBreaker','streak',h=>{if(h.length<4)return{1:0,2:0,3:0,4:0};let last=h[h.length-1],streak=0;for(let i=h.length-1;i>=0&&h[i]===last;i--)streak++;let s={1:0,2:0,3:0,4:0};if(streak>=3){let others=[1,2,3,4].filter(n=>n!==last);others.forEach(o=>s[o]+=25+streak*3);}return s;}),
-        new Algorithm(32,'trendAcceleration','trend',h=>{if(h.length<6)return{1:0,2:0,3:0,4:0};let recent=h.slice(-6),changes=0;for(let i=1;i<recent.length;i++)if(recent[i]!==recent[i-1])changes++;let s={1:0,2:0,3:0,4:0};if(changes<=2){let last=h[h.length-1];s[last]+=25;}else if(changes>=4){let last=h[h.length-1],others=[1,2,3,4].filter(n=>n!==last);others.forEach(o=>s[o]+=15);}return s;}),
-        new Algorithm(33,'streakBreak','streak',h=>{if(h.length<10)return{1:0,2:0,3:0,4:0};let lastSeen={1:null,2:null,3:null,4:null},len=h.length;for(let i=len-1;i>=0;i--)if(lastSeen[h[i]]===null)lastSeen[h[i]]=i;let s={1:0,2:0,3:0,4:0};for(let n=1;n<=4;n++){let steps=lastSeen[n]!==null?len-1-lastSeen[n]:len;s[n]=Math.min(30,steps*2.5);}return s;}),
-        // 34-37: Absence / Gap / Mean reversion
-        new Algorithm(34,'adaptiveAbsence','absence',h=>{if(h.length<8)return{1:0,2:0,3:0,4:0};let lastSeen={1:null,2:null,3:null,4:null},len=h.length;for(let i=len-1;i>=0;i--)if(lastSeen[h[i]]===null)lastSeen[h[i]]=i;let s={1:0,2:0,3:0,4:0};for(let n=1;n<=4;n++){let steps=lastSeen[n]!==null?len-1-lastSeen[n]:len;s[n]=Math.min(50,Math.pow(steps,1.5)*1.2);}return s;}),
-        new Algorithm(35,'gapDetector','absence',h=>{if(h.length<6)return{1:0,2:0,3:0,4:0};let lastSeen={1:-1,2:-1,3:-1,4:-1};for(let i=h.length-1;i>=0;i--)if(lastSeen[h[i]]===-1)lastSeen[h[i]]=i;let s={1:0,2:0,3:0,4:0},len=h.length;for(let n=1;n<=4;n++){let gap=lastSeen[n]===-1?len:len-1-lastSeen[n];s[n]=Math.min(40,gap*gap*0.4);}return s;}),
-        new Algorithm(36,'meanReversion','reversion',h=>{if(h.length<8)return{1:0,2:0,3:0,4:0};let lastSeen={1:-1,2:-1,3:-1,4:-1};for(let i=h.length-1;i>=0;i--)if(lastSeen[h[i]]===-1)lastSeen[h[i]]=i;let s={1:0,2:0,3:0,4:0},len=h.length;for(let n=1;n<=4;n++){let steps=lastSeen[n]===-1?len:len-1-lastSeen[n];if(steps>=3)s[n]+=Math.min(35,steps*2.5);}return s;}),
-        new Algorithm(37,'harmonicReturn','reversion',h=>{if(h.length<10)return{1:0,2:0,3:0,4:0};let freq={1:0,2:0,3:0,4:0},total=h.length;h.forEach(v=>freq[v]++);let s={1:0,2:0,3:0,4:0};for(let n=1;n<=4;n++){let rate=freq[n]/total;if(rate<0.20)s[n]+=(0.25-rate)*100;}return s;}),
-        // 38-39: Entropy / Bayesian
-        new Algorithm(38,'entropyBased','entropy',h=>{if(h.length<8)return{1:0,2:0,3:0,4:0};let freq={1:0,2:0,3:0,4:0};h.forEach(v=>freq[v]++);let total=h.length,entropy=0;for(let n=1;n<=4;n++){let p=freq[n]/total;if(p>0)entropy-=p*Math.log2(p);}let s={1:0,2:0,3:0,4:0};if(entropy>1.8){let recent=h.slice(-6),missing=[1,2,3,4].filter(n=>!recent.includes(n));missing.forEach(m=>s[m]+=25);}else{let recent=h.slice(-6),hot={};recent.forEach(v=>hot[v]=(hot[v]||0)+1);let maxF=Math.max(...Object.values(hot));for(let n=1;n<=4;n++)if(hot[n]===maxF)s[n]+=30;}return s;}),
-        new Algorithm(39,'bayesianInference','statistical',h=>{if(h.length<6)return{1:0,2:0,3:0,4:0};let prior={1:0.25,2:0.25,3:0.25,4:0.25},likelihood={1:0,2:0,3:0,4:0},total=h.length;h.forEach(v=>likelihood[v]++);for(let n=1;n<=4;n++)likelihood[n]/=total;let post={};for(let n=1;n<=4;n++)post[n]=prior[n]*likelihood[n];let lastSeen={};for(let i=h.length-1;i>=0;i--){if(!(h[i]in lastSeen))lastSeen[h[i]]=h.length-1-i;}for(let n=1;n<=4;n++){let steps=lastSeen[n]!==undefined?lastSeen[n]:h.length;post[n]+=Math.min(15,steps*0.5);}return post;}),
-        // 40-42: Ensemble / Deep
-        new Algorithm(40,'gradientBoost','ensemble',h=>{if(h.length<6)return{1:0,2:0,3:0,4:0};let base={1:0,2:0,3:0,4:0},f={1:0,2:0,3:0,4:0};h.forEach(v=>f[v]++);let t=h.length||1;for(let i=1;i<=4;i++)base[i]=(f[i]/t)*25;let recent={1:0,2:0,3:0,4:0},r=h.slice(-6);r.forEach((v,i)=>recent[v]+=1+i*0.3);let m1={1:0,2:0,3:0,4:0};if(h.length>=2){let trans={1:{1:0,2:0,3:0,4:0},2:{1:0,2:0,3:0,4:0},3:{1:0,2:0,3:0,4:0},4:{1:0,2:0,3:0,4:0}};for(let i=0;i<h.length-1;i++)trans[h[i]][h[i+1]]++;let last=h[h.length-1],x=trans[last],sum=0;for(let i=1;i<=4;i++)sum+=x[i];if(sum)for(let i=1;i<=4;i++)m1[i]=(x[i]/sum)*30;}let s={};for(let n=1;n<=4;n++)s[n]=base[n]*0.6+recent[n]*0.4+m1[n]*0.2;return s;}),
-        new Algorithm(41,'randomForestMimic','ensemble',h=>{if(h.length<8)return{1:0,2:0,3:0,4:0};let s={1:0,2:0,3:0,4:0},last3=h.slice(-3),freq3={1:0,2:0,3:0,4:0};last3.forEach(v=>freq3[v]++);let max3=Math.max(...Object.values(freq3));for(let n=1;n<=4;n++)if(freq3[n]===max3)s[n]+=20;if(h.length>=5){let patt=h.slice(-5),matches={};for(let i=0;i<=h.length-6;i++){let seg=h.slice(i,i+5),sim=0;for(let j=0;j<5;j++)if(seg[j]===patt[j])sim++;if(sim>=4){let next=h[i+5];matches[next]=(matches[next]||0)+1;}}let maxMatch=Math.max(...Object.values(matches).concat([0]));for(let n=1;n<=4;n++)if(matches[n]===maxMatch)s[n]+=25;}return s;}),
-        new Algorithm(42,'lstmLike','deep',h=>{if(h.length<10)return{1:0,2:0,3:0,4:0};let s={1:0,2:0,3:0,4:0},window=h.slice(-8);for(let i=0;i<=h.length-8;i++){let seg=h.slice(i,i+8),sim=0;for(let j=0;j<8;j++)if(seg[j]===window[j])sim++;if(sim>=6){let ni=i+8;if(ni<h.length)s[h[ni]]+=(sim/8)*30;}}let recent=h.slice(-4);for(let n=1;n<=4;n++)if(recent.includes(n))s[n]+=5;return s;}),
-        // 43-46: Volatility / Anti-streak / Trend break / Smart skip
-        new Algorithm(43,'volatilityAdjust','volatility',h=>{if(h.length<8)return{1:0,2:0,3:0,4:0};let recent=h.slice(-8),freq={1:0,2:0,3:0,4:0};recent.forEach(v=>freq[v]++);let maxF=Math.max(...Object.values(freq)),s={1:0,2:0,3:0,4:0};for(let n=1;n<=4;n++)if(freq[n]===maxF)s[n]+=30;let last=h[h.length-1],others=[1,2,3,4].filter(n=>n!==last);if(freq[last]<2)others.forEach(o=>s[o]+=10);return s;}),
-        new Algorithm(44,'antiStreak','streak',h=>{if(h.length<6)return{1:0,2:0,3:0,4:0};let last=h[h.length-1],streak=0;for(let i=h.length-1;i>=0&&h[i]===last;i--)streak++;let s={1:0,2:0,3:0,4:0};if(streak>=4){let others=[1,2,3,4].filter(n=>n!==last);others.forEach(o=>s[o]+=35);}return s;}),
-        new Algorithm(45,'trendBreak','trend',h=>{if(h.length<8)return{1:0,2:0,3:0,4:0};let last=h[h.length-1],streak=0;for(let i=h.length-1;i>=0&&h[i]===last;i--)streak++;let s={1:0,2:0,3:0,4:0};if(streak>=3){let freq={1:0,2:0,3:0,4:0},window=h.slice(-12);window.forEach(v=>freq[v]=(freq[v]||0)+1);let minF=Math.min(...Object.values(freq));for(let n=1;n<=4;n++)if(freq[n]===minF)s[n]+=25;}return s;}),
-        new Algorithm(46,'smartSkip','misc',h=>{if(h.length<10)return{1:0,2:0,3:0,4:0};let recent=h.slice(-10),freq={1:0,2:0,3:0,4:0};recent.forEach(v=>freq[v]++);let entropy=0;for(let n=1;n<=4;n++){let p=freq[n]/10;if(p>0)entropy-=p*Math.log2(p);}let s={1:0,2:0,3:0,4:0};if(entropy>1.5){let last=h[h.length-1],others=[1,2,3,4].filter(n=>n!==last);others.forEach(o=>s[o]+=10);}return s;}),
-        // 47-51: Alternating / Zigzag / Long alternating
-        new Algorithm(47,'zigzagDetector','alternating',h=>{if(h.length<5)return{1:0,2:0,3:0,4:0};let s={1:0,2:0,3:0,4:0},recent=h.slice(-5),isAlt=true;for(let i=1;i<5;i++)if(recent[i]===recent[i-1]){isAlt=false;break;}if(isAlt){let set=new Set(h.slice(-4));if(set.size===4)s[h[h.length-4]]+=35;else{let last=h[h.length-1],prev=h[h.length-2],opp=[1,2,3,4].filter(n=>n!==last&&n!==prev);opp.forEach(o=>s[o]+=20);}}return s;}),
-        new Algorithm(48,'specificAlternating','alternating',h=>{if(h.length<6)return{1:0,2:0,3:0,4:0};let s={1:0,2:0,3:0,4:0},r=h.slice(-6),a=r[0],b=r[1],ok=true;for(let i=2;i<6;i++)if((i%2===0&&r[i]!==a)||(i%2===1&&r[i]!==b)){ok=false;break;}if(ok&&a!==b){s[a]+=40;s[b]+=15;}return s;}),
-        new Algorithm(49,'suddenReversal','reversal',h=>{if(h.length<6)return{1:0,2:0,3:0,4:0};let s={1:0,2:0,3:0,4:0},r=h.slice(-6),ch=0;for(let i=1;i<6;i++)if(r[i]!==r[i-1])ch++;if(ch>=4){let last=h[h.length-1];[1,2,3,4].filter(n=>n!==last).forEach(o=>s[o]+=25);}return s;}),
-        new Algorithm(50,'longAlternating','alternating',h=>{if(h.length<8)return{1:0,2:0,3:0,4:0};let s={1:0,2:0,3:0,4:0},streak=0;for(let i=h.length-1;i>0;i--){if(h[i]!==h[i-1])streak++;else break;}if(streak>=4){let last=h[h.length-1];[1,2,3,4].filter(n=>n!==last).forEach(o=>s[o]+=30);let freq={1:0,2:0,3:0,4:0};h.slice(-8).forEach(v=>freq[v]++);let min=Math.min(...Object.values(freq));for(let n=1;n<=4;n++)if(freq[n]===min)s[n]+=15;}return s;}),
-        new Algorithm(51,'alternatingAdaptive','alternating',h=>{if(h.length<8)return{1:0,2:0,3:0,4:0};let r=h.slice(-8),ch=0;for(let i=1;i<8;i++)if(r[i]!==r[i-1])ch++;if(ch>=6){let zigzag={1:0,2:0,3:0,4:0},spec={1:0,2:0,3:0,4:0};if(h.length>=5){let recent=h.slice(-5),isAlt=true;for(let i=1;i<5;i++)if(recent[i]===recent[i-1])isAlt=false;if(isAlt){let set=new Set(h.slice(-4));if(set.size===4)zigzag[h[h.length-4]]+=35;else{let last=h[h.length-1],prev=h[h.length-2];[1,2,3,4].filter(n=>n!==last&&n!==prev).forEach(o=>zigzag[o]+=20);}}}if(h.length>=6){let r2=h.slice(-6),a=r2[0],b=r2[1],ok=true;for(let i=2;i<6;i++)if((i%2===0&&r2[i]!==a)||(i%2===1&&r2[i]!==b))ok=false;if(ok&&a!==b){spec[a]+=40;spec[b]+=15;}}let s={};for(let n=1;n<=4;n++)s[n]=zigzag[n]*0.5+spec[n]*0.5;return s;}return{1:0,2:0,3:0,4:0};}),
-        // 52-61: More patterns / chaos / reversal / etc.
-        new Algorithm(52,'bridgeBreakDetect','pattern',h=>{if(h.length<5)return{1:0,2:0,3:0,4:0};let last=h[h.length-1],prev=h[h.length-2],streak=0;for(let i=h.length-2;i>=0&&h[i]===prev;i--)streak++;let s={1:0,2:0,3:0,4:0};if(streak>=3&&last!==prev){let others=[1,2,3,4].filter(n=>n!==prev);others.forEach(o=>s[o]+=30+streak*3);}return s;}),
-        new Algorithm(53,'chaosPattern41441','chaos',h=>{if(h.length<5)return{1:0,2:0,3:0,4:0};let last5=h.slice(-5).join(''),s={1:0,2:0,3:0,4:0};if(['41441','14114','14414','41141'].includes(last5)){let freq={1:0,2:0,3:0,4:0};h.slice(-8).forEach(v=>freq[v]++);let minF=Math.min(...Object.values(freq));for(let n=1;n<=4;n++)if(freq[n]===minF)s[n]+=35;}return s;}),
-        new Algorithm(54,'historyRepeat5','pattern',h=>{if(h.length<6)return{1:0,2:0,3:0,4:0};let pat=h.slice(-5),s={1:0,2:0,3:0,4:0};for(let i=0;i<=h.length-6;i++){let seg=h.slice(i,i+5);if(seg.every((v,idx)=>v===pat[idx])){let ni=i+5;if(ni<h.length)s[h[ni]]+=28;}}return s;}),
-        new Algorithm(55,'entropyReversalBoost','entropy',h=>{if(h.length<8)return{1:0,2:0,3:0,4:0};let freq={1:0,2:0,3:0,4:0};h.forEach(v=>freq[v]++);let total=h.length,entropy=0;for(let n=1;n<=4;n++){let p=freq[n]/total;if(p>0)entropy-=p*Math.log2(p);}let s={1:0,2:0,3:0,4:0};if(entropy>1.9){let recent=h.slice(-6),missing=[1,2,3,4].filter(n=>!recent.includes(n));missing.forEach(m=>s[m]+=22);}return s;}),
-        new Algorithm(56,'vShapeReversal','pattern',h=>{if(h.length<5)return{1:0,2:0,3:0,4:0};let r=h.slice(-5),s={1:0,2:0,3:0,4:0},up=0,down=0;for(let i=1;i<5;i++){if(r[i]>r[i-1])up++;else if(r[i]<r[i-1])down++;}if(up>=2&&down>=1&&r[4]<r[3])for(let n=1;n<=2;n++)s[n]+=25;if(down>=2&&up>=1&&r[4]>r[3])for(let n=3;n<=4;n++)s[n]+=25;return s;}),
-        new Algorithm(57,'fiboCycle','cycle',h=>{if(h.length<8)return{1:0,2:0,3:0,4:0};let cycles=[2,3,5,8],s={1:0,2:0,3:0,4:0};cycles.forEach(c=>{if(h.length>c)s[h[h.length-c]]+=15;});return s;}),
-        new Algorithm(58,'bridgeRebound','pattern',h=>{if(h.length<6)return{1:0,2:0,3:0,4:0};let last=h[h.length-1],prev=h[h.length-2],s={1:0,2:0,3:0,4:0},streak=0;for(let i=h.length-2;i>=0&&h[i]===prev;i--)streak++;if(streak>=3&&last!==prev){let rebound=0;for(let i=streak+2;i<h.length-2;i++)if(h[i]===prev&&h[i-1]!==prev&&h[i-2]===prev)rebound++;if(rebound>=1)s[prev]+=35;}return s;}),
-        new Algorithm(59,'pattern41441Prediction','chaos',h=>{if(h.length<5)return{1:0,2:0,3:0,4:0};let pat=h.slice(-5);if(pat.join('')!=='41441')return{1:0,2:0,3:0,4:0};let s={1:0,2:0,3:0,4:0};for(let i=0;i<=h.length-6;i++){if(h.slice(i,i+5).join('')==='41441'){let next=h[i+5];if(next)s[next]+=40;}}if(!s[1]&&!s[2]&&!s[3]&&!s[4]){s[2]+=25;s[3]+=20;}return s;}),
-        new Algorithm(60,'threeDistinctReversal','reversal',h=>{if(h.length<4)return{1:0,2:0,3:0,4:0};let r=h.slice(-3);if(r[0]!==r[1]&&r[1]!==r[2]&&r[0]!==r[2]){let missing=[1,2,3,4].find(x=>!r.includes(x));let s={1:0,2:0,3:0,4:0};s[missing]=30;return s;}return{1:0,2:0,3:0,4:0};}),
-        new Algorithm(61,'recentVsGlobalReversal','reversal',h=>{if(h.length<8)return{1:0,2:0,3:0,4:0};let global={1:0,2:0,3:0,4:0},recent={1:0,2:0,3:0,4:0};h.forEach(v=>global[v]++);for(let i=Math.max(0,h.length-6);i<h.length;i++)recent[h[i]]++;let s={1:0,2:0,3:0,4:0};for(let n=1;n<=4;n++){let gRate=global[n]/h.length,rRate=recent[n]/6;if(gRate>0.25&&rRate<0.1)s[n]+=28;}return s;})
+    const algoList = [
+        new Algorithm(1,'basicFreq','frequency',h=>{let f={1:0,2:0,3:0,4:0};h.forEach(v=>f[v]++);let t=h.length||1,s={};for(let i=1;i<=4;i++)s[i]=f[i]/t;return s;}),
+        new Algorithm(2,'recentTrend','frequency',h=>{let r=h.slice(-6),s={1:0,2:0,3:0,4:0};r.forEach((v,i)=>s[v]+=1+i*0.3);let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
+        new Algorithm(3,'timeWeightedFreq','frequency',h=>{let s={1:0,2:0,3:0,4:0},l=h.length;for(let i=0;i<l;i++)s[h[i]]+=Math.pow(0.94,l-1-i);let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
+        new Algorithm(4,'weightedMA','frequency',h=>{if(h.length<5)return{1:0.25,2:0.25,3:0.25,4:0.25};let s={1:0,2:0,3:0,4:0},n=Math.min(10,h.length),r=h.slice(-n);for(let i=0;i<r.length;i++)s[r[i]]+=(i+1)*1.2;let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
+        new Algorithm(5,'weightedRecentFreq','frequency',h=>{if(h.length<5)return{1:0.25,2:0.25,3:0.25,4:0.25};let s={1:0,2:0,3:0,4:0},n=Math.min(8,h.length),r=h.slice(-n);for(let i=0;i<r.length;i++)s[r[i]]+=(1+i*0.4)*2.5;let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
+        new Algorithm(6,'markov1','markov',h=>{if(h.length<2)return{1:0.25,2:0.25,3:0.25,4:0.25};let t={1:{1:0,2:0,3:0,4:0},2:{1:0,2:0,3:0,4:0},3:{1:0,2:0,3:0,4:0},4:{1:0,2:0,3:0,4:0}};for(let i=0;i<h.length-1;i++)t[h[i]][h[i+1]]++;let l=h[h.length-1],x=t[l],s=0;for(let i=1;i<=4;i++)s+=x[i];if(!s)return{1:0.25,2:0.25,3:0.25,4:0.25};let o={};for(let i=1;i<=4;i++)o[i]=x[i]/s;return o;}),
+        new Algorithm(7,'markov2','markov',h=>{if(h.length<3)return{1:0.25,2:0.25,3:0.25,4:0.25};let last2=h[h.length-2]+','+h[h.length-1],trans={};for(let i=0;i<h.length-2;i++){let k=h[i]+','+h[i+1];if(!trans[k])trans[k]={1:0,2:0,3:0,4:0};trans[k][h[i+2]]++;}let np=trans[last2];if(!np)return{1:0.25,2:0.25,3:0.25,4:0.25};let total=np[1]+np[2]+np[3]+np[4];if(!total)return{1:0.25,2:0.25,3:0.25,4:0.25};let s={};for(let i=1;i<=4;i++)s[i]=np[i]/total;return s;}),
+        new Algorithm(8,'markov3','markov',h=>{if(h.length<4)return{1:0.25,2:0.25,3:0.25,4:0.25};let last3=h[h.length-3]+','+h[h.length-2]+','+h[h.length-1],trans={};for(let i=0;i<h.length-3;i++){let k=h[i]+','+h[i+1]+','+h[i+2];if(!trans[k])trans[k]={1:0,2:0,3:0,4:0};trans[k][h[i+3]]++;}let np=trans[last3];if(!np)return{1:0.25,2:0.25,3:0.25,4:0.25};let total=np[1]+np[2]+np[3]+np[4];if(!total)return{1:0.25,2:0.25,3:0.25,4:0.25};let s={};for(let i=1;i<=4;i++)s[i]=np[i]/total;return s;}),
+        new Algorithm(9,'hotPair','pair',h=>{if(h.length<2)return{1:0.25,2:0.25,3:0.25,4:0.25};let last=h[h.length-1],pc={};for(let i=0;i<h.length-1;i++){let k=h[i]+'-'+h[i+1];pc[k]=(pc[k]||0)+1;}let s={1:0,2:0,3:0,4:0};for(let n=1;n<=4;n++)s[n]=Math.min(22,(pc[last+'-'+n]||0)*4.5);let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
+        new Algorithm(10,'hotTriple','pair',h=>{if(h.length<3)return{1:0.25,2:0.25,3:0.25,4:0.25};let last2=h[h.length-2]+','+h[h.length-1],pc={};for(let i=0;i<h.length-2;i++){let k=h[i]+','+h[i+1];if(!pc[k])pc[k]={1:0,2:0,3:0,4:0};pc[k][h[i+2]]++;}let np=pc[last2];if(!np)return{1:0.25,2:0.25,3:0.25,4:0.25};let total=np[1]+np[2]+np[3]+np[4];if(!total)return{1:0.25,2:0.25,3:0.25,4:0.25};let s={};for(let i=1;i<=4;i++)s[i]=np[i]/total;return s;}),
+        new Algorithm(11,'pairContinuation','pattern',h=>{if(h.length<3)return{1:0.25,2:0.25,3:0.25,4:0.25};let last=h[h.length-1],prev=h[h.length-2],s={1:0,2:0,3:0,4:0};if(last===prev)s[last]+=25;else s[last]+=10;let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
+        new Algorithm(12,'delayedReaction','pattern',h=>{if(h.length<5)return{1:0.25,2:0.25,3:0.25,4:0.25};let last2=h.slice(-2),s={1:0,2:0,3:0,4:0};for(let i=0;i<h.length-4;i++){if(h[i]===last2[0]&&h[i+1]===last2[1]){let next=h[i+2];if(next!==undefined)s[next]+=15;}}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
+        new Algorithm(13,'cyclePrediction','cycle',h=>{if(h.length<6)return{1:0.25,2:0.25,3:0.25,4:0.25};let bestCycle=null,bestScore=0;for(let c=2;c<=Math.min(10,Math.floor(h.length/2));c++){let matches=0,checks=Math.min(30,h.length-c);for(let i=0;i<checks;i++)if(h[h.length-1-i]===h[h.length-1-c-i])matches++;let score=checks?matches/checks:0;if(score>bestScore&&score>0.55){bestScore=score;bestCycle=c;}}let s={1:0.25,2:0.25,3:0.25,4:0.25};if(bestCycle)s[h[h.length-bestCycle]]+=22*bestScore;let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
+        new Algorithm(14,'cycleExtended','cycle',h=>{if(h.length<8)return{1:0.25,2:0.25,3:0.25,4:0.25};let bestCycle=null,bestScore=0;for(let c=2;c<=Math.min(15,Math.floor(h.length/2));c++){let matches=0,checks=Math.min(40,h.length-c);for(let i=0;i<checks;i++)if(h[h.length-1-i]===h[h.length-1-c-i])matches++;let score=checks?matches/checks:0;if(score>bestScore&&score>0.5){bestScore=score;bestCycle=c;}}let s={1:0.25,2:0.25,3:0.25,4:0.25};if(bestCycle)s[h[h.length-bestCycle]]+=25*bestScore;let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
+        new Algorithm(15,'fourierCycle','cycle',h=>{if(h.length<8)return{1:0.25,2:0.25,3:0.25,4:0.25};let bestCycle=null,bestScore=0;for(let c=3;c<=Math.min(12,Math.floor(h.length/2));c++){let matches=0,total=0;for(let i=0;i<h.length-c;i++){if(h[i]===h[i+c])matches++;total++;}let score=total?matches/total:0;if(score>bestScore&&score>0.55){bestScore=score;bestCycle=c;}}let s={1:0.25,2:0.25,3:0.25,4:0.25};if(bestCycle&&h.length>=bestCycle)s[h[h.length-bestCycle]]+=28*bestScore;let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
+        new Algorithm(16,'fourierExtend','cycle',h=>{if(h.length<12)return{1:0.25,2:0.25,3:0.25,4:0.25};let bestCycle=null,bestScore=0;for(let c=3;c<=Math.min(20,Math.floor(h.length/2));c++){let matches=0,total=0;for(let i=0;i<h.length-c;i++){if(h[i]===h[i+c])matches++;total++;}let score=total?matches/total:0;if(score>bestScore&&score>0.55){bestScore=score;bestCycle=c;}}let s={1:0.25,2:0.25,3:0.25,4:0.25};if(bestCycle&&h.length>=bestCycle)s[h[h.length-bestCycle]]+=35*bestScore;let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
+        new Algorithm(17,'patternPrediction','pattern',h=>{if(h.length<4)return{1:0.25,2:0.25,3:0.25,4:0.25};let last=h[h.length-1],prev=h[h.length-2],pprev=h[h.length-3],s={1:0,2:0,3:0,4:0};if(last===prev){s[last]+=28;if(prev===pprev)s[last]+=15;}else{if(prev===pprev&&prev!==last)s[prev]+=20;if(h.length>=5&&h[h.length-5]===h[h.length-3]&&h[h.length-4]===h[h.length-2])s[h[h.length-4]]+=18;}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
+        new Algorithm(18,'knnPattern','pattern',h=>{const pl=5;if(h.length<pl+1)return{1:0.25,2:0.25,3:0.25,4:0.25};let lp=h.slice(-pl),s={1:0,2:0,3:0,4:0};for(let i=0;i<=h.length-pl-1;i++){let c=h.slice(i,i+pl),m=0;for(let j=0;j<pl;j++)if(c[j]===lp[j])m++;if(m>=pl-1){let ni=i+pl;if(ni<h.length)s[h[ni]]+=(m/pl)*25;}}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
+        new Algorithm(19,'patternMatch7','pattern',h=>{if(h.length<8)return{1:0.25,2:0.25,3:0.25,4:0.25};let w=h.slice(-7),s={1:0,2:0,3:0,4:0};for(let i=0;i<=h.length-8;i++){let seg=h.slice(i,i+7),sim=0;for(let j=0;j<7;j++)if(seg[j]===w[j])sim++;if(sim>=5){let ni=i+7;if(ni<h.length)s[h[ni]]+=(sim/7)*32;}}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
+        new Algorithm(20,'alternatingPair','alternating',h=>{if(h.length<4)return{1:0.25,2:0.25,3:0.25,4:0.25};let last=h[h.length-1],slast=h[h.length-2],s={1:0,2:0,3:0,4:0};for(let i=0;i<h.length-3;i++){if(h[i]===slast&&h[i+1]===last)s[h[i+2]]+=18;}if(h.length>=4){let a=h[h.length-4],b=h[h.length-3],c=h[h.length-2],d=h[h.length-1];if(a===c&&b===d&&a!==b)s[a]+=22;}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
+        new Algorithm(21,'pairReversal','reversal',h=>{if(h.length<4)return{1:0.25,2:0.25,3:0.25,4:0.25};let last=h[h.length-1],prev=h[h.length-2],s={1:0,2:0,3:0,4:0},pat=prev+','+last;for(let i=0;i<h.length-2;i++){if(h[i]+','+h[i+1]===pat){let next=h[i+2];if(next!==undefined)s[next]+=18;}}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
+        new Algorithm(22,'streakReversal','reversal',h=>{if(h.length<4)return{1:0.25,2:0.25,3:0.25,4:0.25};let last=h[h.length-1],streak=0;for(let i=h.length-1;i>=0&&h[i]===last;i--)streak++;let s={1:0,2:0,3:0,4:0};if(streak>=2){let others=[1,2,3,4].filter(n=>n!==last);others.forEach(o=>s[o]+=15+streak*2);}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
+        new Algorithm(23,'streakMomentum','streak',h=>{if(h.length<6)return{1:0.25,2:0.25,3:0.25,4:0.25};let last=h[h.length-1],cnt=0;for(let i=h.length-1;i>=0&&h[i]===last;i--)cnt++;let s={1:0,2:0,3:0,4:0};if(cnt>=1)s[last]=cnt>=2?30:18;let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
+        new Algorithm(24,'streakContinuation','streak',h=>{if(h.length<2)return{1:0.25,2:0.25,3:0.25,4:0.25};let last=h[h.length-1],prev=h[h.length-2],s={1:0,2:0,3:0,4:0};if(last===prev){let streak=2;for(let i=h.length-3;i>=0&&h[i]===last;i--)streak++;s[last]+=Math.min(40,15+streak*4);}else s[last]+=8;let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
+        new Algorithm(25,'extremeStreakBoost','streak',h=>{if(h.length<4)return{1:0.25,2:0.25,3:0.25,4:0.25};let last=h[h.length-1],streak=0;for(let i=h.length-1;i>=0&&h[i]===last;i--)streak++;let s={1:0,2:0,3:0,4:0};if(streak>=4)s[last]+=Math.min(50,20+streak*5);else if(streak>=2)s[last]+=15;let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
+        new Algorithm(26,'adaptiveMomentum','momentum',h=>{if(h.length<6)return{1:0.25,2:0.25,3:0.25,4:0.25};let s={1:0,2:0,3:0,4:0},last=h[h.length-1],streak=0;for(let i=h.length-1;i>=0&&h[i]===last;i--)streak++;if(streak>=2){let prev=h[h.length-streak-1]||0,prevStreak=0;for(let i=h.length-streak-2;i>=0&&h[i]===prev;i--)prevStreak++;if(prevStreak<streak)s[last]+=35;else{let missing=[1,2,3,4].filter(n=>n!==last);missing.forEach(m=>s[m]+=15);}}else{let recent=h.slice(-4);for(let n=1;n<=4;n++)if(recent.includes(n))s[n]+=10;}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
+        new Algorithm(27,'trendStrength','trend',h=>{if(h.length<12)return{1:0.25,2:0.25,3:0.25,4:0.25};let recent=h.slice(-12),changes=0;for(let i=1;i<recent.length;i++)if(recent[i]!==recent[i-1])changes++;let s={1:0.25,2:0.25,3:0.25,4:0.25},avg=changes/11;if(avg<0.4){let l6=recent.slice(-6),f={1:0,2:0,3:0,4:0};l6.forEach(v=>f[v]++);let maxF=Math.max(...Object.values(f));for(let n=1;n<=4;n++)if(f[n]===maxF)s[n]+=30;}else if(avg>0.7){let l6=recent.slice(-6),missing=[1,2,3,4].filter(n=>!l6.includes(n));missing.forEach(m=>s[m]+=20);}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
+        new Algorithm(28,'trendReversal','reversal',h=>{if(h.length<4)return{1:0.25,2:0.25,3:0.25,4:0.25};let r=h.slice(-3);if(r[0]!==r[1]&&r[1]!==r[2]&&r[0]!==r[2]){let missing=[1,2,3,4].find(x=>!r.includes(x));let s={1:0,2:0,3:0,4:0};s[missing]=22;let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}return{1:0.25,2:0.25,3:0.25,4:0.25};}),
+        new Algorithm(29,'breakoutReversal','reversal',h=>{if(h.length<5)return{1:0.25,2:0.25,3:0.25,4:0.25};let last=h[h.length-1],prev=h[h.length-2],streak=1;for(let i=h.length-2;i>=0&&h[i]===prev;i--)streak++;let s={1:0.25,2:0.25,3:0.25,4:0.25};if(streak>=4&&last!==prev){let recent=h.slice(-6);for(let n=1;n<=4;n++)if(!recent.includes(n))s[n]+=20;for(let n=1;n<=4;n++)if(n!==prev)s[n]+=12;}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
+        new Algorithm(30,'reversalAfterStreak','reversal',h=>{if(h.length<4)return{1:0.25,2:0.25,3:0.25,4:0.25};let last=h[h.length-1],streak=0;for(let i=h.length-1;i>=0&&h[i]===last;i--)streak++;let s={1:0.25,2:0.25,3:0.25,4:0.25};if(streak>=3){let others=[1,2,3,4].filter(n=>n!==last);others.forEach(o=>s[o]+=20);if(h.length>=6){let before=h.slice(-6-streak,-streak);if(before.length){let freq={};before.forEach(v=>freq[v]=(freq[v]||0)+1);let maxF=Math.max(...Object.values(freq));for(let n=1;n<=4;n++)if(freq[n]===maxF)s[n]+=12;}}}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
+        new Algorithm(31,'streakBreaker','streak',h=>{if(h.length<4)return{1:0.25,2:0.25,3:0.25,4:0.25};let last=h[h.length-1],streak=0;for(let i=h.length-1;i>=0&&h[i]===last;i--)streak++;let s={1:0.25,2:0.25,3:0.25,4:0.25};if(streak>=3){let others=[1,2,3,4].filter(n=>n!==last);others.forEach(o=>s[o]+=25+streak*3);}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
+        new Algorithm(32,'trendAcceleration','trend',h=>{if(h.length<6)return{1:0.25,2:0.25,3:0.25,4:0.25};let recent=h.slice(-6),changes=0;for(let i=1;i<recent.length;i++)if(recent[i]!==recent[i-1])changes++;let s={1:0.25,2:0.25,3:0.25,4:0.25};if(changes<=2){let last=h[h.length-1];s[last]+=25;}else if(changes>=4){let last=h[h.length-1],others=[1,2,3,4].filter(n=>n!==last);others.forEach(o=>s[o]+=15);}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
+        new Algorithm(33,'streakBreak','streak',h=>{if(h.length<10)return{1:0.25,2:0.25,3:0.25,4:0.25};let lastSeen={1:null,2:null,3:null,4:null},len=h.length;for(let i=len-1;i>=0;i--)if(lastSeen[h[i]]===null)lastSeen[h[i]]=i;let s={1:0,2:0,3:0,4:0};for(let n=1;n<=4;n++){let steps=lastSeen[n]!==null?len-1-lastSeen[n]:len;s[n]=Math.min(30,steps*2.5);}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
+        new Algorithm(34,'adaptiveAbsence','absence',h=>{if(h.length<8)return{1:0.25,2:0.25,3:0.25,4:0.25};let lastSeen={1:null,2:null,3:null,4:null},len=h.length;for(let i=len-1;i>=0;i--)if(lastSeen[h[i]]===null)lastSeen[h[i]]=i;let s={1:0,2:0,3:0,4:0};for(let n=1;n<=4;n++){let steps=lastSeen[n]!==null?len-1-lastSeen[n]:len;s[n]=Math.min(50,Math.pow(steps,1.5)*1.2);}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
+        new Algorithm(35,'gapDetector','absence',h=>{if(h.length<6)return{1:0.25,2:0.25,3:0.25,4:0.25};let lastSeen={1:-1,2:-1,3:-1,4:-1};for(let i=h.length-1;i>=0;i--)if(lastSeen[h[i]]===-1)lastSeen[h[i]]=i;let s={1:0,2:0,3:0,4:0},len=h.length;for(let n=1;n<=4;n++){let gap=lastSeen[n]===-1?len:len-1-lastSeen[n];s[n]=Math.min(40,gap*gap*0.4);}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
+        new Algorithm(36,'meanReversion','reversion',h=>{if(h.length<8)return{1:0.25,2:0.25,3:0.25,4:0.25};let lastSeen={1:-1,2:-1,3:-1,4:-1};for(let i=h.length-1;i>=0;i--)if(lastSeen[h[i]]===-1)lastSeen[h[i]]=i;let s={1:0,2:0,3:0,4:0},len=h.length;for(let n=1;n<=4;n++){let steps=lastSeen[n]===-1?len:len-1-lastSeen[n];if(steps>=3)s[n]+=Math.min(35,steps*2.5);}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
+        new Algorithm(37,'harmonicReturn','reversion',h=>{if(h.length<10)return{1:0.25,2:0.25,3:0.25,4:0.25};let freq={1:0,2:0,3:0,4:0},total=h.length;h.forEach(v=>freq[v]++);let s={1:0.25,2:0.25,3:0.25,4:0.25};for(let n=1;n<=4;n++){let rate=freq[n]/total;if(rate<0.20)s[n]+=(0.25-rate)*100;}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
+        new Algorithm(38,'entropyBased','entropy',h=>{if(h.length<8)return{1:0.25,2:0.25,3:0.25,4:0.25};let freq={1:0,2:0,3:0,4:0};h.forEach(v=>freq[v]++);let total=h.length,entropy=0;for(let n=1;n<=4;n++){let p=freq[n]/total;if(p>0)entropy-=p*Math.log2(p);}let s={1:0.25,2:0.25,3:0.25,4:0.25};if(entropy>1.8){let recent=h.slice(-6),missing=[1,2,3,4].filter(n=>!recent.includes(n));missing.forEach(m=>s[m]+=25);}else{let recent=h.slice(-6),hot={};recent.forEach(v=>hot[v]=(hot[v]||0)+1);let maxF=Math.max(...Object.values(hot));for(let n=1;n<=4;n++)if(hot[n]===maxF)s[n]+=30;}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
+        new Algorithm(39,'bayesianInference','statistical',h=>{if(h.length<6)return{1:0.25,2:0.25,3:0.25,4:0.25};let prior={1:0.25,2:0.25,3:0.25,4:0.25},likelihood={1:0,2:0,3:0,4:0},total=h.length;h.forEach(v=>likelihood[v]++);for(let n=1;n<=4;n++)likelihood[n]/=total;let post={};for(let n=1;n<=4;n++)post[n]=prior[n]*likelihood[n];let lastSeen={};for(let i=h.length-1;i>=0;i--){if(!(h[i]in lastSeen))lastSeen[h[i]]=h.length-1-i;}for(let n=1;n<=4;n++){let steps=lastSeen[n]!==undefined?lastSeen[n]:h.length;post[n]+=Math.min(15,steps*0.5);}let sum=post[1]+post[2]+post[3]+post[4];if(sum)for(let i=1;i<=4;i++)post[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return post;}),
+        new Algorithm(40,'gradientBoost','ensemble',h=>{if(h.length<6)return{1:0.25,2:0.25,3:0.25,4:0.25};let base={1:0,2:0,3:0,4:0},f={1:0,2:0,3:0,4:0};h.forEach(v=>f[v]++);let t=h.length||1;for(let i=1;i<=4;i++)base[i]=f[i]/t;let recent={1:0,2:0,3:0,4:0},r=h.slice(-6);r.forEach((v,i)=>recent[v]+=1+i*0.3);let sumRec=recent[1]+recent[2]+recent[3]+recent[4];if(sumRec)for(let i=1;i<=4;i++)recent[i]/=sumRec;let m1={1:0.25,2:0.25,3:0.25,4:0.25};if(h.length>=2){let trans={1:{1:0,2:0,3:0,4:0},2:{1:0,2:0,3:0,4:0},3:{1:0,2:0,3:0,4:0},4:{1:0,2:0,3:0,4:0}};for(let i=0;i<h.length-1;i++)trans[h[i]][h[i+1]]++;let last=h[h.length-1],x=trans[last],sumM=0;for(let i=1;i<=4;i++)sumM+=x[i];if(sumM)for(let i=1;i<=4;i++)m1[i]=x[i]/sumM;}let s={};for(let n=1;n<=4;n++)s[n]=base[n]*0.6+recent[n]*0.4+m1[n]*0.2;let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
+        new Algorithm(41,'randomForestMimic','ensemble',h=>{if(h.length<8)return{1:0.25,2:0.25,3:0.25,4:0.25};let s={1:0,2:0,3:0,4:0},last3=h.slice(-3),freq3={1:0,2:0,3:0,4:0};last3.forEach(v=>freq3[v]++);let max3=Math.max(...Object.values(freq3));for(let n=1;n<=4;n++)if(freq3[n]===max3)s[n]+=20;if(h.length>=5){let patt=h.slice(-5),matches={};for(let i=0;i<=h.length-6;i++){let seg=h.slice(i,i+5),sim=0;for(let j=0;j<5;j++)if(seg[j]===patt[j])sim++;if(sim>=4){let next=h[i+5];matches[next]=(matches[next]||0)+1;}}let maxMatch=Math.max(...Object.values(matches).concat([0]));for(let n=1;n<=4;n++)if(matches[n]===maxMatch)s[n]+=25;}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
+        new Algorithm(42,'lstmLike','deep',h=>{if(h.length<10)return{1:0.25,2:0.25,3:0.25,4:0.25};let s={1:0,2:0,3:0,4:0},window=h.slice(-8);for(let i=0;i<=h.length-8;i++){let seg=h.slice(i,i+8),sim=0;for(let j=0;j<8;j++)if(seg[j]===window[j])sim++;if(sim>=6){let ni=i+8;if(ni<h.length)s[h[ni]]+=(sim/8)*30;}}let recent=h.slice(-4);for(let n=1;n<=4;n++)if(recent.includes(n))s[n]+=5;let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
+        new Algorithm(43,'volatilityAdjust','volatility',h=>{if(h.length<8)return{1:0.25,2:0.25,3:0.25,4:0.25};let recent=h.slice(-8),freq={1:0,2:0,3:0,4:0};recent.forEach(v=>freq[v]++);let maxF=Math.max(...Object.values(freq)),s={1:0,2:0,3:0,4:0};for(let n=1;n<=4;n++)if(freq[n]===maxF)s[n]+=30;let last=h[h.length-1],others=[1,2,3,4].filter(n=>n!==last);if(freq[last]<2)others.forEach(o=>s[o]+=10);let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
+        new Algorithm(44,'antiStreak','streak',h=>{if(h.length<6)return{1:0.25,2:0.25,3:0.25,4:0.25};let last=h[h.length-1],streak=0;for(let i=h.length-1;i>=0&&h[i]===last;i--)streak++;let s={1:0.25,2:0.25,3:0.25,4:0.25};if(streak>=4){let others=[1,2,3,4].filter(n=>n!==last);others.forEach(o=>s[o]+=35);}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
+        new Algorithm(45,'trendBreak','trend',h=>{if(h.length<8)return{1:0.25,2:0.25,3:0.25,4:0.25};let last=h[h.length-1],streak=0;for(let i=h.length-1;i>=0&&h[i]===last;i--)streak++;let s={1:0.25,2:0.25,3:0.25,4:0.25};if(streak>=3){let freq={1:0,2:0,3:0,4:0},window=h.slice(-12);window.forEach(v=>freq[v]=(freq[v]||0)+1);let minF=Math.min(...Object.values(freq));for(let n=1;n<=4;n++)if(freq[n]===minF)s[n]+=25;}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
+        new Algorithm(46,'smartSkip','misc',h=>{if(h.length<10)return{1:0.25,2:0.25,3:0.25,4:0.25};let recent=h.slice(-10),freq={1:0,2:0,3:0,4:0};recent.forEach(v=>freq[v]++);let entropy=0;for(let n=1;n<=4;n++){let p=freq[n]/10;if(p>0)entropy-=p*Math.log2(p);}let s={1:0.25,2:0.25,3:0.25,4:0.25};if(entropy>1.5){let last=h[h.length-1],others=[1,2,3,4].filter(n=>n!==last);others.forEach(o=>s[o]+=10);}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
+        new Algorithm(47,'zigzagDetector','alternating',h=>{if(h.length<5)return{1:0.25,2:0.25,3:0.25,4:0.25};let s={1:0,2:0,3:0,4:0},recent=h.slice(-5),isAlt=true;for(let i=1;i<5;i++)if(recent[i]===recent[i-1]){isAlt=false;break;}if(isAlt){let set=new Set(h.slice(-4));if(set.size===4)s[h[h.length-4]]+=35;else{let last=h[h.length-1],prev=h[h.length-2],opp=[1,2,3,4].filter(n=>n!==last&&n!==prev);opp.forEach(o=>s[o]+=20);}}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
+        new Algorithm(48,'specificAlternating','alternating',h=>{if(h.length<6)return{1:0.25,2:0.25,3:0.25,4:0.25};let s={1:0,2:0,3:0,4:0},r=h.slice(-6),a=r[0],b=r[1],ok=true;for(let i=2;i<6;i++)if((i%2===0&&r[i]!==a)||(i%2===1&&r[i]!==b)){ok=false;break;}if(ok&&a!==b){s[a]+=40;s[b]+=15;}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
+        new Algorithm(49,'suddenReversal','reversal',h=>{if(h.length<6)return{1:0.25,2:0.25,3:0.25,4:0.25};let s={1:0,2:0,3:0,4:0},r=h.slice(-6),ch=0;for(let i=1;i<6;i++)if(r[i]!==r[i-1])ch++;if(ch>=4){let last=h[h.length-1];[1,2,3,4].filter(n=>n!==last).forEach(o=>s[o]+=25);}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
+        new Algorithm(50,'longAlternating','alternating',h=>{if(h.length<8)return{1:0.25,2:0.25,3:0.25,4:0.25};let s={1:0,2:0,3:0,4:0},streak=0;for(let i=h.length-1;i>0;i--){if(h[i]!==h[i-1])streak++;else break;}if(streak>=4){let last=h[h.length-1];[1,2,3,4].filter(n=>n!==last).forEach(o=>s[o]+=30);let freq={1:0,2:0,3:0,4:0};h.slice(-8).forEach(v=>freq[v]++);let min=Math.min(...Object.values(freq));for(let n=1;n<=4;n++)if(freq[n]===min)s[n]+=15;}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
+        new Algorithm(51,'alternatingAdaptive','alternating',h=>{if(h.length<8)return{1:0.25,2:0.25,3:0.25,4:0.25};let r=h.slice(-8),ch=0;for(let i=1;i<8;i++)if(r[i]!==r[i-1])ch++;if(ch>=6){let zigzag={1:0,2:0,3:0,4:0},spec={1:0,2:0,3:0,4:0};if(h.length>=5){let recent=h.slice(-5),isAlt=true;for(let i=1;i<5;i++)if(recent[i]===recent[i-1])isAlt=false;if(isAlt){let set=new Set(h.slice(-4));if(set.size===4)zigzag[h[h.length-4]]+=35;else{let last=h[h.length-1],prev=h[h.length-2];[1,2,3,4].filter(n=>n!==last&&n!==prev).forEach(o=>zigzag[o]+=20);}}}if(h.length>=6){let r2=h.slice(-6),a=r2[0],b=r2[1],ok=true;for(let i=2;i<6;i++)if((i%2===0&&r2[i]!==a)||(i%2===1&&r2[i]!==b))ok=false;if(ok&&a!==b){spec[a]+=40;spec[b]+=15;}}let s={};for(let n=1;n<=4;n++)s[n]=zigzag[n]*0.5+spec[n]*0.5;let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}return{1:0.25,2:0.25,3:0.25,4:0.25};}),
+        new Algorithm(52,'bridgeBreakDetect','pattern',h=>{if(h.length<5)return{1:0.25,2:0.25,3:0.25,4:0.25};let last=h[h.length-1],prev=h[h.length-2],streak=0;for(let i=h.length-2;i>=0&&h[i]===prev;i--)streak++;let s={1:0,2:0,3:0,4:0};if(streak>=3&&last!==prev){let others=[1,2,3,4].filter(n=>n!==prev);others.forEach(o=>s[o]+=30+streak*3);}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
+        new Algorithm(53,'chaosPattern41441','chaos',h=>{if(h.length<5)return{1:0.25,2:0.25,3:0.25,4:0.25};let last5=h.slice(-5).join(''),s={1:0,2:0,3:0,4:0};if(['41441','14114','14414','41141'].includes(last5)){let freq={1:0,2:0,3:0,4:0};h.slice(-8).forEach(v=>freq[v]++);let minF=Math.min(...Object.values(freq));for(let n=1;n<=4;n++)if(freq[n]===minF)s[n]+=35;}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
+        new Algorithm(54,'historyRepeat5','pattern',h=>{if(h.length<6)return{1:0.25,2:0.25,3:0.25,4:0.25};let pat=h.slice(-5),s={1:0,2:0,3:0,4:0};for(let i=0;i<=h.length-6;i++){let seg=h.slice(i,i+5);if(seg.every((v,idx)=>v===pat[idx])){let ni=i+5;if(ni<h.length)s[h[ni]]+=28;}}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
+        new Algorithm(55,'entropyReversalBoost','entropy',h=>{if(h.length<8)return{1:0.25,2:0.25,3:0.25,4:0.25};let freq={1:0,2:0,3:0,4:0};h.forEach(v=>freq[v]++);let total=h.length,entropy=0;for(let n=1;n<=4;n++){let p=freq[n]/total;if(p>0)entropy-=p*Math.log2(p);}let s={1:0.25,2:0.25,3:0.25,4:0.25};if(entropy>1.9){let recent=h.slice(-6),missing=[1,2,3,4].filter(n=>!recent.includes(n));missing.forEach(m=>s[m]+=22);}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
+        new Algorithm(56,'vShapeReversal','pattern',h=>{if(h.length<5)return{1:0.25,2:0.25,3:0.25,4:0.25};let r=h.slice(-5),s={1:0,2:0,3:0,4:0},up=0,down=0;for(let i=1;i<5;i++){if(r[i]>r[i-1])up++;else if(r[i]<r[i-1])down++;}if(up>=2&&down>=1&&r[4]<r[3])for(let n=1;n<=2;n++)s[n]+=25;if(down>=2&&up>=1&&r[4]>r[3])for(let n=3;n<=4;n++)s[n]+=25;let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
+        new Algorithm(57,'fiboCycle','cycle',h=>{if(h.length<8)return{1:0.25,2:0.25,3:0.25,4:0.25};let cycles=[2,3,5,8],s={1:0,2:0,3:0,4:0};cycles.forEach(c=>{if(h.length>c)s[h[h.length-c]]+=15;});let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
+        new Algorithm(58,'bridgeRebound','pattern',h=>{if(h.length<6)return{1:0.25,2:0.25,3:0.25,4:0.25};let last=h[h.length-1],prev=h[h.length-2],s={1:0,2:0,3:0,4:0},streak=0;for(let i=h.length-2;i>=0&&h[i]===prev;i--)streak++;if(streak>=3&&last!==prev){let rebound=0;for(let i=streak+2;i<h.length-2;i++)if(h[i]===prev&&h[i-1]!==prev&&h[i-2]===prev)rebound++;if(rebound>=1)s[prev]+=35;}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
+        new Algorithm(59,'pattern41441Prediction','chaos',h=>{if(h.length<5)return{1:0.25,2:0.25,3:0.25,4:0.25};let pat=h.slice(-5);if(pat.join('')!=='41441')return{1:0.25,2:0.25,3:0.25,4:0.25};let s={1:0,2:0,3:0,4:0};for(let i=0;i<=h.length-6;i++){if(h.slice(i,i+5).join('')==='41441'){let next=h[i+5];if(next)s[next]+=40;}}if(!s[1]&&!s[2]&&!s[3]&&!s[4]){s[2]+=25;s[3]+=20;}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
+        new Algorithm(60,'threeDistinctReversal','reversal',h=>{if(h.length<4)return{1:0.25,2:0.25,3:0.25,4:0.25};let r=h.slice(-3);if(r[0]!==r[1]&&r[1]!==r[2]&&r[0]!==r[2]){let missing=[1,2,3,4].find(x=>!r.includes(x));let s={1:0,2:0,3:0,4:0};s[missing]=30;let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}return{1:0.25,2:0.25,3:0.25,4:0.25};}),
+        new Algorithm(61,'recentVsGlobalReversal','reversal',h=>{if(h.length<8)return{1:0.25,2:0.25,3:0.25,4:0.25};let global={1:0,2:0,3:0,4:0},recent={1:0,2:0,3:0,4:0};h.forEach(v=>global[v]++);for(let i=Math.max(0,h.length-6);i<h.length;i++)recent[h[i]]++;let s={1:0,2:0,3:0,4:0};for(let n=1;n<=4;n++){let gRate=global[n]/h.length,rRate=recent[n]/6;if(gRate>0.25&&rRate<0.1)s[n]+=28;}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;})
     ];
+    return algoList;
 }
 
-// ====================== WEIGHT MANAGER (với chống thua chuỗi) ======================
-class WeightManager {
-    constructor(algorithms) {
+// ====================== ADAPTIVE WEIGHT ENGINE ======================
+class AdaptiveWeightEngine {
+    constructor(algorithms){
         this.algorithms = algorithms;
-        this.originalWeights = algorithms.map(a => a.weight);
-        this.initWeights();
+        this.rollingResults = {};
+        this.algorithms.forEach(a=>{ this.rollingResults[a.id]=[]; });
     }
-    initWeights() {
-        const n = this.algorithms.length;
-        this.algorithms.forEach(a => a.weight = 1/n);
-        this.normalize();
-    }
-    normalize() {
-        let sum = this.algorithms.reduce((s, a) => s + a.weight, 0);
-        if (sum <= 0) {
-            this.algorithms.forEach(a => a.weight = 1/this.algorithms.length);
-            return;
-        }
-        this.algorithms.forEach(a => {
-            a.weight = Math.max(CONFIG.WEIGHT_MIN, Math.min(CONFIG.WEIGHT_MAX, a.weight / sum));
-        });
-        sum = this.algorithms.reduce((s, a) => s + a.weight, 0);
-        this.algorithms.forEach(a => a.weight /= sum);
-    }
-    updateWeights(history, actual, learningRate, consecutiveLosses = 0) {
-        for (const algo of this.algorithms) {
+    update(history, actual, ensemblePredSet){
+        const correct = (predSet, act) => (predSet==='1-2-3'&&[1,2,3].includes(act))||(predSet==='2-3-4'&&[2,3,4].includes(act));
+        for (let algo of this.algorithms){
+            if (!algo.enabled) continue;
             const scores = algo.predict(history);
             const norm = Utils.normalizeScores(scores);
-            const set123 = norm[1] + norm[2] + norm[3];
-            const set234 = norm[2] + norm[3] + norm[4];
-            const predSet = set123 > set234 ? '1-2-3' : '2-3-4';
-            const correct = (predSet === '1-2-3' && [1,2,3].includes(actual)) ||
-                            (predSet === '2-3-4' && [2,3,4].includes(actual));
-            const reward = correct ? 1.2 : -0.6;
-            algo.weight *= Math.exp(learningRate * reward);
-            algo.updateStats(correct);
+            const set123 = norm[1]+norm[2]+norm[3];
+            const set234 = norm[2]+norm[3]+norm[4];
+            const predSet = set123>set234 ? '1-2-3' : '2-3-4';
+            const isCorrect = correct(predSet, actual);
+            algo.updateStats(isCorrect);
+            this.rollingResults[algo.id].push(isCorrect);
+            if (this.rollingResults[algo.id].length > 100) this.rollingResults[algo.id].shift();
+            algo.updateRolling(30, this.rollingResults[algo.id]);
+            algo.updateRolling(100, this.rollingResults[algo.id]);
+            const recentAccuracy = algo.accuracy30 || algo.accuracyAll;
+            algo.weight = algo.weight * CONFIG.WEIGHT_DECAY + (1 - CONFIG.WEIGHT_DECAY) * recentAccuracy;
+            algo.confidence = recentAccuracy;
+            algo.importance = algo.weight * (0.5 + 0.5 * algo.confidence);
         }
-        // Chống thua chuỗi: điều chỉnh trọng số dựa trên số lần thua liên tiếp
-        if (consecutiveLosses >= 2) {
-            const adjustStrength = consecutiveLosses >= 3 ? CONFIG.STREAK_ADJUST_STRENGTH_HIGH : CONFIG.STREAK_ADJUST_STRENGTH;
-            for (const algo of this.algorithms) {
-                // Nhóm reversal được boost
-                if (['reversal','antiStreak','pattern','alternating','chaos','momentum'].includes(algo.category)) {
-                    algo.weight *= (1 + adjustStrength * CONFIG.REVERSAL_WEIGHT_BOOST);
-                }
-                // Nhóm trend / streak bị giảm
-                if (['trend','streak','frequency','markov'].includes(algo.category)) {
-                    algo.weight *= (1 - adjustStrength * (1 - CONFIG.TREND_WEIGHT_REDUCTION));
-                }
+        this.normalize();
+    }
+    normalize(){
+        let totalImportance = this.algorithms.reduce((s,a)=> s + (a.enabled ? a.importance : 0), 0);
+        if (totalImportance <= 0) {
+            this.algorithms.forEach(a=> a.weight = 1/this.algorithms.length);
+            return;
+        }
+        for (let a of this.algorithms){
+            if (!a.enabled) { a.weight = 0.001; continue; }
+            a.weight = a.importance / totalImportance;
+        }
+    }
+    prune(){
+        for (let a of this.algorithms){
+            if (a.total >= CONFIG.PRUNE_MIN_SAMPLES && a.accuracy30 < CONFIG.PRUNE_ACC_THRESHOLD){
+                a.enabled = false;
+            } else if (!a.enabled && a.total >= CONFIG.PRUNE_MIN_SAMPLES && a.accuracy30 > CONFIG.PRUNE_RECOVER_THRESHOLD){
+                a.enabled = true;
             }
         }
-        this.normalize();
-    }
-    pruneWeakAlgos() {
-        for (const algo of this.algorithms) {
-            if (algo.shouldPrune()) algo.weight = CONFIG.WEIGHT_MIN;
-        }
-        this.normalize();
-    }
-    getWeightsArray() { return this.algorithms.map(a => a.weight); }
-    setWeightsFromArray(arr) {
-        if (arr.length !== this.algorithms.length) return;
-        arr.forEach((w, i) => this.algorithms[i].weight = w);
-        this.normalize();
     }
 }
 
-// ====================== PREDICTION ENGINE ======================
-class PredictionEngine {
-    constructor(algorithms, weightManager) {
-        this.algorithms = algorithms;
-        this.weightManager = weightManager;
+// ====================== MARKOV ENGINE ======================
+class MarkovEngine {
+    static buildTransitionMatrix(hist, order){
+        const map = new Map();
+        for (let i=order; i<hist.length; i++){
+            const key = hist.slice(i-order, i).join(',');
+            const next = hist[i];
+            if (!map.has(key)) map.set(key, [0,0,0,0]);
+            const counts = map.get(key);
+            counts[next-1]++;
+        }
+        return map;
     }
-    ensembleScores(history) {
+    static predict(hist, order){
+        if (hist.length < order) return {1:0.25,2:0.25,3:0.25,4:0.25};
+        const mat = this.buildTransitionMatrix(hist, order);
+        const key = hist.slice(-order).join(',');
+        const counts = mat.get(key) || [1,1,1,1]; // Laplace smoothing
+        const total = counts.reduce((a,b)=>a+b,0);
+        return {1:counts[0]/total,2:counts[1]/total,3:counts[2]/total,4:counts[3]/total};
+    }
+    static adaptiveOrder(hist){
+        let bestOrder = 1, bestEntropy = 999;
+        for (let order=1; order<=4; order++){
+            if (hist.length < order+10) continue;
+            const mat = this.buildTransitionMatrix(hist, order);
+            let entropySum = 0, rowCount = 0;
+            for (let [, counts] of mat){
+                const total = counts.reduce((a,b)=>a+b,0);
+                let ent = 0;
+                for (let i=0; i<4; i++){
+                    const p = counts[i]/total;
+                    if (p>0) ent -= p*Math.log2(p);
+                }
+                entropySum += ent;
+                rowCount++;
+            }
+            const avgEntropy = rowCount ? entropySum/rowCount : 0;
+            if (avgEntropy < bestEntropy){
+                bestEntropy = avgEntropy;
+                bestOrder = order;
+            }
+        }
+        return bestOrder;
+    }
+}
+
+// ====================== BAYESIAN ENGINE ======================
+class BayesianEngine {
+    constructor(){
+        this.prior = {1:0.25,2:0.25,3:0.25,4:0.25};
+        this.likelihood = {1:{},2:{},3:{},4:{}};
+    }
+    update(hist, actual){
+        if (hist.length < 2) return;
+        const last = hist[hist.length-2];
+        if (!this.likelihood[last]) this.likelihood[last] = {1:0,2:0,3:0,4:0};
+        this.likelihood[last][actual] = (this.likelihood[last][actual]||0)+1;
+        const total = Object.values(this.prior).reduce((a,b)=>a+b,0);
+        for (let n=1;n<=4;n++) this.prior[n] = (this.prior[n] + (actual===n?1:0)) / (total+1);
+    }
+    predict(hist){
+        if (hist.length < 2) return {1:0.25,2:0.25,3:0.25,4:0.25};
+        const last = hist[hist.length-1];
+        const like = this.likelihood[last] || {1:1,2:1,3:1,4:1};
+        const total = like[1]+like[2]+like[3]+like[4] || 4;
+        const posterior = {};
+        for (let n=1;n<=4;n++) posterior[n] = (this.prior[n] * like[n]) / total;
+        const sum = posterior[1]+posterior[2]+posterior[3]+posterior[4];
+        if (sum) for (let n=1;n<=4;n++) posterior[n]/=sum;
+        else return {1:0.25,2:0.25,3:0.25,4:0.25};
+        return posterior;
+    }
+}
+
+// ====================== HMM (đơn giản) ======================
+class HiddenMarkovModel {
+    constructor(){
+        this.states = 4;
+        this.transition = Array.from({length:4},()=>[0.25,0.25,0.25,0.25]);
+        this.emission = Array.from({length:4},()=>[0.25,0.25,0.25,0.25]);
+        this.stateBelief = [0.25,0.25,0.25,0.25];
+    }
+    update(hist){
+        if (hist.length < 5) return;
+        // Cập nhật online đơn giản bằng heuristic
+        const recent = hist.slice(-20);
+        // Phân phối lại emission dựa trên tần suất gần đây
+        const freq = {1:0,2:0,3:0,4:0};
+        recent.forEach(v=>freq[v]++);
+        for (let s=0; s<this.states; s++){
+            // Mỗi trạng thái thiên về một số khác nhau
+            for (let n=1; n<=4; n++){
+                this.emission[s][n-1] = (freq[n] + (s+1===n ? 5 : 1)) / (recent.length + 8);
+            }
+        }
+    }
+    predict(hist){
+        const nextBelief = [0,0,0,0];
+        for (let i=0; i<this.states; i++){
+            for (let j=0; j<this.states; j++){
+                nextBelief[j] += this.stateBelief[i] * this.transition[i][j];
+            }
+        }
+        const pred = {1:0,2:0,3:0,4:0};
+        for (let s=0; s<this.states; s++){
+            for (let n=1; n<=4; n++){
+                pred[n] += nextBelief[s] * this.emission[s][n-1];
+            }
+        }
+        const sum = pred[1]+pred[2]+pred[3]+pred[4];
+        if (sum) for (let n=1;n<=4;n++) pred[n]/=sum;
+        else return {1:0.25,2:0.25,3:0.25,4:0.25};
+        return pred;
+    }
+}
+
+// ====================== MONTE CARLO ENGINE ======================
+class MonteCarloEngine {
+    static simulate(probs, samples=CONFIG.MONTE_CARLO_SAMPLES, steps=CONFIG.MONTE_CARLO_MULTI_STEP){
+        let dist = probs;
+        for (let s=1; s<steps; s++){
+            const next = {1:0,2:0,3:0,4:0};
+            for (let i=1; i<=4; i++){
+                for (let j=1; j<=4; j++){
+                    next[j] += dist[i] * dist[j];
+                }
+            }
+            const sum = next[1]+next[2]+next[3]+next[4];
+            if (sum) for (let i=1;i<=4;i++) next[i]/=sum;
+            dist = next;
+        }
+        let count123=0, count234=0;
+        const cumProbs = [0, dist[1], dist[1]+dist[2], dist[1]+dist[2]+dist[3], 1];
+        for (let i=0; i<samples; i++){
+            const r = Math.random();
+            let chosen = 1;
+            for (let n=1; n<=4; n++) if (r < cumProbs[n]) { chosen = n; break; }
+            if (chosen <= 3) count123++;
+            else count234++;
+        }
+        return {
+            set123: count123/samples,
+            set234: count234/samples,
+            variance123: (count123/samples)*(1-count123/samples)/samples,
+            variance234: (count234/samples)*(1-count234/samples)/samples
+        };
+    }
+}
+
+// ====================== PATTERN DATABASE ======================
+class PatternDatabase {
+    constructor(){
+        this.patterns = new Map();
+    }
+    addPattern(seq, next){
+        const key = seq.join(',');
+        if (!this.patterns.has(key)) this.patterns.set(key, [0,0,0,0]);
+        const counts = this.patterns.get(key);
+        counts[next-1]++;
+    }
+    getPrediction(hist, length=5){
+        if (hist.length < length) return null;
+        const key = hist.slice(-length).join(',');
+        const counts = this.patterns.get(key);
+        if (!counts) return null;
+        const total = counts.reduce((a,b)=>a+b,0);
+        if (total<3) return null;
+        return {1:counts[0]/total,2:counts[1]/total,3:counts[2]/total,4:counts[3]/total};
+    }
+    update(hist, actual){
+        for (let len=3; len<=7; len++){
+            if (hist.length >= len+1){
+                const seq = hist.slice(-len-1, -1);
+                this.addPattern(seq, actual);
+            }
+        }
+    }
+}
+
+// ====================== PREDICTION ENGINE TỔNG ======================
+class PredictionEngine {
+    constructor(algorithms, weightEngine){
+        this.algorithms = algorithms;
+        this.weightEngine = weightEngine;
+        this.markov = new MarkovEngine();
+        this.bayesian = new BayesianEngine();
+        this.hmm = new HiddenMarkovModel();
+        this.patternDB = new PatternDatabase();
+        this.cache = new Map();
+    }
+    ensemble(history){
         const final = {1:0,2:0,3:0,4:0};
-        for (const algo of this.algorithms) {
+        let totalWeight = 0;
+        for (let algo of this.algorithms){
+            if (!algo.enabled) continue;
             const scores = algo.predict(history);
             const norm = Utils.normalizeScores(scores);
             const w = algo.weight;
             for (let n=1; n<=4; n++) final[n] += norm[n] * w;
+            totalWeight += w;
         }
+        if (totalWeight) for (let n=1; n<=4; n++) final[n] /= totalWeight;
+        else return {1:0.25,2:0.25,3:0.25,4:0.25};
         return final;
     }
-    monteCarloMultiStep(scores, steps = CONFIG.MONTE_CARLO_MULTI_STEP) {
-        let currentDist = Utils.normalizeScores(scores);
-        const transition = currentDist;
-        for (let step=1; step<steps; step++) {
-            const nextDist = {1:0,2:0,3:0,4:0};
-            for (let i=1; i<=4; i++) {
-                for (let j=1; j<=4; j++) {
-                    nextDist[j] += currentDist[i] * transition[j];
-                }
-            }
-            currentDist = Utils.normalizeScores(nextDist);
-        }
-        let count123 = 0, count234 = 0;
-        const probs = currentDist;
-        for (let i=0; i<CONFIG.MONTE_CARLO_SAMPLES; i++) {
-            const r = Math.random();
-            let cum = 0, chosen = 1;
-            for (let n=1; n<=4; n++) { cum += probs[n]; if (r <= cum) { chosen = n; break; } }
-            if (chosen === 1 || chosen === 2 || chosen === 3) count123++;
-            else count234++;
-        }
-        return { set123: count123/CONFIG.MONTE_CARLO_SAMPLES, set234: count234/CONFIG.MONTE_CARLO_SAMPLES };
-    }
-    predict(history) {
-        const scores = this.ensembleScores(history);
-        const set123 = scores[1] + scores[2] + scores[3];
-        const set234 = scores[2] + scores[3] + scores[4];
-        const diff = Math.abs(set123 - set234);
-        let confidence = (diff / (set123 + set234 + 0.0001)) * 100;
-        const mc = this.monteCarloMultiStep(scores);
-        let predSet;
-        if (confidence < CONFIG.CONFIDENCE_THRESHOLD_LOW) {
+    predict(history){
+        if (history.length < CONFIG.MIN_HISTORY_FOR_PREDICTION) return null;
+        const cacheKey = history.slice(-20).join(',');
+        if (this.cache.has(cacheKey)) return this.cache.get(cacheKey);
+        
+        let scores = this.ensemble(history);
+        
+        const order = MarkovEngine.adaptiveOrder(history);
+        const markovScores = MarkovEngine.predict(history, order);
+        
+        const bayesianScores = this.bayesian.predict(history);
+        
+        const patternScores = this.patternDB.getPrediction(history, 5);
+        
+        const hmmScores = this.hmm.predict(history);
+        
+        const regime = Utils.detectRegime(history);
+        const regimeWeights = {
+            'trend': {ensemble:0.2, markov:0.4, bayesian:0.1, pattern:0.2, hmm:0.1},
+            'chaos': {ensemble:0.3, markov:0.1, bayesian:0.3, pattern:0.2, hmm:0.1},
+            'alternating': {ensemble:0.1, markov:0.3, bayesian:0.2, pattern:0.3, hmm:0.1},
+            'repeating': {ensemble:0.2, markov:0.2, bayesian:0.2, pattern:0.3, hmm:0.1},
+            'mean_reversion': {ensemble:0.3, markov:0.2, bayesian:0.2, pattern:0.2, hmm:0.1},
+            'transition': {ensemble:0.2, markov:0.2, bayesian:0.3, pattern:0.2, hmm:0.1},
+            'breakout': {ensemble:0.1, markov:0.2, bayesian:0.4, pattern:0.2, hmm:0.1},
+            'neutral': {ensemble:0.3, markov:0.2, bayesian:0.2, pattern:0.2, hmm:0.1}
+        };
+        const w = regimeWeights[regime] || regimeWeights.neutral;
+        const combined = {1:0,2:0,3:0,4:0};
+        const mix = (target, src, weight) => { for(let n=1;n<=4;n++) target[n] += src[n]*weight; };
+        mix(combined, scores, w.ensemble);
+        mix(combined, markovScores, w.markov);
+        mix(combined, bayesianScores, w.bayesian);
+        if (patternScores) mix(combined, patternScores, w.pattern);
+        mix(combined, hmmScores, w.hmm);
+        
+        const total = combined[1]+combined[2]+combined[3]+combined[4];
+        if (total) for (let n=1;n<=4;n++) combined[n]/=total;
+        
+        const mc = MonteCarloEngine.simulate(combined);
+        const set123 = combined[1]+combined[2]+combined[3];
+        const set234 = combined[2]+combined[3]+combined[4];
+        let predSet = set123 > set234 ? '1-2-3' : '2-3-4';
+        const diff = Math.abs(set123-set234);
+        let confidence = (diff / (set123+set234+0.0001))*100;
+        if (confidence < 25) {
             predSet = mc.set123 > mc.set234 ? '1-2-3' : '2-3-4';
-            confidence = Math.abs(mc.set123 - mc.set234) * 100;
-        } else {
-            predSet = set123 > set234 ? '1-2-3' : '2-3-4';
+            confidence = Math.abs(mc.set123-mc.set234)*100;
         }
-        return { scores, predSet, confidence, set123, set234, mc };
+        
+        const result = { scores:combined, predSet, confidence, set123, set234, mc };
+        this.cache.set(cacheKey, result);
+        if (this.cache.size > 1000) this.cache.clear();
+        return result;
     }
-}
-
-// ====================== STATISTICS MANAGER ======================
-class StatisticsManager {
-    constructor() {
-        this.wins = 0; this.losses = 0; this.historyResults = [];
+    updateModels(history, actual){
+        this.bayesian.update(history, actual);
+        this.patternDB.update(history, actual);
+        this.hmm.update(history);
     }
-    record(predSet, actual) {
-        const correct = (predSet === '1-2-3' && [1,2,3].includes(actual)) ||
-                        (predSet === '2-3-4' && [2,3,4].includes(actual));
-        this.historyResults.push({predSet, actual, correct});
-        if (this.historyResults.length > 500) this.historyResults.shift();
-        if (correct) this.wins++;
-        else this.losses++;
-        return correct;
-    }
-    get winRate() { const total=this.wins+this.losses; return total===0?0:this.wins/total; }
 }
 
 // ====================== BACKTEST ENGINE ======================
 class BacktestEngine {
-    constructor(algorithms, weightManager) {
-        this.algorithms = algorithms; this.weightManager = weightManager;
-    }
-    run(history) {
+    static run(history, predictionEngine){
         if (history.length < CONFIG.BACKTEST_MIN_SAMPLES) return null;
-        const originalWeights = this.weightManager.getWeightsArray();
-        let correctTotal = 0; const n = history.length;
-        const tempEngine = new PredictionEngine(this.algorithms, this.weightManager);
-        for (let i=CONFIG.MIN_HISTORY_FOR_PREDICTION; i<n; i++) {
-            const trainHist = history.slice(0, i);
+        const results = [];
+        for (let i=CONFIG.MIN_HISTORY_FOR_PREDICTION; i<history.length; i++){
+            const train = history.slice(0,i);
             const actual = history[i];
-            const pred = tempEngine.predict(trainHist);
+            const pred = predictionEngine.predict(train);
+            if (!pred) continue;
             const correct = (pred.predSet==='1-2-3'&&[1,2,3].includes(actual))||
                             (pred.predSet==='2-3-4'&&[2,3,4].includes(actual));
-            if (correct) correctTotal++;
-            this.weightManager.updateWeights(trainHist, actual, CONFIG.LEARNING_RATE_BASE);
+            results.push({actual, pred:pred.predSet, correct, confidence:pred.confidence});
         }
-        this.weightManager.setWeightsFromArray(originalWeights);
-        const accuracy = correctTotal / (n - CONFIG.MIN_HISTORY_FOR_PREDICTION);
-        return { accuracy, totalTests: n - CONFIG.MIN_HISTORY_FOR_PREDICTION };
+        const total = results.length;
+        const correctCount = results.filter(r=>r.correct).length;
+        const accuracy = correctCount/total;
+        const precision = correctCount / (results.filter(r=>r.pred==='1-2-3').length || 1);
+        const recall = correctCount / (results.filter(r=>[1,2,3].includes(r.actual)).length || 1);
+        const f1 = 2*precision*recall/(precision+recall||1);
+        const logLoss = results.reduce((s,r)=>{
+            const p = r.confidence/100;
+            return s - (r.correct?Math.log2(p):Math.log2(1-p));
+        },0)/total;
+        return { accuracy, precision, recall, f1, logLoss, total };
     }
 }
 
@@ -450,25 +661,29 @@ class UIManager {
     }
     updatePrediction(prediction) {
         const { scores, predSet, confidence, mc } = prediction;
-        const lowConf = confidence < CONFIG.CONFIDENCE_THRESHOLD_LOW;
-        this.elements.predSet.textContent = lowConf ? '⚠️ ĐỢI (' + predSet + ')' : predSet;
-        this.elements.predSet.style.color = lowConf ? '#ff4444' : '#ff0';
+        this.elements.predSet.textContent = predSet;
+        this.elements.predSet.style.color = '#ff0';
         this.elements.confFill.style.width = Math.min(100, confidence) + '%';
         this.elements.confText.textContent = `Độ tin cậy: ${confidence.toFixed(1)}%`;
         for (let n=1; n<=4; n++) this.elements['s'+n].textContent = (scores[n]*100).toFixed(1)+'%';
         this.elements.mcBar123.style.width = (mc.set123*100)+'%';
         this.elements.mcBar234.style.width = (mc.set234*100)+'%';
-        this.elements.mcInfo.innerHTML = `Monte Carlo: 1-2-3 ${(mc.set123*100).toFixed(1)}% | 2-3-4 ${(mc.set234*100).toFixed(1)}%`;
+        this.elements.mcInfo.innerHTML = `Monte Carlo (100k): 1-2-3 ${(mc.set123*100).toFixed(1)}% | 2-3-4 ${(mc.set234*100).toFixed(1)}%`;
     }
-    updateStats(winCount, lossCount, winRate, regime, consecutiveLosses) {
-        this.elements.winCount.textContent = winCount;
-        this.elements.lossCount.textContent = lossCount;
+    updateStats(wins, losses, winRate, regime, streak) {
+        this.elements.winCount.textContent = wins;
+        this.elements.lossCount.textContent = losses;
         this.elements.winRate.textContent = (winRate*100).toFixed(1)+'%';
-        const map = { trend: ['📈 BỆT','regime-trend'], chaos: ['🎲 HỖN LOẠN','regime-chaos'], neutral: ['⚖️ TRUNG TÍNH','regime-neutral'] };
+        const map = {
+            trend: ['📈 BỆT','regime-trend'], chaos: ['🎲 HỖN LOẠN','regime-chaos'],
+            alternating: ['🔄 XEN KẼ','regime-chaos'], repeating: ['🔁 LẶP','regime-trend'],
+            mean_reversion: ['↩️ HỒI','regime-neutral'], transition: ['🔀 CHUYỂN','regime-neutral'],
+            breakout: ['🚀 BỨT','regime-trend'], neutral: ['⚖️ TRUNG TÍNH','regime-neutral']
+        };
         const [txt, cls] = map[regime] || map.neutral;
         this.elements.regimeDisplay.textContent = txt;
         this.elements.regimeDisplay.className = 'regime-badge '+cls;
-        this.elements.streakIndicator.textContent = consecutiveLosses > 0 ? `⚠️ Chuỗi thua: ${consecutiveLosses}` : '';
+        this.elements.streakIndicator.textContent = streak>0 ? `⚠️ Chuỗi thua: ${streak}` : '';
     }
     addLogEntry(actual, predicted, correct) {
         const entry = document.createElement('div'); entry.className = 'log-entry';
@@ -477,10 +692,10 @@ class UIManager {
         if (this.elements.historyLog.children.length > 100) this.elements.historyLog.removeChild(this.elements.historyLog.lastChild);
     }
     updateAlgoDetail(algorithms) {
-        let html = '<b>🔥 TRỌNG SỐ & ĐỘ CHÍNH XÁC</b><br>';
-        algorithms.forEach((a,i) => {
-            const acc = a.total ? (a.correct/a.total*100).toFixed(1) : '—';
-            html += `<span>#${i+1} ${a.name}</span> w:${(a.weight*100).toFixed(1)}% | acc:${acc}%<br>`;
+        let html = '<b>🔥 CHI TIẾT THUẬT TOÁN</b><br>';
+        algorithms.forEach(a => {
+            const acc = a.total ? (a.accuracyAll*100).toFixed(1) : '—';
+            html += `<span>${a.name}</span> w:${(a.weight*100).toFixed(1)}% acc30:${(a.accuracy30*100).toFixed(1)}% enabled:${a.enabled}<br>`;
         });
         this.elements.algoDetail.innerHTML = html;
     }
@@ -491,123 +706,94 @@ class FanTanApp {
     constructor() {
         this.storage = new StorageManager(CONFIG.STORAGE_VERSION);
         this.algorithms = createAlgorithms();
-        this.weightManager = new WeightManager(this.algorithms);
-        this.engine = new PredictionEngine(this.algorithms, this.weightManager);
-        this.stats = new StatisticsManager();
+        this.weightEngine = new AdaptiveWeightEngine(this.algorithms);
+        this.engine = new PredictionEngine(this.algorithms, this.weightEngine);
         this.ui = new UIManager();
         this.history = [];
-        this.consecutiveLosses = 0;
+        this.wins = 0; this.losses = 0; this.consecutiveLosses = 0;
         this.algoDetailVisible = false;
         this.loadData();
         this.updateUI();
     }
     loadData() {
-        this.history = this.storage.load('fan_hist_v3', []);
-        const wl = this.storage.load('fan_wl_v3', {win:0, loss:0});
-        this.stats.wins = wl.win || 0;
-        this.stats.losses = wl.loss || 0;
-        const savedWeights = this.storage.load('fan_weights_v3', null);
+        this.history = this.storage.load('fan_hist_v6', []);
+        const wl = this.storage.load('fan_wl_v6', {win:0, loss:0});
+        this.wins = wl.win || 0;
+        this.losses = wl.loss || 0;
+        const savedWeights = this.storage.load('fan_weights_v6', null);
         if (savedWeights && savedWeights.length === this.algorithms.length) {
-            this.weightManager.setWeightsFromArray(savedWeights);
-        }
-        const savedStats = this.storage.load('fan_algo_stats_v5', null);
-        if (savedStats && savedStats.length === this.algorithms.length) {
-            savedStats.forEach((s,i) => {
-                this.algorithms[i].total = s.total || 0;
-                this.algorithms[i].correct = s.correct || 0;
-            });
+            savedWeights.forEach((w,i)=> this.algorithms[i].weight = w);
         }
     }
     saveData() {
-        this.storage.scheduleSave('fan_hist_v3', () => this.history);
-        this.storage.scheduleSave('fan_wl_v3', () => ({win: this.stats.wins, loss: this.stats.losses}));
-        this.storage.scheduleSave('fan_weights_v3', () => this.weightManager.getWeightsArray());
-        this.storage.scheduleSave('fan_algo_stats_v5', () => this.algorithms.map(a => ({total:a.total, correct:a.correct})));
+        this.storage.scheduleSave('fan_hist_v6', ()=> this.history);
+        this.storage.scheduleSave('fan_wl_v6', ()=> ({win:this.wins, loss:this.losses}));
+        this.storage.scheduleSave('fan_weights_v6', ()=> this.algorithms.map(a=>a.weight));
     }
     addNumber(num) {
         if (this.history.length >= CONFIG.MIN_HISTORY_FOR_PREDICTION) {
             const prediction = this.engine.predict(this.history);
-            const correct = this.stats.record(prediction.predSet, num);
-            this.ui.addLogEntry(num, prediction.predSet, correct);
-            if (correct) {
-                this.consecutiveLosses = 0;
-            } else {
-                this.consecutiveLosses++;
+            if (prediction) {
+                const correct = (prediction.predSet==='1-2-3'&&[1,2,3].includes(num))||
+                                (prediction.predSet==='2-3-4'&&[2,3,4].includes(num));
+                if (correct) { this.wins++; this.consecutiveLosses=0; }
+                else { this.losses++; this.consecutiveLosses++; }
+                this.ui.addLogEntry(num, prediction.predSet, correct);
+                this.weightEngine.update(this.history, num, prediction.predSet);
+                this.engine.updateModels(this.history, num);
+                if ((this.wins+this.losses) % 20 === 0) this.weightEngine.prune();
+                this.saveData();
             }
-            const lr = Math.min(
-                CONFIG.LEARNING_RATE_BASE + this.consecutiveLosses * CONFIG.LEARNING_RATE_PER_LOSS,
-                CONFIG.MAX_LEARNING_RATE
-            );
-            this.weightManager.updateWeights(this.history, num, lr, this.consecutiveLosses);
-            if ((this.stats.wins+this.stats.losses) % CONFIG.PRUNE_INTERVAL === 0) {
-                this.weightManager.pruneWeakAlgos();
-            }
-            this.saveData();
         }
         this.history.push(num);
         if (this.history.length > CONFIG.MAX_HISTORY) this.history = this.history.slice(-CONFIG.MAX_HISTORY);
         this.updateUI();
     }
     undoLast() {
-        if (this.history.length === 0) return;
+        if (!this.history.length) return;
         this.history.pop();
         this.updateUI();
     }
     resetAll() {
-        this.history = [];
-        this.stats.wins = 0; this.stats.losses = 0; this.stats.historyResults = [];
-        this.consecutiveLosses = 0;
-        this.weightManager.initWeights();
-        this.algorithms.forEach(a => { a.total=0; a.correct=0; });
+        this.history = []; this.wins = 0; this.losses = 0; this.consecutiveLosses = 0;
+        this.algorithms.forEach(a=>{ a.total=0; a.correct=0; a.weight=1/this.algorithms.length; a.enabled=true; });
         this.saveData();
         this.updateUI();
         document.getElementById('historyLog').innerHTML = '';
-        this.ui.elements.algoDetail.style.display = 'none';
-        this.algoDetailVisible = false;
     }
-    clearStorage() {
-        this.storage.clearAll();
-        this.resetAll();
-    }
+    clearStorage() { this.storage.clearAll(); this.resetAll(); }
     toggleAlgoDetail() {
         this.algoDetailVisible = !this.algoDetailVisible;
         this.ui.elements.algoDetail.style.display = this.algoDetailVisible ? 'block' : 'none';
         if (this.algoDetailVisible) this.ui.updateAlgoDetail(this.algorithms);
     }
     runBacktest() {
-        if (this.history.length < CONFIG.BACKTEST_MIN_SAMPLES) {
-            alert('Cần ít nhất 10 số để backtest!');
-            return;
-        }
-        const backtest = new BacktestEngine(this.algorithms, this.weightManager);
-        const result = backtest.run(this.history);
+        if (this.history.length < CONFIG.BACKTEST_MIN_SAMPLES) { alert('Cần ít nhất 12 số!'); return; }
+        const result = BacktestEngine.run(this.history, this.engine);
         if (result) {
-            alert(`Backtest walk-forward trên ${result.totalTests} ván\nTỉ lệ đúng: ${(result.accuracy*100).toFixed(1)}%`);
-        } else {
-            alert('Không đủ dữ liệu backtest.');
+            alert(`Backtest: ${result.total} ván\nAccuracy: ${(result.accuracy*100).toFixed(1)}%\nPrecision: ${result.precision.toFixed(2)}\nRecall: ${result.recall.toFixed(2)}\nF1: ${result.f1.toFixed(2)}\nLogLoss: ${result.logLoss.toFixed(3)}`);
         }
     }
     updateUI() {
         this.ui.updateHistory(this.history);
         const regime = Utils.detectRegime(this.history);
-        this.ui.updateStats(this.stats.wins, this.stats.losses, this.stats.winRate, regime, this.consecutiveLosses);
+        const winRate = this.wins+this.losses ? this.wins/(this.wins+this.losses) : 0;
+        this.ui.updateStats(this.wins, this.losses, winRate, regime, this.consecutiveLosses);
         if (this.history.length >= CONFIG.MIN_HISTORY_FOR_PREDICTION) {
-            const prediction = this.engine.predict(this.history);
-            this.ui.updatePrediction(prediction);
+            const pred = this.engine.predict(this.history);
+            if (pred) this.ui.updatePrediction(pred);
         } else {
-            this.ui.elements.predSet.textContent = '—';
-            this.ui.elements.confFill.style.width = '0%';
-            this.ui.elements.confText.textContent = 'Độ tin cậy: —';
-            for (let n=1; n<=4; n++) this.ui.elements['s'+n].textContent = '—';
-            this.ui.elements.mcBar123.style.width = '50%';
-            this.ui.elements.mcBar234.style.width = '50%';
-            this.ui.elements.mcInfo.innerHTML = '';
+            ['predSet','confFill','confText','s1','s2','s3','s4','mcBar123','mcBar234','mcInfo'].forEach(id=>{
+                if (id==='predSet') this.ui.elements.predSet.textContent='—';
+                else if (id==='confFill') this.ui.elements.confFill.style.width='0%';
+                else if (id==='confText') this.ui.elements.confText.textContent='Độ tin cậy: —';
+                else if (id.startsWith('s')) this.ui.elements[id].textContent='—';
+                else if (id.includes('Bar')) this.ui.elements[id].style.width='50%';
+                else if (id==='mcInfo') this.ui.elements.mcInfo.innerHTML='';
+            });
         }
-        if (this.algoDetailVisible) this.ui.updateAlgoDetail(this.algorithms);
     }
 }
-
-// Khởi tạo ứng dụng
 window.app = new FanTanApp();
 </script>
 </body>
