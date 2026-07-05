@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FAN‑TAN ULTIMATE v8.0 ACCURACY MAX | HeaNg[Black-Cyber]</title>
+    <title>FAN‑TAN ULTIMATE v10.0 PREDICTION CORE | HeaNg[Black-Cyber]</title>
     <style>
         *{margin:0;padding:0;box-sizing:border-box;font-family:'Courier New',monospace}
         body{background:#010314;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:1rem}
@@ -52,13 +52,23 @@
         .quality-strong{color:#00ff99;border-color:#00ff9966;box-shadow:0 0 10px #00ff9933}
         .quality-medium{color:#ffd966;border-color:#ffd96666}
         .quality-weak{color:#ff7777;border-color:#ff777766}
+        .quality-skip{color:#ff5555;border-color:#ff555566;box-shadow:0 0 12px #ff555533;background:#170608}
         .edge-line{font-size:0.74rem;color:#aaa;margin-top:4px;line-height:1.35}
+        .guard-line{margin-top:6px;font-size:0.78rem;padding:6px 8px;border-radius:10px;border:1px solid #333;background:#050511;color:#bbb;line-height:1.35}
+        .guard-play{border-color:#00ff9966;color:#8fffd0}
+        .guard-caution{border-color:#ffd96666;color:#ffd966}
+        .guard-skip{border-color:#ff555566;color:#ff8888;background:#170608}
+        .decision-badge{display:inline-block;margin-top:6px;padding:6px 14px;border-radius:18px;font-size:0.9rem;font-weight:bold;border:1px solid #444}
+        .decision-play{color:#00ff99;border-color:#00ff9966;box-shadow:0 0 10px #00ff9933}
+        .decision-skip{color:#ff5555;border-color:#ff555566;box-shadow:0 0 12px #ff555533}
+        .core-line{font-size:0.74rem;color:#7ee7ff;margin-top:5px;line-height:1.35;border-top:1px dashed #333;padding-top:5px}
+        .core-hot{color:#00ffcc}.core-cold{color:#ffcc66}
     </style>
 </head>
 <body>
 <div class="container">
-    <div class="title">🏆 FAN‑TAN ULTIMATE v8.0 ACCURACY MAX 🏆</div>
-    <div class="subtitle">3 SET AI · EDGE EXCLUSION LEARNER · CONSENSUS GATE · WALK-FORWARD · CALIBRATION</div>
+    <div class="title">🏆 FAN‑TAN ULTIMATE v10.0 PREDICTION CORE 🏆</div>
+    <div class="subtitle">3 SET AI · PREDICTION CORE · EDGE MARKOV · MULTI-WINDOW · AUTO-SKIP</div>
 
     <div class="row">
         <div class="history-section">
@@ -69,7 +79,8 @@
             <div style="color:#ffd700;font-weight:bold;">📊 THỐNG KÊ</div>
             <div class="win-loss">✅ Thắng: <span id="winCount">0</span></div>
             <div class="win-loss">❌ Thua: <span id="lossCount">0</span></div>
-            <div>Tỉ lệ: <span id="winRate">0%</span></div>
+            <div class="win-loss">⏸ Bỏ: <span id="skipCount">0</span></div>
+            <div>Tỉ lệ theo lượt đánh: <span id="winRate">0%</span></div>
             <div style="font-size:0.8rem;margin-top:4px;" id="regimeDisplay" class="regime-badge regime-neutral">⚖️ Trung tính</div>
             <div id="streakIndicator" class="streak-indicator"></div>
         </div>
@@ -96,7 +107,10 @@
         <div class="conf-bar"><div class="conf-fill" id="confFill"></div></div>
         <div id="confText" style="font-size:0.9rem;color:#ddd;">Độ tin cậy: —</div>
         <div id="qualityText" class="quality-line quality-medium">Tín hiệu: —</div>
+        <div id="decisionBadge" class="decision-badge decision-play">Quyết định: —</div>
+        <div id="guardInfo" class="guard-line guard-caution">Bộ lọc: —</div>
         <div id="edgeInfo" class="edge-line"></div>
+        <div id="coreInfo" class="core-line"></div>
         <div class="scores">
             <div class="score-cell">❶ <span id="s1">—</span></div>
             <div class="score-cell">❷ <span id="s2">—</span></div>
@@ -117,7 +131,7 @@
     </div>
 
     <div id="algoDetail" class="algo-detail"></div>
-    <div class="footer">HeaNg[Black-Cyber] · v8.0 ACCURACY MAX · 61 algorithms + Edge Exclusion AI + Signal Gate</div>
+    <div class="footer">HeaNg[Black-Cyber] · v10.0 PREDICTION CORE · Meta Edge AI + Multi-Window Guard</div>
 </div>
 
 <script>
@@ -128,8 +142,8 @@ const CONFIG = {
     BACKTEST_MIN_SAMPLES: 18,
     MONTE_CARLO_SAMPLES: 20000,
     MONTE_CARLO_MULTI_STEP: 1,
-    STORAGE_VERSION: 9,
-    STORAGE_PREFIX: 'fan_v9_',
+    STORAGE_VERSION: 10,
+    STORAGE_PREFIX: 'fan_v10_',
     DEBOUNCE_SAVE_MS: 250,
     DEV_MODE: false,
     PRUNE_ACC_THRESHOLD: 0.42,
@@ -147,7 +161,20 @@ const CONFIG = {
     EDGE_EXCLUSION_WEIGHT: 0.30,
     CONSENSUS_WEIGHT: 0.10,
     MIN_STRONG_MARGIN: 0.022,
-    MIN_PLAY_CONFIDENCE: 63
+    MIN_PLAY_CONFIDENCE: 63,
+    AUTO_SKIP_ENABLED: true,
+    GUARD_MIN_MARGIN: 0.014,
+    GUARD_MIN_CONSENSUS: 0.43,
+    GUARD_MAX_DRIFT: 0.145,
+    GUARD_MIN_EDGE_SAMPLES: 8,
+    GUARD_TIE_PENALTY: 0.20,
+    CORE_META_WEIGHT: 0.135,
+    CORE_EDGE_WINDOWS: [8, 16, 32, 64],
+    CORE_PATTERN_MIN_HITS: 2,
+    CORE_MARKOV_EDGE_WEIGHT: 0.34,
+    CORE_GAP_WEIGHT: 0.22,
+    CORE_WINDOW_WEIGHT: 0.28,
+    CORE_PATTERN_WEIGHT: 0.16
 };
 
 // ====================== UTILS ======================
@@ -269,7 +296,7 @@ class StorageManager {
     save(key,data){ try{ localStorage.setItem(key,JSON.stringify(data)); }catch(e){} }
     scheduleSave(key,getFn){ this._pending=this._pending||{}; this._pending[key]=getFn; this.saveDebounced(); }
     _saveAll(){ if(!this._pending) return; Object.entries(this._pending).forEach(([k,fn])=>this.save(k,fn())); this._pending={}; }
-    clearAll(){ ['fan_hist_v9','fan_wl_v9','fan_weights_v9','fan_algo_stats_v9','fan_set_stats_v9','fan_edge_stats_v9','fan_hist_v8','fan_wl_v8','fan_weights_v8','fan_algo_stats_v8','fan_set_stats_v8','fan_hist_v7','fan_wl_v7','fan_weights_v7','fan_algo_stats_v7','fan_hist_v6','fan_wl_v6','fan_weights_v6','fan_algo_stats_v6'].forEach(k=>localStorage.removeItem(k)); }
+    clearAll(){ ['fan_hist_v10','fan_wl_v10','fan_weights_v10','fan_algo_stats_v10','fan_set_stats_v10','fan_edge_stats_v10','fan_guard_stats_v10','fan_hist_v9','fan_wl_v9','fan_weights_v9','fan_algo_stats_v9','fan_set_stats_v9','fan_edge_stats_v9','fan_hist_v8','fan_wl_v8','fan_weights_v8','fan_algo_stats_v8','fan_set_stats_v8','fan_hist_v7','fan_wl_v7','fan_weights_v7','fan_algo_stats_v7','fan_hist_v6','fan_wl_v6','fan_weights_v6','fan_algo_stats_v6'].forEach(k=>localStorage.removeItem(k)); }
 }
 
 // ====================== ALGORITHM CLASS ======================
@@ -864,6 +891,191 @@ class CandidateSetEngine {
     }
 }
 
+
+
+// ====================== META PREDICTION CORE v10 ======================
+class MetaPredictionCore {
+    static softmax(items, temp=0.085){
+        const vals = Object.values(items);
+        const max = Math.max(...vals);
+        const exps = {}; let sum = 0;
+        Object.entries(items).forEach(([k,v])=>{ exps[k] = Math.exp((v-max)/Math.max(0.01,temp)); sum += exps[k]; });
+        const out = {}; Object.keys(items).forEach(k=> out[k] = sum ? exps[k]/sum : 1/Object.keys(items).length);
+        return out;
+    }
+    static windowRisk(history){
+        const risk = {1:0.33,3:0.33,4:0.33};
+        let totalW = 0;
+        CONFIG.CORE_EDGE_WINDOWS.forEach((win, idx)=>{
+            if (history.length < Math.max(6, Math.floor(win/2))) return;
+            const r = history.slice(-win).filter(v=>v===1 || v===3 || v===4);
+            const w = 1 / (idx + 1);
+            totalW += w;
+            const denom = r.length + 3;
+            [1,3,4].forEach(n=>{
+                const c = r.filter(v=>v===n).length + 1;
+                risk[n] += (c/denom) * w;
+            });
+        });
+        const base = totalW ? totalW : 1;
+        [1,3,4].forEach(n=> risk[n] = risk[n] / (1 + base));
+        const sum = risk[1]+risk[3]+risk[4];
+        [1,3,4].forEach(n=> risk[n] = sum ? risk[n]/sum : 1/3);
+        return risk;
+    }
+    static gapRisk(history){
+        const raw = {1:0,3:0,4:0};
+        [1,3,4].forEach(n=>{
+            let gap = history.length;
+            for (let i=history.length-1;i>=0;i--){ if (history[i]===n){ gap = history.length-1-i; break; } }
+            // Lâu chưa ra thì rủi ro bật lại cao hơn, nhưng không để áp đảo.
+            raw[n] = Utils.clamp(0.22 + Math.log1p(gap)/Math.log(18), 0.18, 0.92);
+        });
+        const sum = raw[1]+raw[3]+raw[4];
+        [1,3,4].forEach(n=> raw[n] = sum ? raw[n]/sum : 1/3);
+        return raw;
+    }
+    static edgeMarkovRisk(history){
+        const last = history[history.length-1];
+        const last2 = history.length>=2 ? history[history.length-2]+','+history[history.length-1] : null;
+        const risk = {1:1,3:1,4:1};
+        let hit1 = 0, hit2 = 0;
+        for (let i=0;i<history.length-1;i++){
+            if (history[i] === last && (history[i+1]===1 || history[i+1]===3 || history[i+1]===4)) { risk[history[i+1]] += 2.0; hit1++; }
+        }
+        if (last2){
+            for (let i=0;i<history.length-2;i++){
+                if ((history[i]+','+history[i+1]) === last2 && (history[i+2]===1 || history[i+2]===3 || history[i+2]===4)) { risk[history[i+2]] += 3.2; hit2++; }
+            }
+        }
+        const strength = Utils.clamp((hit1*0.12 + hit2*0.22), 0, 1);
+        const sum = risk[1]+risk[3]+risk[4];
+        [1,3,4].forEach(n=> risk[n] = sum ? risk[n]/sum : 1/3);
+        return {risk, strength, hit1, hit2};
+    }
+    static patternRisk(history){
+        const risk = {1:1,3:1,4:1};
+        let hits = 0;
+        for (let len=3; len<=7; len++){
+            if (history.length <= len+1) continue;
+            const pat = history.slice(-len).join(',');
+            for (let i=0; i<=history.length-len-1; i++){
+                if (history.slice(i,i+len).join(',') === pat){
+                    const next = history[i+len];
+                    if (next===1 || next===3 || next===4){
+                        const simW = 1 + (len-3)*0.25;
+                        risk[next] += simW;
+                        hits += simW;
+                    }
+                }
+            }
+        }
+        const strength = Utils.clamp(hits / 9, 0, 1);
+        const sum = risk[1]+risk[3]+risk[4];
+        [1,3,4].forEach(n=> risk[n] = sum ? risk[n]/sum : 1/3);
+        return {risk, strength, hits};
+    }
+    static predict(history, baseScores, regime){
+        const win = this.windowRisk(history);
+        const gap = this.gapRisk(history);
+        const mk = this.edgeMarkovRisk(history);
+        const pat = this.patternRisk(history);
+        const baseRisk = {1:baseScores[1],3:baseScores[3],4:baseScores[4]};
+        const riskRaw = {1:0,3:0,4:0};
+        [1,3,4].forEach(n=>{
+            riskRaw[n] =
+                baseRisk[n] * 0.18 +
+                win[n] * CONFIG.CORE_WINDOW_WEIGHT +
+                gap[n] * CONFIG.CORE_GAP_WEIGHT +
+                mk.risk[n] * CONFIG.CORE_MARKOV_EDGE_WEIGHT +
+                pat.risk[n] * CONFIG.CORE_PATTERN_WEIGHT;
+        });
+        const risk = this.softmax(riskRaw, regime === 'chaos' ? 0.13 : 0.095);
+        // Bộ tốt là bộ LOẠI TRỪ số có rủi ro thấp nhất.
+        const setScores = {
+            '1-2-3': 1 - risk[4],
+            '1-2-4': 1 - risk[3],
+            '2-3-4': 1 - risk[1]
+        };
+        const rankedRisk = [1,3,4].map(n=>({n, risk:risk[n]})).sort((a,b)=>a.risk-b.risk);
+        const bestMissing = rankedRisk[0].n;
+        const bestKey = bestMissing===4 ? '1-2-3' : (bestMissing===3 ? '1-2-4' : '2-3-4');
+        const spread = rankedRisk[1].risk - rankedRisk[0].risk;
+        const strength = Utils.clamp(spread*3.2 + mk.strength*0.22 + pat.strength*0.18, 0, 1);
+        return {risk, setScores, bestMissing, bestKey, strength, spread, markovHits:mk.hit1+mk.hit2, patternHits:pat.hits};
+    }
+}
+
+// ====================== RISK / AUTO-SKIP GUARD ======================
+class RiskGuardEngine {
+    static freq(history, window){
+        const r = history.slice(-window);
+        const f = {1:1,2:1,3:1,4:1};
+        r.forEach(v=>{ if (f[v] !== undefined) f[v]++; });
+        const total = f[1]+f[2]+f[3]+f[4];
+        return {1:f[1]/total,2:f[2]/total,3:f[3]/total,4:f[4]/total};
+    }
+    static kl(p,q){
+        let out = 0;
+        for (let n=1;n<=4;n++) out += p[n] * Math.log((p[n]||0.001)/(q[n]||0.001));
+        return out;
+    }
+    static js(p,q){
+        const m = {1:(p[1]+q[1])/2,2:(p[2]+q[2])/2,3:(p[3]+q[3])/2,4:(p[4]+q[4])/2};
+        return Math.max(0, (this.kl(p,m)+this.kl(q,m))/2);
+    }
+    static edgeSamples(history, window=36){
+        return history.slice(-window).filter(v=>v===1 || v===3 || v===4).length;
+    }
+    static edgeEntropy(history, window=36){
+        const r = history.slice(-window).filter(v=>v===1 || v===3 || v===4);
+        if (!r.length) return 1;
+        const f = {1:0,3:0,4:0}; r.forEach(v=>f[v]++);
+        let e = 0;
+        [1,3,4].forEach(n=>{ const p=f[n]/r.length; if(p>0)e-=p*Math.log2(p); });
+        return e / Math.log2(3);
+    }
+    static streakNoise(history){
+        if (history.length < 10) return 0;
+        const r = history.slice(-12);
+        let changes = 0;
+        for (let i=1;i<r.length;i++) if (r[i]!==r[i-1]) changes++;
+        const ent = Utils.entropy(r)/2;
+        return Utils.clamp(changes/11*0.55 + ent*0.45, 0, 1);
+    }
+    static assess(history, pred){
+        const recent = this.freq(history, Math.min(14, history.length));
+        const baseline = this.freq(history, Math.min(70, history.length));
+        const drift = this.js(recent, baseline);
+        const edgeN = this.edgeSamples(history, 36);
+        const edgeEntropy = this.edgeEntropy(history, 36);
+        const tieRisk = Utils.clamp(1 - (pred.margin || 0) / 0.055, 0, 1);
+        const lowConsensus = Utils.clamp((CONFIG.GUARD_MIN_CONSENSUS - (pred.consensus || 0)) / CONFIG.GUARD_MIN_CONSENSUS, 0, 1);
+        const lowMargin = Utils.clamp((CONFIG.GUARD_MIN_MARGIN - (pred.margin || 0)) / CONFIG.GUARD_MIN_MARGIN, 0, 1);
+        const driftRisk = Utils.clamp(drift / CONFIG.GUARD_MAX_DRIFT, 0, 1);
+        const edgeRisk = Utils.clamp((CONFIG.GUARD_MIN_EDGE_SAMPLES - edgeN) / CONFIG.GUARD_MIN_EDGE_SAMPLES, 0, 1);
+        const noise = this.streakNoise(history);
+        const risk = Utils.clamp(lowMargin*0.27 + lowConsensus*0.22 + driftRisk*0.20 + edgeRisk*0.16 + tieRisk*0.10 + edgeEntropy*0.03 + noise*0.02, 0, 1);
+        const reasons = [];
+        if (lowMargin > 0.15) reasons.push('3 bộ sát điểm');
+        if (lowConsensus > 0.10) reasons.push('AI chưa đồng thuận');
+        if (drift > CONFIG.GUARD_MAX_DRIFT) reasons.push('lịch sử gần đổi nhịp');
+        if (edgeN < CONFIG.GUARD_MIN_EDGE_SAMPLES) reasons.push('ít mẫu phân biệt 1/3/4');
+        if (edgeEntropy > 0.92 && pred.margin < 0.020) reasons.push('biên 1/3/4 đang loạn');
+        let playMode = 'PLAY';
+        let guardClass = 'play';
+        let guardLabel = 'ĐÁNH ĐƯỢC';
+        let grade = 'A';
+        if (CONFIG.AUTO_SKIP_ENABLED && (risk >= 0.58 || pred.confidence < CONFIG.MIN_PLAY_CONFIDENCE || (pred.signalClass==='weak' && risk >= 0.42))) {
+            playMode = 'SKIP'; guardClass = 'skip'; guardLabel = 'BỎ LƯỢT'; grade = 'C';
+        } else if (risk >= 0.36 || pred.signalClass === 'weak') {
+            guardClass = 'caution'; guardLabel = 'CẨN TRỌNG'; grade = 'B';
+        }
+        const penalty = Utils.clamp(risk * 18 + (playMode==='SKIP'?7:0), 0, 28);
+        return {playMode, guardClass, guardLabel, grade, risk, penalty, drift, edgeN, edgeEntropy, tieRisk, reasons};
+    }
+}
+
 // ====================== PREDICTION ENGINE TONG ======================
 class PredictionEngine {
     constructor(algorithms, weightEngine){
@@ -927,6 +1139,7 @@ class PredictionEngine {
         const reliability = this.weightEngine.reliability();
         const setEval = this.setEngine.scoreSets(normalized, history, reliability);
         const edgeEval = this.edgeLearner.predict(normalized, history, regime);
+        const metaEval = MetaPredictionCore.predict(history, normalized, regime);
         const sourceVotes = [];
         const voteFromScores = (label, src, weight=1) => {
             const key = Utils.predSetFromScores(src);
@@ -938,6 +1151,7 @@ class PredictionEngine {
         voteFromScores('hmm', hmmScores, 0.80);
         if (patternScores) voteFromScores('pattern', patternScores, 1.15);
         sourceVotes.push({label:'edge', key:edgeEval.bestKey, weight:1.25});
+        sourceVotes.push({label:'core', key:metaEval.bestKey, weight:1.10 + metaEval.strength*0.55});
         const voteScore = {'1-2-3':0,'1-2-4':0,'2-3-4':0};
         let voteTotal = 0;
         sourceVotes.forEach(v=>{ voteScore[v.key] += v.weight; voteTotal += v.weight; });
@@ -945,10 +1159,11 @@ class PredictionEngine {
         const consensus = voteTotal ? voteScore[consensusKey]/voteTotal : 1/3;
         const edgeWeight = Utils.clamp(CONFIG.EDGE_EXCLUSION_WEIGHT * edgeEval.strength, 0.06, CONFIG.EDGE_EXCLUSION_WEIGHT);
         const consensusWeight = Utils.clamp(CONFIG.CONSENSUS_WEIGHT * consensus, 0.025, CONFIG.CONSENSUS_WEIGHT);
+        const metaWeight = Utils.clamp(CONFIG.CORE_META_WEIGHT * (0.40 + metaEval.strength), 0.045, CONFIG.CORE_META_WEIGHT);
         const setScores = {};
         Utils.candidateSets().forEach(set=>{
             const consensusScore = set.key === consensusKey ? 0.86 : 0.70;
-            const raw = setEval.scores[set.key]*(1-edgeWeight-consensusWeight) + edgeEval.setScores[set.key]*edgeWeight + consensusScore*consensusWeight;
+            const raw = setEval.scores[set.key]*(1-edgeWeight-consensusWeight-metaWeight) + edgeEval.setScores[set.key]*edgeWeight + metaEval.setScores[set.key]*metaWeight + consensusScore*consensusWeight;
             setScores[set.key] = Utils.clamp(raw, 0.45, 0.985);
         });
         const setRanking = Utils.candidateSets().map(set=>({...set, score:setScores[set.key], missRisk:edgeEval.risk[set.missing]})).sort((a,b)=>b.score-a.score || a.key.localeCompare(b.key));
@@ -956,7 +1171,7 @@ class PredictionEngine {
         const selectedProb = setScores[predSet];
         const margin = Math.max(0, setRanking[0].score - setRanking[1].score);
         const decisiveSignal = Math.max(normalized[1], normalized[3], normalized[4]) - Math.min(normalized[1], normalized[3], normalized[4]);
-        const signalScore = Utils.clamp((margin/0.055)*0.42 + (consensus-1/3)*0.62 + reliability*0.18 + decisiveSignal*0.45, 0, 1);
+        const signalScore = Utils.clamp((margin/0.055)*0.38 + (consensus-1/3)*0.58 + reliability*0.16 + decisiveSignal*0.38 + metaEval.strength*0.22, 0, 1);
         let signalLabel = 'YẾU - NÊN QUAN SÁT';
         let signalClass = 'weak';
         let playAdvice = '3 bộ đang sát điểm, không nên tin tuyệt đối bộ #1.';
@@ -969,12 +1184,24 @@ class PredictionEngine {
             signalClass = 'medium';
             playAdvice = 'Có tín hiệu nhưng chưa đủ mạnh, nên giảm kỳ vọng.';
         }
-        let confidence = (selectedProb*0.66 + reliability*0.08 + margin*1.05 + decisiveSignal*0.08 + consensus*0.12 + signalScore*0.10) * 100;
+        let confidence = (selectedProb*0.62 + reliability*0.08 + margin*1.00 + decisiveSignal*0.07 + consensus*0.11 + signalScore*0.10 + metaEval.strength*0.07) * 100;
         if (signalClass === 'weak') confidence = Math.min(confidence, 68);
         if (signalClass === 'medium') confidence = Math.min(confidence, 82);
         confidence = Utils.clamp(confidence, 50, 97);
+        let provisional = {predSet, confidence, margin, consensus, signalClass, signalScore};
+        const guard = RiskGuardEngine.assess(history, provisional);
+        confidence = Utils.clamp(confidence - guard.penalty, 45, 97);
+        if (guard.playMode === 'SKIP') {
+            signalLabel = 'BỎ LƯỢT - NHIỄU';
+            signalClass = 'skip';
+            playAdvice = 'Auto-skip đang bật: bỏ lượt này để giữ tỉ lệ, không ép đánh.';
+        } else if (guard.guardClass === 'caution' && signalClass === 'strong') {
+            signalLabel = 'VỪA - ĐI NHẸ';
+            signalClass = 'medium';
+            playAdvice = 'Bộ #1 vẫn đứng đầu nhưng bộ lọc phát hiện rủi ro, nên giảm lực.';
+        }
         const mc = MonteCarloEngine.simulate(normalized);
-        const result = { scores:normalized, predSet, confidence, setScores, setRanking, selectedProb, set123:setScores['1-2-3'], set124:setScores['1-2-4'], set234:setScores['2-3-4'], mc, order, regime, margin, reliability, decisiveSignal, edgeRisk:edgeEval.risk, edgeStrength:edgeEval.strength, consensus, consensusKey, signalScore, signalLabel, signalClass, playAdvice };
+        const result = { scores:normalized, predSet, confidence, setScores, setRanking, selectedProb, set123:setScores['1-2-3'], set124:setScores['1-2-4'], set234:setScores['2-3-4'], mc, order, regime, margin, reliability, decisiveSignal, edgeRisk:edgeEval.risk, edgeStrength:edgeEval.strength, metaEval, consensus, consensusKey, signalScore, signalLabel, signalClass, playAdvice, guard, playMode:guard.playMode };
         this.cache.set(cacheKey, result);
         if (this.cache.size > 500) this.cache.clear();
         return result;
@@ -1008,7 +1235,8 @@ class BacktestEngine {
             const edge = (actual !== 2);
             const edgeCorrect = edge ? correct : null;
             const ranking = pred.setRanking ? pred.setRanking.map(x=>x.key+':'+(x.score*100).toFixed(1)).join(' > ') : pred.predSet;
-            results.push({actual, pred:pred.predSet, correct, confidence:pred.confidence, pWin, edge, edgeCorrect, ranking, brier:Utils.brierScore(pred.scores, actual), signalClass:pred.signalClass});
+            const skipped = pred.playMode === 'SKIP';
+            results.push({actual, pred:pred.predSet, correct, confidence:pred.confidence, pWin, edge, edgeCorrect, ranking, brier:Utils.brierScore(pred.scores, actual), signalClass:pred.signalClass, skipped, coreStrength:pred.metaEval ? pred.metaEval.strength : 0});
             weightEngine.update(train, actual);
             engine.updateModels(train, actual);
             if (i % 20 === 0) weightEngine.prune();
@@ -1026,8 +1254,12 @@ class BacktestEngine {
         const strongRows = results.filter(r=>r.signalClass==='strong');
         const mediumRows = results.filter(r=>r.signalClass==='medium');
         const weakRows = results.filter(r=>r.signalClass==='weak');
+        const skipRows = results.filter(r=>r.skipped);
+        const playRows = results.filter(r=>!r.skipped);
+        const coreRows = results.filter(r=>r.coreStrength>=0.45);
         const rate = rows => rows.length ? rows.filter(r=>r.correct).length/rows.length : 0;
-        return { accuracy, edgeAccuracy, avgConfidence, logLoss, brier, total:results.length, edgeTotal:edgeRows.length, strongTotal:strongRows.length, strongAccuracy:rate(strongRows), mediumTotal:mediumRows.length, mediumAccuracy:rate(mediumRows), weakTotal:weakRows.length, weakAccuracy:rate(weakRows) };
+        const edgeRate = rows => { const er = rows.filter(r=>r.edge); return er.length ? er.filter(r=>r.edgeCorrect).length/er.length : 0; };
+        return { accuracy, edgeAccuracy, avgConfidence, logLoss, brier, total:results.length, edgeTotal:edgeRows.length, strongTotal:strongRows.length, strongAccuracy:rate(strongRows), mediumTotal:mediumRows.length, mediumAccuracy:rate(mediumRows), weakTotal:weakRows.length, weakAccuracy:rate(weakRows), playTotal:playRows.length, playAccuracy:rate(playRows), playEdgeAccuracy:edgeRate(playRows), skipTotal:skipRows.length, coreTotal:coreRows.length, coreAccuracy:rate(coreRows) };
     }
 }
 
@@ -1043,8 +1275,9 @@ class UIManager {
             bar123: document.getElementById('bar123'), bar124: document.getElementById('bar124'), bar234: document.getElementById('bar234'),
             setScore123: document.getElementById('setScore123'), setScore124: document.getElementById('setScore124'), setScore234: document.getElementById('setScore234'),
             mcInfo: document.getElementById('mcInfo'),
-            qualityText: document.getElementById('qualityText'), edgeInfo: document.getElementById('edgeInfo'),
-            winCount: document.getElementById('winCount'), lossCount: document.getElementById('lossCount'), winRate: document.getElementById('winRate'),
+            qualityText: document.getElementById('qualityText'), decisionBadge: document.getElementById('decisionBadge'), guardInfo: document.getElementById('guardInfo'), edgeInfo: document.getElementById('edgeInfo'), coreInfo: document.getElementById('coreInfo'),
+            winCount: document.getElementById('winCount'), lossCount: document.getElementById('lossCount'),
+            skipCount: document.getElementById('skipCount'), winRate: document.getElementById('winRate'),
             regimeDisplay: document.getElementById('regimeDisplay'),
             historyLog: document.getElementById('historyLog'),
             algoDetail: document.getElementById('algoDetail'),
@@ -1072,13 +1305,25 @@ class UIManager {
         const cls = prediction.signalClass || 'medium';
         this.elements.qualityText.className = 'quality-line quality-' + cls;
         this.elements.qualityText.textContent = `Tín hiệu: ${prediction.signalLabel || '—'} · ${prediction.playAdvice || ''}`;
+        const guard = prediction.guard || {};
+        const isSkip = prediction.playMode === 'SKIP';
+        this.elements.decisionBadge.className = 'decision-badge ' + (isSkip ? 'decision-skip' : 'decision-play');
+        this.elements.decisionBadge.textContent = isSkip ? `Quyết định: BỎ LƯỢT · vẫn ưu tiên ${prediction.predSet}` : `Quyết định: THEO BỘ #1 · ${prediction.predSet}`;
+        const reasons = (guard.reasons && guard.reasons.length) ? guard.reasons.join(', ') : 'tín hiệu đủ sạch';
+        this.elements.guardInfo.className = 'guard-line guard-' + (guard.guardClass || 'caution');
+        this.elements.guardInfo.innerHTML = `Bộ lọc v10: ${guard.guardLabel || '—'} · điểm rủi ro ${((guard.risk||0)*100).toFixed(0)}% · drift ${((guard.drift||0)*100).toFixed(1)}% · mẫu 1/3/4 ${guard.edgeN ?? 0}/36 · ${reasons}`;
         if (prediction.edgeRisk) {
             this.elements.edgeInfo.innerHTML = `AI loại trừ: rủi ro ra 1 ${(prediction.edgeRisk[1]*100).toFixed(1)}% · ra 3 ${(prediction.edgeRisk[3]*100).toFixed(1)}% · ra 4 ${(prediction.edgeRisk[4]*100).toFixed(1)}% · đồng thuận ${(prediction.consensus*100).toFixed(0)}%`;
         } else this.elements.edgeInfo.innerHTML = '';
+        if (prediction.metaEval) {
+            const m = prediction.metaEval;
+            this.elements.coreInfo.innerHTML = `Core v10: né <b class="core-hot">${m.bestMissing}</b> → ${m.bestKey} · lực ${(m.strength*100).toFixed(0)}% · spread ${(m.spread*100).toFixed(1)}% · Markov ${m.markovHits} · Pattern ${m.patternHits.toFixed(1)}`;
+        } else this.elements.coreInfo.innerHTML = '';
     }
-    updateStats(wins, losses, winRate, regime, streak) {
+    updateStats(wins, losses, skips, winRate, regime, streak) {
         this.elements.winCount.textContent = wins;
         this.elements.lossCount.textContent = losses;
+        this.elements.skipCount.textContent = skips || 0;
         this.elements.winRate.textContent = (winRate*100).toFixed(1)+'%';
         const map = {
             trend: ['📈 BỆT','regime-trend'], chaos: ['🎲 HỖN LOẠN','regime-chaos'],
@@ -1093,7 +1338,9 @@ class UIManager {
     }
     addLogEntry(actual, predicted, correct) {
         const entry = document.createElement('div'); entry.className = 'log-entry';
-        entry.innerHTML = `<span class="log-num">${actual}</span><span class="log-pred">→ ${predicted}</span><span class="log-result ${correct?'win':'loss'}">${correct?'✅':'❌'}</span>`;
+        const mark = correct===null ? '⏸' : (correct?'✅':'❌');
+        const cls = correct===null ? 'draw' : (correct?'win':'loss');
+        entry.innerHTML = `<span class="log-num">${actual}</span><span class="log-pred">→ ${predicted}</span><span class="log-result ${cls}">${mark}</span>`;
         this.elements.historyLog.prepend(entry);
         if (this.elements.historyLog.children.length > 100) this.elements.historyLog.removeChild(this.elements.historyLog.lastChild);
     }
@@ -1117,35 +1364,36 @@ class FanTanApp {
         this.engine = new PredictionEngine(this.algorithms, this.weightEngine);
         this.ui = new UIManager();
         this.history = [];
-        this.wins = 0; this.losses = 0; this.consecutiveLosses = 0;
+        this.wins = 0; this.losses = 0; this.skips = 0; this.consecutiveLosses = 0;
         this.algoDetailVisible = false;
         this.loadData();
         this.updateUI();
     }
     loadData() {
-        this.history = this.storage.loadAny(['fan_hist_v9','fan_hist_v8','fan_hist_v7','fan_hist_v6'], []);
-        const wl = this.storage.loadAny(['fan_wl_v9','fan_wl_v8','fan_wl_v7','fan_wl_v6'], {win:0, loss:0});
+        this.history = this.storage.loadAny(['fan_hist_v10','fan_hist_v9','fan_hist_v8','fan_hist_v7','fan_hist_v6'], []);
+        const wl = this.storage.loadAny(['fan_wl_v10','fan_wl_v9','fan_wl_v8','fan_wl_v7','fan_wl_v6'], {win:0, loss:0, skip:0});
         this.wins = wl.win || 0;
         this.losses = wl.loss || 0;
-        const savedStats = this.storage.load('fan_algo_stats_v9', null) || this.storage.load('fan_algo_stats_v8', null) || this.storage.load('fan_algo_stats_v7', null);
+        this.skips = wl.skip || 0;
+        const savedStats = this.storage.load('fan_algo_stats_v10', null) || this.storage.load('fan_algo_stats_v9', null) || this.storage.load('fan_algo_stats_v8', null) || this.storage.load('fan_algo_stats_v7', null);
         if (savedStats) this.weightEngine.importState(savedStats);
         else {
             const savedWeights = this.storage.load('fan_weights_v6', null);
             if (savedWeights && savedWeights.length === this.algorithms.length) savedWeights.forEach((w,i)=> this.algorithms[i].weight = w);
         }
         this.rebuildModelsFromHistory();
-        const savedSetStats = this.storage.load('fan_set_stats_v9', null) || this.storage.load('fan_set_stats_v8', null);
+        const savedSetStats = this.storage.load('fan_set_stats_v10', null) || this.storage.load('fan_set_stats_v9', null) || this.storage.load('fan_set_stats_v8', null);
         if (savedSetStats) this.engine.setEngine.importState(savedSetStats);
-        const savedEdgeStats = this.storage.load('fan_edge_stats_v9', null);
+        const savedEdgeStats = this.storage.load('fan_edge_stats_v10', null) || this.storage.load('fan_edge_stats_v9', null);
         if (savedEdgeStats) this.engine.edgeLearner.importState(savedEdgeStats);
     }
     saveData() {
-        this.storage.scheduleSave('fan_hist_v9', ()=> this.history);
-        this.storage.scheduleSave('fan_wl_v9', ()=> ({win:this.wins, loss:this.losses}));
-        this.storage.scheduleSave('fan_weights_v9', ()=> this.algorithms.map(a=>a.weight));
-        this.storage.scheduleSave('fan_algo_stats_v9', ()=> this.weightEngine.exportState());
-        this.storage.scheduleSave('fan_set_stats_v9', ()=> this.engine.setEngine.exportState());
-        this.storage.scheduleSave('fan_edge_stats_v9', ()=> this.engine.edgeLearner.exportState());
+        this.storage.scheduleSave('fan_hist_v10', ()=> this.history);
+        this.storage.scheduleSave('fan_wl_v10', ()=> ({win:this.wins, loss:this.losses, skip:this.skips}));
+        this.storage.scheduleSave('fan_weights_v10', ()=> this.algorithms.map(a=>a.weight));
+        this.storage.scheduleSave('fan_algo_stats_v10', ()=> this.weightEngine.exportState());
+        this.storage.scheduleSave('fan_set_stats_v10', ()=> this.engine.setEngine.exportState());
+        this.storage.scheduleSave('fan_edge_stats_v10', ()=> this.engine.edgeLearner.exportState());
     }
     rebuildModelsFromHistory() {
         this.engine = new PredictionEngine(this.algorithms, this.weightEngine);
@@ -1158,9 +1406,11 @@ class FanTanApp {
             const prediction = this.engine.predict(this.history);
             if (prediction) {
                 const correct = Utils.isSetCorrect(prediction.predSet, num);
-                if (correct) { this.wins++; this.consecutiveLosses=0; }
-                else { this.losses++; this.consecutiveLosses++; }
-                this.ui.addLogEntry(num, prediction.predSet, correct);
+                if (prediction.playMode === 'SKIP') {
+                    this.skips++;
+                    this.ui.addLogEntry(num, 'BỎ ' + prediction.predSet, null);
+                } else if (correct) { this.wins++; this.consecutiveLosses=0; this.ui.addLogEntry(num, prediction.predSet, true); }
+                else { this.losses++; this.consecutiveLosses++; this.ui.addLogEntry(num, prediction.predSet, false); }
                 this.weightEngine.update(this.history, num, prediction.predSet);
                 this.engine.updateModels(this.history, num);
                 if ((this.wins+this.losses) % 20 === 0) this.weightEngine.prune();
@@ -1177,7 +1427,7 @@ class FanTanApp {
         this.updateUI();
     }
     resetAll() {
-        this.history = []; this.wins = 0; this.losses = 0; this.consecutiveLosses = 0;
+        this.history = []; this.wins = 0; this.losses = 0; this.skips = 0; this.consecutiveLosses = 0;
         this.algorithms.forEach(a=>{ a.total=0; a.correct=0; a.weight=1/this.algorithms.length; a.enabled=true; a.skill=0.5; a.edgeTotal=0; a.edgeCorrect=0; });
         this.weightEngine = new AdaptiveWeightEngine(this.algorithms);
         this.engine = new PredictionEngine(this.algorithms, this.weightEngine);
@@ -1195,24 +1445,39 @@ class FanTanApp {
         if (this.history.length < CONFIG.BACKTEST_MIN_SAMPLES) { alert('Cần ít nhất 18 số!'); return; }
         const result = BacktestEngine.run(this.history);
         if (result) {
-            alert(`Backtest walk-forward: ${result.total} ván\nTỉ lệ thắng bộ: ${(result.accuracy*100).toFixed(1)}%\nMẫu phân biệt 1/3/4 đúng: ${(result.edgeAccuracy*100).toFixed(1)}% (${result.edgeTotal} mẫu)\nTín hiệu MẠNH: ${(result.strongAccuracy*100).toFixed(1)}% (${result.strongTotal} mẫu)\nTín hiệu VỪA: ${(result.mediumAccuracy*100).toFixed(1)}% (${result.mediumTotal} mẫu)\nTín hiệu YẾU: ${(result.weakAccuracy*100).toFixed(1)}% (${result.weakTotal} mẫu)\nĐộ tin cậy TB: ${result.avgConfidence.toFixed(1)}%\nBrier: ${result.brier.toFixed(3)}\nLogLoss: ${result.logLoss.toFixed(3)}`);
+            alert(`Backtest walk-forward: ${result.total} ván
+Lượt ĐÁNH sau lọc: ${result.playTotal} · thắng ${(result.playAccuracy*100).toFixed(1)}%
+Mẫu 1/3/4 sau lọc đúng: ${(result.playEdgeAccuracy*100).toFixed(1)}%
+Bỏ lượt: ${result.skipTotal}
+Core v10 mạnh: ${(result.coreAccuracy*100).toFixed(1)}% (${result.coreTotal} mẫu)
+Tỉ lệ nếu ép đánh mọi ván: ${(result.accuracy*100).toFixed(1)}%
+Mẫu phân biệt 1/3/4 đúng: ${(result.edgeAccuracy*100).toFixed(1)}% (${result.edgeTotal} mẫu)
+Tín hiệu MẠNH: ${(result.strongAccuracy*100).toFixed(1)}% (${result.strongTotal} mẫu)
+Tín hiệu VỪA: ${(result.mediumAccuracy*100).toFixed(1)}% (${result.mediumTotal} mẫu)
+Tín hiệu YẾU/SKIP: ${(result.weakAccuracy*100).toFixed(1)}% (${result.weakTotal} mẫu)
+Độ tin cậy TB: ${result.avgConfidence.toFixed(1)}%
+Brier: ${result.brier.toFixed(3)}
+LogLoss: ${result.logLoss.toFixed(3)}`);
         }
     }
     updateUI() {
         this.ui.updateHistory(this.history);
         const regime = Utils.detectRegime(this.history);
         const winRate = this.wins+this.losses ? this.wins/(this.wins+this.losses) : 0;
-        this.ui.updateStats(this.wins, this.losses, winRate, regime, this.consecutiveLosses);
+        this.ui.updateStats(this.wins, this.losses, this.skips, winRate, regime, this.consecutiveLosses);
         if (this.history.length >= CONFIG.MIN_HISTORY_FOR_PREDICTION) {
             const pred = this.engine.predict(this.history);
             if (pred) this.ui.updatePrediction(pred);
         } else {
-            ['predSet','confFill','confText','qualityText','edgeInfo','s1','s2','s3','s4','bar123','bar124','bar234','setScore123','setScore124','setScore234','mcInfo'].forEach(id=>{
+            ['predSet','confFill','confText','qualityText','decisionBadge','guardInfo','edgeInfo','coreInfo','s1','s2','s3','s4','bar123','bar124','bar234','setScore123','setScore124','setScore234','mcInfo'].forEach(id=>{
                 if (id==='predSet') this.ui.elements.predSet.textContent='-';
                 else if (id==='confFill') this.ui.elements.confFill.style.width='0%';
                 else if (id==='confText') this.ui.elements.confText.textContent='Độ tin cậy: —';
                 else if (id==='qualityText') { this.ui.elements.qualityText.textContent='Tín hiệu: —'; this.ui.elements.qualityText.className='quality-line quality-medium'; }
+                else if (id==='decisionBadge') { this.ui.elements.decisionBadge.textContent='Quyết định: —'; this.ui.elements.decisionBadge.className='decision-badge decision-play'; }
+                else if (id==='guardInfo') { this.ui.elements.guardInfo.textContent='Bộ lọc: —'; this.ui.elements.guardInfo.className='guard-line guard-caution'; }
                 else if (id==='edgeInfo') this.ui.elements.edgeInfo.innerHTML='';
+                else if (id==='coreInfo') this.ui.elements.coreInfo.innerHTML='';
                 else if (id.startsWith('s') && this.ui.elements[id]) this.ui.elements[id].textContent='—';
                 else if (id.startsWith('bar')) this.ui.elements[id].style.width='0%';
                 else if (id.startsWith('setScore')) this.ui.elements[id].textContent='--';
