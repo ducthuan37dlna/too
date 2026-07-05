@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FAN‑TAN ULTIMATE v5.0 PRO | HeaNg[Black-Cyber]</title>
+    <title>FAN‑TAN ULTIMATE v8.0 ACCURACY MAX | HeaNg[Black-Cyber]</title>
     <style>
         *{margin:0;padding:0;box-sizing:border-box;font-family:'Courier New',monospace}
         body{background:#010314;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:1rem}
@@ -39,16 +39,26 @@
         .algo-detail{max-height:180px;overflow-y:auto;background:#000;border:1px solid #555;border-radius:8px;padding:0.5rem;margin-top:0.6rem;font-size:0.7rem;text-align:left;color:#ccc;display:none}
         .algo-detail span{display:inline-block;width:70px}
         .footer{text-align:center;color:#444;font-size:0.7rem;margin-top:1.2rem}
-        .mc-bar{display:flex;gap:10px;justify-content:center;margin-top:4px}
-        .mc-bar div{background:#222;border-radius:12px;height:8px;flex:1;max-width:150px;overflow:hidden}
-        .mc-bar div span{display:block;height:100%;background:linear-gradient(90deg,#0f0,#ff0);width:50%;transition:width 0.5s}
+        .set-bars{display:grid;gap:8px;margin-top:10px;text-align:left}
+        .set-row{display:grid;grid-template-columns:70px 1fr 56px;gap:8px;align-items:center;color:#ddd;font-size:0.78rem}
+        .set-track{background:#222;border-radius:12px;height:10px;overflow:hidden;border:1px solid #333}
+        .set-fill{display:block;height:100%;background:linear-gradient(90deg,#0f0,#ff0);width:0%;transition:width 0.5s}
+        .set-score{text-align:right;color:#ffd700;font-weight:bold}
+        .set-fill.alt{background:linear-gradient(90deg,#0ff,#ff0)}
+        .set-fill.hot{background:linear-gradient(90deg,#f0f,#ff0)}
         .streak-indicator{font-size:0.9rem;margin-top:5px;color:#ff8888}
+
+        .quality-line{margin-top:6px;font-size:0.82rem;font-weight:bold;padding:5px 8px;border-radius:10px;border:1px solid #333;background:#090916}
+        .quality-strong{color:#00ff99;border-color:#00ff9966;box-shadow:0 0 10px #00ff9933}
+        .quality-medium{color:#ffd966;border-color:#ffd96666}
+        .quality-weak{color:#ff7777;border-color:#ff777766}
+        .edge-line{font-size:0.74rem;color:#aaa;margin-top:4px;line-height:1.35}
     </style>
 </head>
 <body>
 <div class="container">
-    <div class="title">🏆 FAN‑TAN ULTIMATE v5.0 PRO 🏆</div>
-    <div class="subtitle">AI ENGINE · HMM · BAYESIAN · MARKOV 4 · MONTE CARLO 100K · 8 REGIMES</div>
+    <div class="title">🏆 FAN‑TAN ULTIMATE v8.0 ACCURACY MAX 🏆</div>
+    <div class="subtitle">3 SET AI · EDGE EXCLUSION LEARNER · CONSENSUS GATE · WALK-FORWARD · CALIBRATION</div>
 
     <div class="row">
         <div class="history-section">
@@ -85,19 +95,20 @@
         <div class="pred-set" id="predSet">—</div>
         <div class="conf-bar"><div class="conf-fill" id="confFill"></div></div>
         <div id="confText" style="font-size:0.9rem;color:#ddd;">Độ tin cậy: —</div>
+        <div id="qualityText" class="quality-line quality-medium">Tín hiệu: —</div>
+        <div id="edgeInfo" class="edge-line"></div>
         <div class="scores">
             <div class="score-cell">❶ <span id="s1">—</span></div>
             <div class="score-cell">❷ <span id="s2">—</span></div>
             <div class="score-cell">❸ <span id="s3">—</span></div>
             <div class="score-cell">❹ <span id="s4">—</span></div>
         </div>
-        <div class="mc-bar">
-            <div style="flex:1;text-align:right;color:#0ff;font-size:0.7rem;">1-2-3</div>
-            <div><span id="mcBar123" style="width:50%;"></span></div>
-            <div><span id="mcBar234" style="width:50%;background:linear-gradient(90deg,#f0f,#ff0);"></span></div>
-            <div style="flex:1;text-align:left;color:#f0f;font-size:0.7rem;">2-3-4</div>
+        <div class="set-bars">
+            <div class="set-row"><span>1-2-3</span><div class="set-track"><span id="bar123" class="set-fill alt"></span></div><span id="setScore123" class="set-score">--</span></div>
+            <div class="set-row"><span>1-2-4</span><div class="set-track"><span id="bar124" class="set-fill"></span></div><span id="setScore124" class="set-score">--</span></div>
+            <div class="set-row"><span>2-3-4</span><div class="set-track"><span id="bar234" class="set-fill hot"></span></div><span id="setScore234" class="set-score">--</span></div>
         </div>
-        <div id="mcInfo" style="font-size:0.75rem;color:#aaa;"></div>
+        <div id="mcInfo" style="font-size:0.75rem;color:#aaa;margin-top:6px;"></div>
     </div>
 
     <div style="margin-top:1rem;">
@@ -106,25 +117,37 @@
     </div>
 
     <div id="algoDetail" class="algo-detail"></div>
-    <div class="footer">HeaNg[Black-Cyber] · v5.0 PRO · Full code 61 thuật toán</div>
+    <div class="footer">HeaNg[Black-Cyber] · v8.0 ACCURACY MAX · 61 algorithms + Edge Exclusion AI + Signal Gate</div>
 </div>
 
 <script>
 // ====================== CONFIG ======================
 const CONFIG = {
-    MAX_HISTORY: 500,
-    MIN_HISTORY_FOR_PREDICTION: 8,
-    BACKTEST_MIN_SAMPLES: 12,
-    MONTE_CARLO_SAMPLES: 100000,
-    MONTE_CARLO_MULTI_STEP: 5,
-    STORAGE_VERSION: 6,
-    DEBOUNCE_SAVE_MS: 300,
+    MAX_HISTORY: 700,
+    MIN_HISTORY_FOR_PREDICTION: 10,
+    BACKTEST_MIN_SAMPLES: 18,
+    MONTE_CARLO_SAMPLES: 20000,
+    MONTE_CARLO_MULTI_STEP: 1,
+    STORAGE_VERSION: 9,
+    STORAGE_PREFIX: 'fan_v9_',
+    DEBOUNCE_SAVE_MS: 250,
     DEV_MODE: false,
-    PRUNE_ACC_THRESHOLD: 0.30,
-    PRUNE_MIN_SAMPLES: 50,
-    PRUNE_RECOVER_THRESHOLD: 0.40,
-    LEARNING_RATE: 0.1,
-    WEIGHT_DECAY: 0.99
+    PRUNE_ACC_THRESHOLD: 0.42,
+    PRUNE_MIN_SAMPLES: 70,
+    PRUNE_RECOVER_THRESHOLD: 0.52,
+    LEARNING_RATE: 0.16,
+    WEIGHT_DECAY: 0.92,
+    WEIGHT_FLOOR: 0.0025,
+    SOFTMAX_TEMPERATURE: 0.115,
+    PROBABILITY_SMOOTHING: 0.07,
+    EDGE_LEARN_MULTIPLIER: 1.55,
+    CONFIDENCE_SHRINK: 0.82,
+    PATTERN_MIN_HITS: 2,
+    RECENT_WINDOW: 36,
+    EDGE_EXCLUSION_WEIGHT: 0.30,
+    CONSENSUS_WEIGHT: 0.10,
+    MIN_STRONG_MARGIN: 0.022,
+    MIN_PLAY_CONFIDENCE: 63
 };
 
 // ====================== UTILS ======================
@@ -184,6 +207,55 @@ const Utils = {
         if(ent>1.85) return 'breakout';
         return 'neutral';
     },
+    clamp(x,min,max){ return Math.max(min, Math.min(max, x)); },
+    safeProb(x){ return this.clamp(Number.isFinite(x) ? x : 0.25, 0.001, 0.999); },
+    blendUniform(scores, smoothing=CONFIG.PROBABILITY_SMOOTHING) {
+        const p = this.normalizeScores(scores || {1:0.25,2:0.25,3:0.25,4:0.25});
+        const out = {};
+        for (let n=1; n<=4; n++) out[n] = p[n]*(1-smoothing) + 0.25*smoothing;
+        return this.normalizeScores(out);
+    },
+    candidateSets() {
+        return [
+            {key:'1-2-3', nums:[1,2,3], missing:4},
+            {key:'1-2-4', nums:[1,2,4], missing:3},
+            {key:'2-3-4', nums:[2,3,4], missing:1}
+        ];
+    },
+    candidateByKey(key) {
+        return this.candidateSets().find(s => s.key === key) || this.candidateSets()[0];
+    },
+    setScoresFromNumberProbs(scores) {
+        const p = this.normalizeScores(scores);
+        const out = {};
+        this.candidateSets().forEach(set => {
+            out[set.key] = set.nums.reduce((sum,n)=>sum+p[n], 0);
+        });
+        return out;
+    },
+    bestSetFromSetScores(setScores) {
+        const rows = this.candidateSets().map(set => ({...set, score: Number(setScores[set.key]) || 0}));
+        rows.sort((a,b) => b.score - a.score || a.key.localeCompare(b.key));
+        return rows[0];
+    },
+    predSetFromScores(scores) {
+        return this.bestSetFromSetScores(this.setScoresFromNumberProbs(scores)).key;
+    },
+    setProbability(scores, predSet) {
+        return this.setScoresFromNumberProbs(scores)[predSet] ?? 0.75;
+    },
+    missingNumberForSet(predSet) {
+        return this.candidateByKey(predSet).missing;
+    },
+    isSetCorrect(predSet, actual) {
+        return this.candidateByKey(predSet).nums.includes(actual);
+    },
+    brierScore(scores, actual) {
+        const p = this.normalizeScores(scores);
+        let s = 0;
+        for (let n=1; n<=4; n++) s += (p[n] - (n===actual ? 1 : 0)) ** 2;
+        return s / 4;
+    },
     debounce(fn,delay){ let t; return(...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),delay); }; },
     range(n){ return Array.from({length:n},(_,i)=>i); },
     setUnion(a,b){ return new Set([...a,...b]); }
@@ -193,10 +265,11 @@ const Utils = {
 class StorageManager {
     constructor(ver){ this.version=ver; this.saveDebounced=Utils.debounce(this._saveAll.bind(this), CONFIG.DEBOUNCE_SAVE_MS); }
     load(key,fb=null){ try{ let d=localStorage.getItem(key); return d?JSON.parse(d):fb; }catch(e){ return fb; } }
+    loadAny(keys,fb=null){ for (const key of keys){ const val=this.load(key, null); if (val!==null) return val; } return fb; }
     save(key,data){ try{ localStorage.setItem(key,JSON.stringify(data)); }catch(e){} }
     scheduleSave(key,getFn){ this._pending=this._pending||{}; this._pending[key]=getFn; this.saveDebounced(); }
     _saveAll(){ if(!this._pending) return; Object.entries(this._pending).forEach(([k,fn])=>this.save(k,fn())); this._pending={}; }
-    clearAll(){ ['fan_hist_v6','fan_wl_v6','fan_weights_v6','fan_algo_stats_v6'].forEach(k=>localStorage.removeItem(k)); }
+    clearAll(){ ['fan_hist_v9','fan_wl_v9','fan_weights_v9','fan_algo_stats_v9','fan_set_stats_v9','fan_edge_stats_v9','fan_hist_v8','fan_wl_v8','fan_weights_v8','fan_algo_stats_v8','fan_set_stats_v8','fan_hist_v7','fan_wl_v7','fan_weights_v7','fan_algo_stats_v7','fan_hist_v6','fan_wl_v6','fan_weights_v6','fan_algo_stats_v6'].forEach(k=>localStorage.removeItem(k)); }
 }
 
 // ====================== ALGORITHM CLASS ======================
@@ -205,6 +278,8 @@ class Algorithm {
         this.id=id; this.name=name; this.category=category; this._predict=fn;
         this.total=0; this.correct=0; this.weight=0.01; this.accuracy30=0; this.accuracy100=0; this.accuracyAll=0;
         this.recentWin=0; this.recentLose=0; this.confidence=0.5; this.importance=1;
+        this.skill=0.5; this.brier=0.25; this.logScore=1.386;
+        this.edgeTotal=0; this.edgeCorrect=0;
         this.enabled=true;
     }
     predict(h){ return this._predict(h); }
@@ -288,6 +363,12 @@ function createAlgorithms(){
         new Algorithm(60,'threeDistinctReversal','reversal',h=>{if(h.length<4)return{1:0.25,2:0.25,3:0.25,4:0.25};let r=h.slice(-3);if(r[0]!==r[1]&&r[1]!==r[2]&&r[0]!==r[2]){let missing=[1,2,3,4].find(x=>!r.includes(x));let s={1:0,2:0,3:0,4:0};s[missing]=30;let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}return{1:0.25,2:0.25,3:0.25,4:0.25};}),
         new Algorithm(61,'recentVsGlobalReversal','reversal',h=>{if(h.length<8)return{1:0.25,2:0.25,3:0.25,4:0.25};let global={1:0,2:0,3:0,4:0},recent={1:0,2:0,3:0,4:0};h.forEach(v=>global[v]++);for(let i=Math.max(0,h.length-6);i<h.length;i++)recent[h[i]]++;let s={1:0,2:0,3:0,4:0};for(let n=1;n<=4;n++){let gRate=global[n]/h.length,rRate=recent[n]/6;if(gRate>0.25&&rRate<0.1)s[n]+=28;}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;})
     ];
+    algoList.forEach(a=>{
+        a.weight = 1 / algoList.length;
+        a.importance = a.weight;
+        a.skill = 0.5;
+        a.confidence = 0.5;
+    });
     return algoList;
 }
 
@@ -297,48 +378,107 @@ class AdaptiveWeightEngine {
         this.algorithms = algorithms;
         this.rollingResults = {};
         this.algorithms.forEach(a=>{ this.rollingResults[a.id]=[]; });
+        this.normalize();
     }
-    update(history, actual, ensemblePredSet){
-        const correct = (predSet, act) => (predSet==='1-2-3'&&[1,2,3].includes(act))||(predSet==='2-3-4'&&[2,3,4].includes(act));
+    update(history, actual){
+        const edgeCase = (actual === 1 || actual === 4);
         for (let algo of this.algorithms){
-            if (!algo.enabled) continue;
-            const scores = algo.predict(history);
-            const norm = Utils.normalizeScores(scores);
-            const set123 = norm[1]+norm[2]+norm[3];
-            const set234 = norm[2]+norm[3]+norm[4];
-            const predSet = set123>set234 ? '1-2-3' : '2-3-4';
-            const isCorrect = correct(predSet, actual);
+            if (!algo.enabled && algo.total < CONFIG.PRUNE_MIN_SAMPLES) algo.enabled = true;
+            const norm = Utils.blendUniform(algo.predict(history));
+            const predSet = Utils.predSetFromScores(norm);
+            const isCorrect = Utils.isSetCorrect(predSet, actual);
+            const pActual = Utils.safeProb(norm[actual]);
+            const brier = Utils.brierScore(norm, actual);
+            const brierReward = 1 - Utils.clamp(brier / 0.75, 0, 1);
+            const probReward = Utils.clamp(pActual * 2.35, 0, 1);
+            // Khi kết quả là 2 hoặc 3, cả hai bộ đều thắng nên tín hiệu thắng/thua không phân biệt được thuật toán.
+            // Vì vậy edge 1/4 được học mạnh hơn; còn 2/3 chủ yếu dùng xác suất đúng số để chống ảo chính xác.
+            const setReward = edgeCase ? (isCorrect ? 1 : 0) : 0.5;
+            const instantSkill = 0.36*probReward + 0.34*brierReward + 0.30*setReward;
+            const lr = Utils.clamp(CONFIG.LEARNING_RATE * (edgeCase ? CONFIG.EDGE_LEARN_MULTIPLIER : 1), 0.02, 0.42);
+            algo.skill = algo.skill*(1-lr) + instantSkill*lr;
+            algo.brier = algo.brier*CONFIG.WEIGHT_DECAY + brier*(1-CONFIG.WEIGHT_DECAY);
+            algo.logScore = algo.logScore*CONFIG.WEIGHT_DECAY + (-Math.log(pActual))*(1-CONFIG.WEIGHT_DECAY);
             algo.updateStats(isCorrect);
+            if (edgeCase) { algo.edgeTotal++; if (isCorrect) algo.edgeCorrect++; }
             this.rollingResults[algo.id].push(isCorrect);
             if (this.rollingResults[algo.id].length > 100) this.rollingResults[algo.id].shift();
             algo.updateRolling(30, this.rollingResults[algo.id]);
             algo.updateRolling(100, this.rollingResults[algo.id]);
-            const recentAccuracy = algo.accuracy30 || algo.accuracyAll;
-            algo.weight = algo.weight * CONFIG.WEIGHT_DECAY + (1 - CONFIG.WEIGHT_DECAY) * recentAccuracy;
-            algo.confidence = recentAccuracy;
-            algo.importance = algo.weight * (0.5 + 0.5 * algo.confidence);
+            algo.confidence = Utils.clamp(0.25 + algo.skill*0.75, 0.05, 0.99);
         }
         this.normalize();
     }
     normalize(){
-        let totalImportance = this.algorithms.reduce((s,a)=> s + (a.enabled ? a.importance : 0), 0);
-        if (totalImportance <= 0) {
-            this.algorithms.forEach(a=> a.weight = 1/this.algorithms.length);
-            return;
+        const active = this.algorithms.filter(a=>a.enabled);
+        if (!active.length) this.algorithms.forEach(a=>a.enabled=true);
+        const enabled = this.algorithms.filter(a=>a.enabled);
+        const maxSkill = Math.max(...enabled.map(a=>{
+            const sampleFactor = Utils.clamp(a.total / 35, 0.25, 1);
+            return 0.5 + (a.skill - 0.5) * sampleFactor;
+        }));
+        const raw = new Map();
+        let rawTotal = 0;
+        for (const a of this.algorithms){
+            if (!a.enabled){ raw.set(a, 0); continue; }
+            const sampleFactor = Utils.clamp(a.total / 35, 0.25, 1);
+            const adjustedSkill = 0.5 + (a.skill - 0.5) * sampleFactor;
+            const edgeFactor = a.edgeTotal >= 15 ? (0.85 + 0.30*(a.edgeCorrect/Math.max(1,a.edgeTotal))) : 1;
+            const val = Math.exp((adjustedSkill - maxSkill) / CONFIG.SOFTMAX_TEMPERATURE) * edgeFactor;
+            raw.set(a, val);
+            rawTotal += val;
         }
-        for (let a of this.algorithms){
-            if (!a.enabled) { a.weight = 0.001; continue; }
-            a.weight = a.importance / totalImportance;
+        const floor = CONFIG.WEIGHT_FLOOR;
+        const enabledCount = Math.max(1, enabled.length);
+        const freeMass = Math.max(0.1, 1 - floor*enabledCount);
+        for (const a of this.algorithms){
+            if (!a.enabled){ a.weight = floor; a.importance = 0; continue; }
+            a.weight = floor + freeMass * (raw.get(a) / (rawTotal || 1));
+            a.importance = a.weight * a.confidence;
         }
+    }
+    reliability(){
+        const enabled = this.algorithms.filter(a=>a.enabled);
+        if (!enabled.length) return 0.55;
+        const avgSkill = enabled.reduce((s,a)=>s+a.skill*a.weight,0) / enabled.reduce((s,a)=>s+a.weight,0);
+        return Utils.clamp(0.45 + (avgSkill-0.5)*1.8, 0.35, 0.95);
     }
     prune(){
         for (let a of this.algorithms){
-            if (a.total >= CONFIG.PRUNE_MIN_SAMPLES && a.accuracy30 < CONFIG.PRUNE_ACC_THRESHOLD){
+            const edgeAcc = a.edgeTotal ? a.edgeCorrect/a.edgeTotal : 0.5;
+            if (a.total >= CONFIG.PRUNE_MIN_SAMPLES && a.skill < CONFIG.PRUNE_ACC_THRESHOLD && edgeAcc < 0.48){
                 a.enabled = false;
-            } else if (!a.enabled && a.total >= CONFIG.PRUNE_MIN_SAMPLES && a.accuracy30 > CONFIG.PRUNE_RECOVER_THRESHOLD){
+            } else if (!a.enabled && a.total >= CONFIG.PRUNE_MIN_SAMPLES && (a.skill > CONFIG.PRUNE_RECOVER_THRESHOLD || edgeAcc > 0.56)){
                 a.enabled = true;
             }
         }
+        this.normalize();
+    }
+    exportState(){
+        return this.algorithms.map(a=>({id:a.id, weight:a.weight, total:a.total, correct:a.correct, accuracy30:a.accuracy30, accuracy100:a.accuracy100, accuracyAll:a.accuracyAll, skill:a.skill, brier:a.brier, logScore:a.logScore, edgeTotal:a.edgeTotal, edgeCorrect:a.edgeCorrect, enabled:a.enabled}));
+    }
+    importState(rows){
+        if (!Array.isArray(rows)) return;
+        const byId = new Map(rows.map(r=>[r.id,r]));
+        for (const a of this.algorithms){
+            const r = byId.get(a.id);
+            if (!r) continue;
+            Object.assign(a, {
+                weight: r.weight ?? a.weight,
+                total: r.total ?? 0,
+                correct: r.correct ?? 0,
+                accuracy30: r.accuracy30 ?? 0,
+                accuracy100: r.accuracy100 ?? 0,
+                accuracyAll: r.accuracyAll ?? 0,
+                skill: r.skill ?? 0.5,
+                brier: r.brier ?? 0.25,
+                logScore: r.logScore ?? 1.386,
+                edgeTotal: r.edgeTotal ?? 0,
+                edgeCorrect: r.edgeCorrect ?? 0,
+                enabled: r.enabled !== false
+            });
+        }
+        this.normalize();
     }
 }
 
@@ -392,28 +532,33 @@ class MarkovEngine {
 // ====================== BAYESIAN ENGINE ======================
 class BayesianEngine {
     constructor(){
-        this.prior = {1:0.25,2:0.25,3:0.25,4:0.25};
-        this.likelihood = {1:{},2:{},3:{},4:{}};
+        this.globalCounts = {1:1,2:1,3:1,4:1};
+        this.transition = {1:{1:1,2:1,3:1,4:1},2:{1:1,2:1,3:1,4:1},3:{1:1,2:1,3:1,4:1},4:{1:1,2:1,3:1,4:1}};
     }
     update(hist, actual){
-        if (hist.length < 2) return;
-        const last = hist[hist.length-2];
-        if (!this.likelihood[last]) this.likelihood[last] = {1:0,2:0,3:0,4:0};
-        this.likelihood[last][actual] = (this.likelihood[last][actual]||0)+1;
-        const total = Object.values(this.prior).reduce((a,b)=>a+b,0);
-        for (let n=1;n<=4;n++) this.prior[n] = (this.prior[n] + (actual===n?1:0)) / (total+1);
+        if (!hist.length) return;
+        const last = hist[hist.length-1];
+        this.globalCounts[actual] = (this.globalCounts[actual]||1) + 1;
+        if (!this.transition[last]) this.transition[last] = {1:1,2:1,3:1,4:1};
+        this.transition[last][actual] = (this.transition[last][actual]||1) + 1;
     }
     predict(hist){
-        if (hist.length < 2) return {1:0.25,2:0.25,3:0.25,4:0.25};
+        if (!hist.length) return {1:0.25,2:0.25,3:0.25,4:0.25};
         const last = hist[hist.length-1];
-        const like = this.likelihood[last] || {1:1,2:1,3:1,4:1};
-        const total = like[1]+like[2]+like[3]+like[4] || 4;
-        const posterior = {};
-        for (let n=1;n<=4;n++) posterior[n] = (this.prior[n] * like[n]) / total;
-        const sum = posterior[1]+posterior[2]+posterior[3]+posterior[4];
-        if (sum) for (let n=1;n<=4;n++) posterior[n]/=sum;
-        else return {1:0.25,2:0.25,3:0.25,4:0.25};
-        return posterior;
+        const row = this.transition[last] || {1:1,2:1,3:1,4:1};
+        const rowTotal = row[1]+row[2]+row[3]+row[4];
+        const globalTotal = this.globalCounts[1]+this.globalCounts[2]+this.globalCounts[3]+this.globalCounts[4];
+        const recent = {1:1,2:1,3:1,4:1};
+        hist.slice(-CONFIG.RECENT_WINDOW).forEach(v=>recent[v]++);
+        const recentTotal = recent[1]+recent[2]+recent[3]+recent[4];
+        const rowStrength = Utils.clamp((rowTotal-4)/18, 0.25, 0.65);
+        const recentStrength = hist.length < 40 ? 0.25 : 0.30;
+        const globalStrength = 1 - rowStrength - recentStrength;
+        const out = {};
+        for (let n=1;n<=4;n++){
+            out[n] = (row[n]/rowTotal)*rowStrength + (recent[n]/recentTotal)*recentStrength + (this.globalCounts[n]/globalTotal)*globalStrength;
+        }
+        return Utils.blendUniform(out, 0.04);
     }
 }
 
@@ -422,72 +567,46 @@ class HiddenMarkovModel {
     constructor(){
         this.states = 4;
         this.transition = Array.from({length:4},()=>[0.25,0.25,0.25,0.25]);
-        this.emission = Array.from({length:4},()=>[0.25,0.25,0.25,0.25]);
         this.stateBelief = [0.25,0.25,0.25,0.25];
     }
     update(hist){
         if (hist.length < 5) return;
-        // Cập nhật online đơn giản bằng heuristic
-        const recent = hist.slice(-20);
-        // Phân phối lại emission dựa trên tần suất gần đây
-        const freq = {1:0,2:0,3:0,4:0};
-        recent.forEach(v=>freq[v]++);
-        for (let s=0; s<this.states; s++){
-            // Mỗi trạng thái thiên về một số khác nhau
-            for (let n=1; n<=4; n++){
-                this.emission[s][n-1] = (freq[n] + (s+1===n ? 5 : 1)) / (recent.length + 8);
-            }
+        const counts = Array.from({length:4},()=>[1,1,1,1]);
+        const recent = hist.slice(-80);
+        for (let i=0; i<recent.length-1; i++) counts[recent[i]-1][recent[i+1]-1]++;
+        for (let s=0; s<4; s++){
+            const total = counts[s].reduce((a,b)=>a+b,0);
+            this.transition[s] = counts[s].map(v=>v/total);
         }
+        const last = hist[hist.length-1]-1;
+        this.stateBelief = [0.05,0.05,0.05,0.05];
+        this.stateBelief[last] = 0.85;
     }
     predict(hist){
+        if (!hist.length) return {1:0.25,2:0.25,3:0.25,4:0.25};
         const nextBelief = [0,0,0,0];
-        for (let i=0; i<this.states; i++){
-            for (let j=0; j<this.states; j++){
-                nextBelief[j] += this.stateBelief[i] * this.transition[i][j];
-            }
-        }
-        const pred = {1:0,2:0,3:0,4:0};
-        for (let s=0; s<this.states; s++){
-            for (let n=1; n<=4; n++){
-                pred[n] += nextBelief[s] * this.emission[s][n-1];
-            }
-        }
-        const sum = pred[1]+pred[2]+pred[3]+pred[4];
-        if (sum) for (let n=1;n<=4;n++) pred[n]/=sum;
-        else return {1:0.25,2:0.25,3:0.25,4:0.25};
-        return pred;
+        for (let i=0; i<4; i++) for (let j=0; j<4; j++) nextBelief[j] += this.stateBelief[i] * this.transition[i][j];
+        const recent = {1:1,2:1,3:1,4:1};
+        hist.slice(-20).forEach(v=>recent[v]++);
+        const rt = recent[1]+recent[2]+recent[3]+recent[4];
+        const pred = {};
+        for (let n=1; n<=4; n++) pred[n] = nextBelief[n-1]*0.72 + (recent[n]/rt)*0.28;
+        return Utils.blendUniform(pred, 0.05);
     }
 }
 
 // ====================== MONTE CARLO ENGINE ======================
 class MonteCarloEngine {
-    static simulate(probs, samples=CONFIG.MONTE_CARLO_SAMPLES, steps=CONFIG.MONTE_CARLO_MULTI_STEP){
-        let dist = probs;
-        for (let s=1; s<steps; s++){
-            const next = {1:0,2:0,3:0,4:0};
-            for (let i=1; i<=4; i++){
-                for (let j=1; j<=4; j++){
-                    next[j] += dist[i] * dist[j];
-                }
-            }
-            const sum = next[1]+next[2]+next[3]+next[4];
-            if (sum) for (let i=1;i<=4;i++) next[i]/=sum;
-            dist = next;
-        }
-        let count123=0, count234=0;
-        const cumProbs = [0, dist[1], dist[1]+dist[2], dist[1]+dist[2]+dist[3], 1];
-        for (let i=0; i<samples; i++){
-            const r = Math.random();
-            let chosen = 1;
-            for (let n=1; n<=4; n++) if (r < cumProbs[n]) { chosen = n; break; }
-            if (chosen <= 3) count123++;
-            else count234++;
-        }
+    static simulate(probs, samples=CONFIG.MONTE_CARLO_SAMPLES){
+        const dist = Utils.normalizeScores(probs);
+        const setScores = Utils.setScoresFromNumberProbs(dist);
         return {
-            set123: count123/samples,
-            set234: count234/samples,
-            variance123: (count123/samples)*(1-count123/samples)/samples,
-            variance234: (count234/samples)*(1-count234/samples)/samples
+            set123: setScores['1-2-3'],
+            set124: setScores['1-2-4'],
+            set234: setScores['2-3-4'],
+            variance123: setScores['1-2-3']*(1-setScores['1-2-3'])/samples,
+            variance124: setScores['1-2-4']*(1-setScores['1-2-4'])/samples,
+            variance234: setScores['2-3-4']*(1-setScores['2-3-4'])/samples
         };
     }
 }
@@ -503,26 +622,249 @@ class PatternDatabase {
         const counts = this.patterns.get(key);
         counts[next-1]++;
     }
-    getPrediction(hist, length=5){
-        if (hist.length < length) return null;
-        const key = hist.slice(-length).join(',');
-        const counts = this.patterns.get(key);
-        if (!counts) return null;
-        const total = counts.reduce((a,b)=>a+b,0);
-        if (total<3) return null;
-        return {1:counts[0]/total,2:counts[1]/total,3:counts[2]/total,4:counts[3]/total};
+    getPrediction(hist, maxLength=8){
+        if (hist.length < 3) return null;
+        const out = {1:0,2:0,3:0,4:0};
+        let totalWeight = 0;
+        for (let len=Math.min(maxLength, hist.length); len>=3; len--){
+            const key = hist.slice(-len).join(',');
+            const counts = this.patterns.get(key);
+            if (!counts) continue;
+            const hits = counts.reduce((a,b)=>a+b,0);
+            if (hits < CONFIG.PATTERN_MIN_HITS) continue;
+            const weight = len * Math.log2(hits+1);
+            const smoothedTotal = hits + 4;
+            for (let n=1; n<=4; n++) out[n] += ((counts[n-1]+1)/smoothedTotal) * weight;
+            totalWeight += weight;
+        }
+        if (!totalWeight) return null;
+        for (let n=1; n<=4; n++) out[n] /= totalWeight;
+        return Utils.blendUniform(out, 0.04);
     }
     update(hist, actual){
-        for (let len=3; len<=7; len++){
-            if (hist.length >= len+1){
-                const seq = hist.slice(-len-1, -1);
+        for (let len=3; len<=8; len++){
+            if (hist.length >= len){
+                const seq = hist.slice(-len);
                 this.addPattern(seq, actual);
             }
         }
     }
 }
 
-// ====================== PREDICTION ENGINE TỔNG ======================
+
+
+// ====================== EDGE EXCLUSION LEARNER ======================
+class EdgeExclusionLearner {
+    constructor(){
+        this.edgeCounts = {1:3,3:3,4:3};
+        this.transition = {};
+        for (let last=1; last<=4; last++) this.transition[last] = {1:2,3:2,4:2};
+        this.patterns = new Map();
+        this.emaCorrect = 0.50;
+        this.total = 0;
+    }
+    normalizeRisk(risk){
+        const keys = [1,3,4];
+        let sum = keys.reduce((s,n)=>s+(Number(risk[n])||0),0);
+        if (!sum) return {1:1/3,3:1/3,4:1/3};
+        const out = {};
+        keys.forEach(n=>out[n] = Utils.clamp(risk[n]/sum, 0.02, 0.92));
+        sum = keys.reduce((s,n)=>s+out[n],0);
+        keys.forEach(n=>out[n] /= sum);
+        return out;
+    }
+    recentEdgeFreq(history, window=28){
+        const r = history.slice(-window).filter(v=>v===1||v===3||v===4);
+        const out = {1:1,3:1,4:1};
+        r.forEach(v=>out[v]++);
+        const total = out[1]+out[3]+out[4];
+        return {1:out[1]/total,3:out[3]/total,4:out[4]/total};
+    }
+    gapRisk(history){
+        const out = {1:0,3:0,4:0};
+        [1,3,4].forEach(n=>{
+            let gap = history.length;
+            for (let i=history.length-1; i>=0; i--){ if (history[i]===n){ gap=history.length-1-i; break; } }
+            out[n] = Utils.clamp((gap+1) / 18, 0.05, 0.75);
+        });
+        return this.normalizeRisk(out);
+    }
+    patternRisk(history){
+        if (history.length < 6) return {1:1/3,3:1/3,4:1/3};
+        const out = {1:1,3:1,4:1};
+        let hitWeight = 3;
+        for (let len=Math.min(7, history.length); len>=3; len--){
+            const key = history.slice(-len).join(',');
+            const row = this.patterns.get(key);
+            if (!row) continue;
+            const hits = row[1]+row[3]+row[4];
+            if (hits < 2) continue;
+            const w = len * Math.log2(hits+1);
+            [1,3,4].forEach(n=>out[n] += (row[n]+1)/(hits+3)*w);
+            hitWeight += w;
+        }
+        [1,3,4].forEach(n=>out[n] /= hitWeight);
+        return this.normalizeRisk(out);
+    }
+    predict(numberScores, history, regime='neutral'){
+        const p = Utils.normalizeScores(numberScores);
+        const recent = this.recentEdgeFreq(history, Math.min(42, Math.max(18, history.length)));
+        const gaps = this.gapRisk(history);
+        const pattern = this.patternRisk(history);
+        const last = history.length ? history[history.length-1] : 1;
+        const transRow = this.transition[last] || {1:2,3:2,4:2};
+        const transTotal = transRow[1]+transRow[3]+transRow[4];
+        const globalTotal = this.edgeCounts[1]+this.edgeCounts[3]+this.edgeCounts[4];
+        const trans = {1:transRow[1]/transTotal,3:transRow[3]/transTotal,4:transRow[4]/transTotal};
+        const global = {1:this.edgeCounts[1]/globalTotal,3:this.edgeCounts[3]/globalTotal,4:this.edgeCounts[4]/globalTotal};
+        const regimeGapWeight = (regime==='mean_reversion' || regime==='chaos' || regime==='breakout') ? 0.18 : 0.10;
+        const regimeRecentWeight = (regime==='trend' || regime==='repeating') ? 0.26 : 0.20;
+        const raw = {};
+        [1,3,4].forEach(n=>{
+            raw[n] = p[n]*0.27 + trans[n]*0.18 + recent[n]*regimeRecentWeight + pattern[n]*0.18 + gaps[n]*regimeGapWeight + global[n]*(0.19-regimeGapWeight*0.35);
+        });
+        const risk = this.normalizeRisk(raw);
+        const setScores = {
+            '1-2-3': Utils.clamp(1 - risk[4], 0.50, 0.98),
+            '1-2-4': Utils.clamp(1 - risk[3], 0.50, 0.98),
+            '2-3-4': Utils.clamp(1 - risk[1], 0.50, 0.98)
+        };
+        const ranking = Utils.candidateSets().map(set=>({...set, score:setScores[set.key], missRisk:risk[set.missing]})).sort((a,b)=>b.score-a.score || a.key.localeCompare(b.key));
+        const margin = ranking[0].score - ranking[1].score;
+        const strength = Utils.clamp((this.total/65), 0.10, 1) * Utils.clamp(0.55 + (this.emaCorrect-0.50)*1.4, 0.35, 0.95);
+        return {risk, setScores, ranking, bestKey:ranking[0].key, margin, strength};
+    }
+    update(history, actual, predictedSet){
+        if (!(actual===1 || actual===3 || actual===4)) return;
+        const last = history.length ? history[history.length-1] : null;
+        this.edgeCounts[actual] = (this.edgeCounts[actual] || 2) + 1;
+        if (last){
+            if (!this.transition[last]) this.transition[last] = {1:2,3:2,4:2};
+            this.transition[last][actual] = (this.transition[last][actual] || 2) + 1;
+        }
+        for (let len=3; len<=7; len++){
+            if (history.length >= len){
+                const key = history.slice(-len).join(',');
+                if (!this.patterns.has(key)) this.patterns.set(key, {1:1,3:1,4:1});
+                this.patterns.get(key)[actual]++;
+            }
+        }
+        if (predictedSet){
+            this.total++;
+            const ok = Utils.isSetCorrect(predictedSet, actual);
+            const lr = this.total < 45 ? 0.10 : 0.045;
+            this.emaCorrect = this.emaCorrect*(1-lr) + (ok ? 1 : 0)*lr;
+        }
+    }
+    exportState(){
+        return {edgeCounts:this.edgeCounts, transition:this.transition, patterns:Array.from(this.patterns.entries()), emaCorrect:this.emaCorrect, total:this.total};
+    }
+    importState(state){
+        if (!state || typeof state !== 'object') return;
+        if (state.edgeCounts) this.edgeCounts = {...this.edgeCounts, ...state.edgeCounts};
+        if (state.transition) this.transition = {...this.transition, ...state.transition};
+        if (Array.isArray(state.patterns)) this.patterns = new Map(state.patterns);
+        this.emaCorrect = Number.isFinite(state.emaCorrect) ? state.emaCorrect : this.emaCorrect;
+        this.total = Number.isFinite(state.total) ? state.total : this.total;
+    }
+}
+
+// ====================== THREE-SET CANDIDATE ENGINE ======================
+class CandidateSetEngine {
+    constructor(){
+        this.stats = {};
+        Utils.candidateSets().forEach(set => {
+            this.stats[set.key] = {total:0, correct:0, ema:0.75, brier:0.1875};
+        });
+    }
+    recentFreq(history, window=18){
+        const r = history.slice(-window);
+        const t = Math.max(1, r.length);
+        const f = {1:0,2:0,3:0,4:0};
+        r.forEach(v=>f[v]++);
+        for (let n=1;n<=4;n++) f[n] = f[n] / t;
+        return f;
+    }
+    gaps(history){
+        const gaps = {1:history.length,2:history.length,3:history.length,4:history.length};
+        for (let n=1; n<=4; n++){
+            for (let i=history.length-1; i>=0; i--){
+                if (history[i] === n){ gaps[n] = history.length - 1 - i; break; }
+            }
+        }
+        return gaps;
+    }
+    patternSetBoost(history){
+        if (history.length < 8) return null;
+        const counts = {1:1,2:1,3:1,4:1};
+        let weightTotal = 4;
+        for (let len=Math.min(8, history.length-1); len>=3; len--){
+            const tail = history.slice(-len).join(',');
+            for (let i=0; i<=history.length-len-1; i++){
+                if (history.slice(i, i+len).join(',') === tail){
+                    const next = history[i+len];
+                    if (next){
+                        const w = len / 3;
+                        counts[next] += w;
+                        weightTotal += w;
+                    }
+                }
+            }
+        }
+        const p = {1:counts[1]/weightTotal,2:counts[2]/weightTotal,3:counts[3]/weightTotal,4:counts[4]/weightTotal};
+        return Utils.setScoresFromNumberProbs(p);
+    }
+    scoreSets(numberScores, history, reliability=0.55){
+        const p = Utils.normalizeScores(numberScores);
+        const base = Utils.setScoresFromNumberProbs(p);
+        const regime = Utils.detectRegime(history);
+        const freq = this.recentFreq(history, Math.min(CONFIG.RECENT_WINDOW, Math.max(12, history.length)));
+        const gaps = this.gaps(history);
+        const pattern = this.patternSetBoost(history) || base;
+        const out = {};
+        const learnedWeight = Utils.clamp((history.length - CONFIG.MIN_HISTORY_FOR_PREDICTION) / 90, 0.08, 0.26) * reliability;
+        Utils.candidateSets().forEach(set => {
+            const stat = this.stats[set.key] || {ema:0.75,total:0};
+            const missing = set.missing;
+            const missingHotRisk = Utils.clamp(freq[missing] * 1.35, 0, 0.45);
+            const gapRisk = Utils.clamp((gaps[missing] - 3) / 18, 0, 0.40);
+            let regimeSignal;
+            if (regime === 'trend' || regime === 'repeating') {
+                regimeSignal = Utils.clamp(base[set.key] - missingHotRisk*0.55 + (freq[missing] < 0.10 ? 0.05 : 0), 0.45, 0.98);
+            } else if (regime === 'mean_reversion' || regime === 'chaos' || regime === 'breakout') {
+                regimeSignal = Utils.clamp(base[set.key] - gapRisk*0.45 - missingHotRisk*0.20, 0.45, 0.98);
+            } else {
+                regimeSignal = Utils.clamp(base[set.key] - missingHotRisk*0.35 - gapRisk*0.20, 0.45, 0.98);
+            }
+            const learned = Utils.clamp(stat.ema || 0.75, 0.45, 0.97);
+            const raw = base[set.key]*0.50 + pattern[set.key]*0.18 + regimeSignal*(0.32-learnedWeight) + learned*learnedWeight;
+            out[set.key] = Utils.clamp(raw, 0.45, 0.98);
+        });
+        const ranking = Utils.candidateSets().map(set => ({...set, score: out[set.key]})).sort((a,b)=>b.score-a.score || a.key.localeCompare(b.key));
+        return {scores: out, bestKey: ranking[0].key, bestScore: ranking[0].score, secondScore: ranking[1].score, margin: ranking[0].score - ranking[1].score, ranking};
+    }
+    update(actual, setScores){
+        Utils.candidateSets().forEach(set => {
+            const stat = this.stats[set.key];
+            const ok = set.nums.includes(actual);
+            const pred = Utils.clamp(setScores?.[set.key] ?? 0.75, 0.001, 0.999);
+            stat.total++;
+            if (ok) stat.correct++;
+            const lr = stat.total < 40 ? 0.10 : 0.045;
+            stat.ema = stat.ema*(1-lr) + (ok ? 1 : 0)*lr;
+            stat.brier = stat.brier*0.92 + ((pred - (ok ? 1 : 0)) ** 2)*0.08;
+        });
+    }
+    exportState(){ return JSON.parse(JSON.stringify(this.stats)); }
+    importState(stats){
+        if (!stats || typeof stats !== 'object') return;
+        Utils.candidateSets().forEach(set => {
+            if (stats[set.key]) this.stats[set.key] = {...this.stats[set.key], ...stats[set.key]};
+        });
+    }
+}
+
+// ====================== PREDICTION ENGINE TONG ======================
 class PredictionEngine {
     constructor(algorithms, weightEngine){
         this.algorithms = algorithms;
@@ -531,6 +873,8 @@ class PredictionEngine {
         this.bayesian = new BayesianEngine();
         this.hmm = new HiddenMarkovModel();
         this.patternDB = new PatternDatabase();
+        this.setEngine = new CandidateSetEngine();
+        this.edgeLearner = new EdgeExclusionLearner();
         this.cache = new Map();
     }
     ensemble(history){
@@ -538,103 +882,152 @@ class PredictionEngine {
         let totalWeight = 0;
         for (let algo of this.algorithms){
             if (!algo.enabled) continue;
-            const scores = algo.predict(history);
-            const norm = Utils.normalizeScores(scores);
+            const scores = Utils.blendUniform(algo.predict(history));
             const w = algo.weight;
-            for (let n=1; n<=4; n++) final[n] += norm[n] * w;
+            for (let n=1; n<=4; n++) final[n] += scores[n] * w;
             totalWeight += w;
         }
         if (totalWeight) for (let n=1; n<=4; n++) final[n] /= totalWeight;
         else return {1:0.25,2:0.25,3:0.25,4:0.25};
-        return final;
+        return Utils.blendUniform(final, 0.03);
+    }
+    regimeMix(regime){
+        const regimeWeights = {
+            trend:          {ensemble:0.34, markov:0.28, bayesian:0.12, pattern:0.18, hmm:0.08},
+            chaos:          {ensemble:0.40, markov:0.12, bayesian:0.24, pattern:0.10, hmm:0.14},
+            alternating:    {ensemble:0.24, markov:0.24, bayesian:0.15, pattern:0.27, hmm:0.10},
+            repeating:      {ensemble:0.26, markov:0.20, bayesian:0.14, pattern:0.30, hmm:0.10},
+            mean_reversion: {ensemble:0.35, markov:0.14, bayesian:0.26, pattern:0.14, hmm:0.11},
+            transition:     {ensemble:0.30, markov:0.16, bayesian:0.29, pattern:0.14, hmm:0.11},
+            breakout:       {ensemble:0.25, markov:0.18, bayesian:0.34, pattern:0.12, hmm:0.11},
+            neutral:        {ensemble:0.38, markov:0.18, bayesian:0.22, pattern:0.12, hmm:0.10}
+        };
+        return regimeWeights[regime] || regimeWeights.neutral;
     }
     predict(history){
         if (history.length < CONFIG.MIN_HISTORY_FOR_PREDICTION) return null;
-        const cacheKey = history.slice(-20).join(',');
+        const cacheKey = history.length + ':' + history.slice(-24).join(',') + ':' + this.algorithms.map(a=>a.weight.toFixed(4)).join('|');
         if (this.cache.has(cacheKey)) return this.cache.get(cacheKey);
-        
-        let scores = this.ensemble(history);
-        
+        const ensembleScores = this.ensemble(history);
         const order = MarkovEngine.adaptiveOrder(history);
-        const markovScores = MarkovEngine.predict(history, order);
-        
+        const markovScores = Utils.blendUniform(MarkovEngine.predict(history, order), 0.05);
         const bayesianScores = this.bayesian.predict(history);
-        
-        const patternScores = this.patternDB.getPrediction(history, 5);
-        
+        const patternScores = this.patternDB.getPrediction(history, 8);
         const hmmScores = this.hmm.predict(history);
-        
         const regime = Utils.detectRegime(history);
-        const regimeWeights = {
-            'trend': {ensemble:0.2, markov:0.4, bayesian:0.1, pattern:0.2, hmm:0.1},
-            'chaos': {ensemble:0.3, markov:0.1, bayesian:0.3, pattern:0.2, hmm:0.1},
-            'alternating': {ensemble:0.1, markov:0.3, bayesian:0.2, pattern:0.3, hmm:0.1},
-            'repeating': {ensemble:0.2, markov:0.2, bayesian:0.2, pattern:0.3, hmm:0.1},
-            'mean_reversion': {ensemble:0.3, markov:0.2, bayesian:0.2, pattern:0.2, hmm:0.1},
-            'transition': {ensemble:0.2, markov:0.2, bayesian:0.3, pattern:0.2, hmm:0.1},
-            'breakout': {ensemble:0.1, markov:0.2, bayesian:0.4, pattern:0.2, hmm:0.1},
-            'neutral': {ensemble:0.3, markov:0.2, bayesian:0.2, pattern:0.2, hmm:0.1}
-        };
-        const w = regimeWeights[regime] || regimeWeights.neutral;
+        const w = this.regimeMix(regime);
         const combined = {1:0,2:0,3:0,4:0};
-        const mix = (target, src, weight) => { for(let n=1;n<=4;n++) target[n] += src[n]*weight; };
-        mix(combined, scores, w.ensemble);
-        mix(combined, markovScores, w.markov);
-        mix(combined, bayesianScores, w.bayesian);
-        if (patternScores) mix(combined, patternScores, w.pattern);
-        mix(combined, hmmScores, w.hmm);
-        
-        const total = combined[1]+combined[2]+combined[3]+combined[4];
-        if (total) for (let n=1;n<=4;n++) combined[n]/=total;
-        
-        const mc = MonteCarloEngine.simulate(combined);
-        const set123 = combined[1]+combined[2]+combined[3];
-        const set234 = combined[2]+combined[3]+combined[4];
-        let predSet = set123 > set234 ? '1-2-3' : '2-3-4';
-        const diff = Math.abs(set123-set234);
-        let confidence = (diff / (set123+set234+0.0001))*100;
-        if (confidence < 25) {
-            predSet = mc.set123 > mc.set234 ? '1-2-3' : '2-3-4';
-            confidence = Math.abs(mc.set123-mc.set234)*100;
+        const mix = (src, weight) => { for(let n=1;n<=4;n++) combined[n] += src[n]*weight; };
+        mix(ensembleScores, w.ensemble);
+        mix(markovScores, w.markov);
+        mix(bayesianScores, w.bayesian);
+        mix(patternScores || {1:0.25,2:0.25,3:0.25,4:0.25}, w.pattern);
+        mix(hmmScores, w.hmm);
+        let normalized = Utils.blendUniform(combined, CONFIG.PROBABILITY_SMOOTHING);
+        const reliability = this.weightEngine.reliability();
+        const setEval = this.setEngine.scoreSets(normalized, history, reliability);
+        const edgeEval = this.edgeLearner.predict(normalized, history, regime);
+        const sourceVotes = [];
+        const voteFromScores = (label, src, weight=1) => {
+            const key = Utils.predSetFromScores(src);
+            sourceVotes.push({label, key, weight});
+        };
+        voteFromScores('ensemble', ensembleScores, 1.05);
+        voteFromScores('markov', markovScores, 0.95);
+        voteFromScores('bayes', bayesianScores, 1.00);
+        voteFromScores('hmm', hmmScores, 0.80);
+        if (patternScores) voteFromScores('pattern', patternScores, 1.15);
+        sourceVotes.push({label:'edge', key:edgeEval.bestKey, weight:1.25});
+        const voteScore = {'1-2-3':0,'1-2-4':0,'2-3-4':0};
+        let voteTotal = 0;
+        sourceVotes.forEach(v=>{ voteScore[v.key] += v.weight; voteTotal += v.weight; });
+        const consensusKey = Object.entries(voteScore).sort((a,b)=>b[1]-a[1])[0][0];
+        const consensus = voteTotal ? voteScore[consensusKey]/voteTotal : 1/3;
+        const edgeWeight = Utils.clamp(CONFIG.EDGE_EXCLUSION_WEIGHT * edgeEval.strength, 0.06, CONFIG.EDGE_EXCLUSION_WEIGHT);
+        const consensusWeight = Utils.clamp(CONFIG.CONSENSUS_WEIGHT * consensus, 0.025, CONFIG.CONSENSUS_WEIGHT);
+        const setScores = {};
+        Utils.candidateSets().forEach(set=>{
+            const consensusScore = set.key === consensusKey ? 0.86 : 0.70;
+            const raw = setEval.scores[set.key]*(1-edgeWeight-consensusWeight) + edgeEval.setScores[set.key]*edgeWeight + consensusScore*consensusWeight;
+            setScores[set.key] = Utils.clamp(raw, 0.45, 0.985);
+        });
+        const setRanking = Utils.candidateSets().map(set=>({...set, score:setScores[set.key], missRisk:edgeEval.risk[set.missing]})).sort((a,b)=>b.score-a.score || a.key.localeCompare(b.key));
+        const predSet = setRanking[0].key;
+        const selectedProb = setScores[predSet];
+        const margin = Math.max(0, setRanking[0].score - setRanking[1].score);
+        const decisiveSignal = Math.max(normalized[1], normalized[3], normalized[4]) - Math.min(normalized[1], normalized[3], normalized[4]);
+        const signalScore = Utils.clamp((margin/0.055)*0.42 + (consensus-1/3)*0.62 + reliability*0.18 + decisiveSignal*0.45, 0, 1);
+        let signalLabel = 'YẾU - NÊN QUAN SÁT';
+        let signalClass = 'weak';
+        let playAdvice = '3 bộ đang sát điểm, không nên tin tuyệt đối bộ #1.';
+        if (signalScore >= 0.66 && margin >= CONFIG.MIN_STRONG_MARGIN && consensus >= 0.50) {
+            signalLabel = 'MẠNH - ƯU TIÊN BỘ #1';
+            signalClass = 'strong';
+            playAdvice = 'Bộ #1 có đồng thuận AI và khoảng cách đủ tốt.';
+        } else if (signalScore >= 0.43 && margin >= 0.010) {
+            signalLabel = 'VỪA - ĐI NHẸ';
+            signalClass = 'medium';
+            playAdvice = 'Có tín hiệu nhưng chưa đủ mạnh, nên giảm kỳ vọng.';
         }
-        
-        const result = { scores:combined, predSet, confidence, set123, set234, mc };
+        let confidence = (selectedProb*0.66 + reliability*0.08 + margin*1.05 + decisiveSignal*0.08 + consensus*0.12 + signalScore*0.10) * 100;
+        if (signalClass === 'weak') confidence = Math.min(confidence, 68);
+        if (signalClass === 'medium') confidence = Math.min(confidence, 82);
+        confidence = Utils.clamp(confidence, 50, 97);
+        const mc = MonteCarloEngine.simulate(normalized);
+        const result = { scores:normalized, predSet, confidence, setScores, setRanking, selectedProb, set123:setScores['1-2-3'], set124:setScores['1-2-4'], set234:setScores['2-3-4'], mc, order, regime, margin, reliability, decisiveSignal, edgeRisk:edgeEval.risk, edgeStrength:edgeEval.strength, consensus, consensusKey, signalScore, signalLabel, signalClass, playAdvice };
         this.cache.set(cacheKey, result);
-        if (this.cache.size > 1000) this.cache.clear();
+        if (this.cache.size > 500) this.cache.clear();
         return result;
     }
     updateModels(history, actual){
+        const prior = history.length >= CONFIG.MIN_HISTORY_FOR_PREDICTION ? this.predict(history) : null;
+        if (prior && prior.setScores) this.setEngine.update(actual, prior.setScores);
+        if (prior) this.edgeLearner.update(history, actual, prior.predSet);
         this.bayesian.update(history, actual);
         this.patternDB.update(history, actual);
-        this.hmm.update(history);
+        this.hmm.update([...history, actual]);
+        this.cache.clear();
     }
 }
 
 // ====================== BACKTEST ENGINE ======================
 class BacktestEngine {
-    static run(history, predictionEngine){
+    static run(history){
         if (history.length < CONFIG.BACKTEST_MIN_SAMPLES) return null;
+        const algorithms = createAlgorithms();
+        const weightEngine = new AdaptiveWeightEngine(algorithms);
+        const engine = new PredictionEngine(algorithms, weightEngine);
         const results = [];
         for (let i=CONFIG.MIN_HISTORY_FOR_PREDICTION; i<history.length; i++){
             const train = history.slice(0,i);
             const actual = history[i];
-            const pred = predictionEngine.predict(train);
+            const pred = engine.predict(train);
             if (!pred) continue;
-            const correct = (pred.predSet==='1-2-3'&&[1,2,3].includes(actual))||
-                            (pred.predSet==='2-3-4'&&[2,3,4].includes(actual));
-            results.push({actual, pred:pred.predSet, correct, confidence:pred.confidence});
+            const correct = Utils.isSetCorrect(pred.predSet, actual);
+            const pWin = Utils.clamp(Utils.setProbability(pred.scores, pred.predSet), 0.001, 0.999);
+            const edge = (actual !== 2);
+            const edgeCorrect = edge ? correct : null;
+            const ranking = pred.setRanking ? pred.setRanking.map(x=>x.key+':'+(x.score*100).toFixed(1)).join(' > ') : pred.predSet;
+            results.push({actual, pred:pred.predSet, correct, confidence:pred.confidence, pWin, edge, edgeCorrect, ranking, brier:Utils.brierScore(pred.scores, actual), signalClass:pred.signalClass});
+            weightEngine.update(train, actual);
+            engine.updateModels(train, actual);
+            if (i % 20 === 0) weightEngine.prune();
         }
-        const total = results.length;
+        const total = results.length || 1;
         const correctCount = results.filter(r=>r.correct).length;
+        const edgeRows = results.filter(r=>r.edge);
+        const edgeTotal = edgeRows.length || 1;
+        const edgeCorrect = edgeRows.filter(r=>r.edgeCorrect).length;
         const accuracy = correctCount/total;
-        const precision = correctCount / (results.filter(r=>r.pred==='1-2-3').length || 1);
-        const recall = correctCount / (results.filter(r=>[1,2,3].includes(r.actual)).length || 1);
-        const f1 = 2*precision*recall/(precision+recall||1);
-        const logLoss = results.reduce((s,r)=>{
-            const p = r.confidence/100;
-            return s - (r.correct?Math.log2(p):Math.log2(1-p));
-        },0)/total;
-        return { accuracy, precision, recall, f1, logLoss, total };
+        const edgeAccuracy = edgeCorrect/edgeTotal;
+        const avgConfidence = results.reduce((s,r)=>s+r.confidence,0)/total;
+        const logLoss = results.reduce((s,r)=>s - (r.correct?Math.log(r.pWin):Math.log(1-r.pWin)),0)/total;
+        const brier = results.reduce((s,r)=>s+r.brier,0)/total;
+        const strongRows = results.filter(r=>r.signalClass==='strong');
+        const mediumRows = results.filter(r=>r.signalClass==='medium');
+        const weakRows = results.filter(r=>r.signalClass==='weak');
+        const rate = rows => rows.length ? rows.filter(r=>r.correct).length/rows.length : 0;
+        return { accuracy, edgeAccuracy, avgConfidence, logLoss, brier, total:results.length, edgeTotal:edgeRows.length, strongTotal:strongRows.length, strongAccuracy:rate(strongRows), mediumTotal:mediumRows.length, mediumAccuracy:rate(mediumRows), weakTotal:weakRows.length, weakAccuracy:rate(weakRows) };
     }
 }
 
@@ -647,8 +1040,10 @@ class UIManager {
             confFill: document.getElementById('confFill'),
             confText: document.getElementById('confText'),
             s1: document.getElementById('s1'), s2: document.getElementById('s2'), s3: document.getElementById('s3'), s4: document.getElementById('s4'),
-            mcBar123: document.getElementById('mcBar123'), mcBar234: document.getElementById('mcBar234'),
+            bar123: document.getElementById('bar123'), bar124: document.getElementById('bar124'), bar234: document.getElementById('bar234'),
+            setScore123: document.getElementById('setScore123'), setScore124: document.getElementById('setScore124'), setScore234: document.getElementById('setScore234'),
             mcInfo: document.getElementById('mcInfo'),
+            qualityText: document.getElementById('qualityText'), edgeInfo: document.getElementById('edgeInfo'),
             winCount: document.getElementById('winCount'), lossCount: document.getElementById('lossCount'), winRate: document.getElementById('winRate'),
             regimeDisplay: document.getElementById('regimeDisplay'),
             historyLog: document.getElementById('historyLog'),
@@ -660,15 +1055,26 @@ class UIManager {
         this.elements.histDisplay.textContent = history.length ? history.join(' ') : '—';
     }
     updatePrediction(prediction) {
-        const { scores, predSet, confidence, mc } = prediction;
+        const { scores, predSet, confidence, setScores, setRanking } = prediction;
         this.elements.predSet.textContent = predSet;
         this.elements.predSet.style.color = '#ff0';
         this.elements.confFill.style.width = Math.min(100, confidence) + '%';
         this.elements.confText.textContent = `Độ tin cậy: ${confidence.toFixed(1)}%`;
         for (let n=1; n<=4; n++) this.elements['s'+n].textContent = (scores[n]*100).toFixed(1)+'%';
-        this.elements.mcBar123.style.width = (mc.set123*100)+'%';
-        this.elements.mcBar234.style.width = (mc.set234*100)+'%';
-        this.elements.mcInfo.innerHTML = `Monte Carlo (100k): 1-2-3 ${(mc.set123*100).toFixed(1)}% | 2-3-4 ${(mc.set234*100).toFixed(1)}%`;
+        const rows = [ ['123','1-2-3'], ['124','1-2-4'], ['234','2-3-4'] ];
+        rows.forEach(([id,key]) => {
+            const val = Math.max(0, Math.min(100, (setScores?.[key] ?? 0) * 100));
+            this.elements['bar'+id].style.width = val.toFixed(1)+'%';
+            this.elements['setScore'+id].textContent = val.toFixed(1)+'%';
+        });
+        const ranking = (setRanking || []).map((r,i)=>`#${i+1} ${r.key} ${(r.score*100).toFixed(1)}%`).join(' | ');
+        this.elements.mcInfo.innerHTML = `AI xếp hạng bộ: ${ranking}`;
+        const cls = prediction.signalClass || 'medium';
+        this.elements.qualityText.className = 'quality-line quality-' + cls;
+        this.elements.qualityText.textContent = `Tín hiệu: ${prediction.signalLabel || '—'} · ${prediction.playAdvice || ''}`;
+        if (prediction.edgeRisk) {
+            this.elements.edgeInfo.innerHTML = `AI loại trừ: rủi ro ra 1 ${(prediction.edgeRisk[1]*100).toFixed(1)}% · ra 3 ${(prediction.edgeRisk[3]*100).toFixed(1)}% · ra 4 ${(prediction.edgeRisk[4]*100).toFixed(1)}% · đồng thuận ${(prediction.consensus*100).toFixed(0)}%`;
+        } else this.elements.edgeInfo.innerHTML = '';
     }
     updateStats(wins, losses, winRate, regime, streak) {
         this.elements.winCount.textContent = wins;
@@ -695,7 +1101,8 @@ class UIManager {
         let html = '<b>🔥 CHI TIẾT THUẬT TOÁN</b><br>';
         algorithms.forEach(a => {
             const acc = a.total ? (a.accuracyAll*100).toFixed(1) : '—';
-            html += `<span>${a.name}</span> w:${(a.weight*100).toFixed(1)}% acc30:${(a.accuracy30*100).toFixed(1)}% enabled:${a.enabled}<br>`;
+            const edge = a.edgeTotal ? (a.edgeCorrect/a.edgeTotal*100).toFixed(1) : '—';
+            html += `<span>${a.name}</span> w:${(a.weight*100).toFixed(1)}% skill:${(a.skill*100).toFixed(1)} edge:${edge}% on:${a.enabled}<br>`;
         });
         this.elements.algoDetail.innerHTML = html;
     }
@@ -716,26 +1123,41 @@ class FanTanApp {
         this.updateUI();
     }
     loadData() {
-        this.history = this.storage.load('fan_hist_v6', []);
-        const wl = this.storage.load('fan_wl_v6', {win:0, loss:0});
+        this.history = this.storage.loadAny(['fan_hist_v9','fan_hist_v8','fan_hist_v7','fan_hist_v6'], []);
+        const wl = this.storage.loadAny(['fan_wl_v9','fan_wl_v8','fan_wl_v7','fan_wl_v6'], {win:0, loss:0});
         this.wins = wl.win || 0;
         this.losses = wl.loss || 0;
-        const savedWeights = this.storage.load('fan_weights_v6', null);
-        if (savedWeights && savedWeights.length === this.algorithms.length) {
-            savedWeights.forEach((w,i)=> this.algorithms[i].weight = w);
+        const savedStats = this.storage.load('fan_algo_stats_v9', null) || this.storage.load('fan_algo_stats_v8', null) || this.storage.load('fan_algo_stats_v7', null);
+        if (savedStats) this.weightEngine.importState(savedStats);
+        else {
+            const savedWeights = this.storage.load('fan_weights_v6', null);
+            if (savedWeights && savedWeights.length === this.algorithms.length) savedWeights.forEach((w,i)=> this.algorithms[i].weight = w);
         }
+        this.rebuildModelsFromHistory();
+        const savedSetStats = this.storage.load('fan_set_stats_v9', null) || this.storage.load('fan_set_stats_v8', null);
+        if (savedSetStats) this.engine.setEngine.importState(savedSetStats);
+        const savedEdgeStats = this.storage.load('fan_edge_stats_v9', null);
+        if (savedEdgeStats) this.engine.edgeLearner.importState(savedEdgeStats);
     }
     saveData() {
-        this.storage.scheduleSave('fan_hist_v6', ()=> this.history);
-        this.storage.scheduleSave('fan_wl_v6', ()=> ({win:this.wins, loss:this.losses}));
-        this.storage.scheduleSave('fan_weights_v6', ()=> this.algorithms.map(a=>a.weight));
+        this.storage.scheduleSave('fan_hist_v9', ()=> this.history);
+        this.storage.scheduleSave('fan_wl_v9', ()=> ({win:this.wins, loss:this.losses}));
+        this.storage.scheduleSave('fan_weights_v9', ()=> this.algorithms.map(a=>a.weight));
+        this.storage.scheduleSave('fan_algo_stats_v9', ()=> this.weightEngine.exportState());
+        this.storage.scheduleSave('fan_set_stats_v9', ()=> this.engine.setEngine.exportState());
+        this.storage.scheduleSave('fan_edge_stats_v9', ()=> this.engine.edgeLearner.exportState());
+    }
+    rebuildModelsFromHistory() {
+        this.engine = new PredictionEngine(this.algorithms, this.weightEngine);
+        for (let i=1; i<this.history.length; i++){
+            this.engine.updateModels(this.history.slice(0,i), this.history[i]);
+        }
     }
     addNumber(num) {
         if (this.history.length >= CONFIG.MIN_HISTORY_FOR_PREDICTION) {
             const prediction = this.engine.predict(this.history);
             if (prediction) {
-                const correct = (prediction.predSet==='1-2-3'&&[1,2,3].includes(num))||
-                                (prediction.predSet==='2-3-4'&&[2,3,4].includes(num));
+                const correct = Utils.isSetCorrect(prediction.predSet, num);
                 if (correct) { this.wins++; this.consecutiveLosses=0; }
                 else { this.losses++; this.consecutiveLosses++; }
                 this.ui.addLogEntry(num, prediction.predSet, correct);
@@ -756,7 +1178,9 @@ class FanTanApp {
     }
     resetAll() {
         this.history = []; this.wins = 0; this.losses = 0; this.consecutiveLosses = 0;
-        this.algorithms.forEach(a=>{ a.total=0; a.correct=0; a.weight=1/this.algorithms.length; a.enabled=true; });
+        this.algorithms.forEach(a=>{ a.total=0; a.correct=0; a.weight=1/this.algorithms.length; a.enabled=true; a.skill=0.5; a.edgeTotal=0; a.edgeCorrect=0; });
+        this.weightEngine = new AdaptiveWeightEngine(this.algorithms);
+        this.engine = new PredictionEngine(this.algorithms, this.weightEngine);
         this.saveData();
         this.updateUI();
         document.getElementById('historyLog').innerHTML = '';
@@ -768,10 +1192,10 @@ class FanTanApp {
         if (this.algoDetailVisible) this.ui.updateAlgoDetail(this.algorithms);
     }
     runBacktest() {
-        if (this.history.length < CONFIG.BACKTEST_MIN_SAMPLES) { alert('Cần ít nhất 12 số!'); return; }
-        const result = BacktestEngine.run(this.history, this.engine);
+        if (this.history.length < CONFIG.BACKTEST_MIN_SAMPLES) { alert('Cần ít nhất 18 số!'); return; }
+        const result = BacktestEngine.run(this.history);
         if (result) {
-            alert(`Backtest: ${result.total} ván\nAccuracy: ${(result.accuracy*100).toFixed(1)}%\nPrecision: ${result.precision.toFixed(2)}\nRecall: ${result.recall.toFixed(2)}\nF1: ${result.f1.toFixed(2)}\nLogLoss: ${result.logLoss.toFixed(3)}`);
+            alert(`Backtest walk-forward: ${result.total} ván\nTỉ lệ thắng bộ: ${(result.accuracy*100).toFixed(1)}%\nMẫu phân biệt 1/3/4 đúng: ${(result.edgeAccuracy*100).toFixed(1)}% (${result.edgeTotal} mẫu)\nTín hiệu MẠNH: ${(result.strongAccuracy*100).toFixed(1)}% (${result.strongTotal} mẫu)\nTín hiệu VỪA: ${(result.mediumAccuracy*100).toFixed(1)}% (${result.mediumTotal} mẫu)\nTín hiệu YẾU: ${(result.weakAccuracy*100).toFixed(1)}% (${result.weakTotal} mẫu)\nĐộ tin cậy TB: ${result.avgConfidence.toFixed(1)}%\nBrier: ${result.brier.toFixed(3)}\nLogLoss: ${result.logLoss.toFixed(3)}`);
         }
     }
     updateUI() {
@@ -783,12 +1207,15 @@ class FanTanApp {
             const pred = this.engine.predict(this.history);
             if (pred) this.ui.updatePrediction(pred);
         } else {
-            ['predSet','confFill','confText','s1','s2','s3','s4','mcBar123','mcBar234','mcInfo'].forEach(id=>{
-                if (id==='predSet') this.ui.elements.predSet.textContent='—';
+            ['predSet','confFill','confText','qualityText','edgeInfo','s1','s2','s3','s4','bar123','bar124','bar234','setScore123','setScore124','setScore234','mcInfo'].forEach(id=>{
+                if (id==='predSet') this.ui.elements.predSet.textContent='-';
                 else if (id==='confFill') this.ui.elements.confFill.style.width='0%';
                 else if (id==='confText') this.ui.elements.confText.textContent='Độ tin cậy: —';
-                else if (id.startsWith('s')) this.ui.elements[id].textContent='—';
-                else if (id.includes('Bar')) this.ui.elements[id].style.width='50%';
+                else if (id==='qualityText') { this.ui.elements.qualityText.textContent='Tín hiệu: —'; this.ui.elements.qualityText.className='quality-line quality-medium'; }
+                else if (id==='edgeInfo') this.ui.elements.edgeInfo.innerHTML='';
+                else if (id.startsWith('s') && this.ui.elements[id]) this.ui.elements[id].textContent='—';
+                else if (id.startsWith('bar')) this.ui.elements[id].style.width='0%';
+                else if (id.startsWith('setScore')) this.ui.elements[id].textContent='--';
                 else if (id==='mcInfo') this.ui.elements.mcInfo.innerHTML='';
             });
         }
