@@ -1,1492 +1,401 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FAN‑TAN ULTIMATE v10.0 PREDICTION CORE | HeaNg[Black-Cyber]</title>
-    <style>
-        *{margin:0;padding:0;box-sizing:border-box;font-family:'Courier New',monospace}
-        body{background:#010314;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:1rem}
-        .container{max-width:950px;width:100%;background:#0a0a20;border:2px solid #ffd700;border-radius:22px;padding:1.5rem;box-shadow:0 0 60px #ffd70066}
-        .title{text-align:center;font-size:2.2rem;color:#ffd700;text-shadow:0 0 30px #ffd700;letter-spacing:2px}
-        .subtitle{text-align:center;font-size:0.85rem;color:#f0f;margin-bottom:1rem}
-        .row{display:flex;gap:1rem;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap}
-        .history-section{flex:2;min-width:220px}
-        .stats-section{flex:1;min-width:150px;background:#000;border:1px solid #ffd700;border-radius:12px;padding:0.6rem;text-align:center}
-        .history-box{background:#000;border:1px solid #ffd700;border-radius:8px;padding:0.6rem;min-height:2.8rem;color:#0f0;word-break:break-all;max-height:100px;overflow-y:auto;font-size:1rem}
-        .input-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0.8rem;margin:1.2rem 0}
-        .num-btn{padding:1.2rem;font-size:2.2rem;font-weight:bold;background:#12123a;border:2px solid #ffd700;color:#ffd700;border-radius:16px;cursor:pointer;transition:0.2s;text-shadow:0 0 15px #ffd700}
-        .num-btn:hover{background:#ffd70033;transform:scale(1.08);box-shadow:0 0 25px #ffd700}
-        .prediction-area{background:#000;border:2px solid #f0f;border-radius:18px;padding:1.2rem;margin:1.2rem 0;text-align:center}
-        .pred-set{font-size:3rem;font-weight:bold;color:#ff0;text-shadow:0 0 30px #ff0;margin:0.5rem 0}
-        .conf-bar{height:12px;background:#222;border-radius:8px;overflow:hidden;margin:0.5rem 0}
-        .conf-fill{height:100%;background:linear-gradient(90deg,#ffd700,#f0f);width:0%;transition:width 0.5s}
-        .scores{display:grid;grid-template-columns:repeat(4,1fr);gap:0.6rem;margin-top:0.6rem}
-        .score-cell{background:#12122e;padding:0.4rem;border-radius:8px;border:1px solid #ffd70055;font-size:1.1rem}
-        .action-row{display:flex;gap:0.6rem;justify-content:center;margin-top:0.6rem;flex-wrap:wrap}
-        .action-btn{background:#1a1a3a;border:1px solid #f0f;color:#f0f;border-radius:8px;padding:0.5rem 1.2rem;cursor:pointer;font-size:0.85rem;transition:0.2s}
-        .action-btn:hover{background:#2a2a5a;box-shadow:0 0 12px #f0f}
-        .win-loss{font-size:1.2rem;font-weight:bold;margin:0.3rem 0}
-        .win{color:#0f0}.loss{color:#f00}.draw{color:#888}
-        .log-entry{display:flex;justify-content:space-between;align-items:center;padding:0.2rem 0;border-bottom:1px solid #222;font-size:0.8rem}
-        .log-num{color:#0ff;width:35px;font-weight:bold}
-        .log-pred{color:#ffaa00;flex:1;text-align:center}
-        .log-result{width:70px;text-align:right;font-weight:bold}
-        .regime-badge{display:inline-block;padding:4px 14px;border-radius:24px;font-size:0.85rem;font-weight:bold;margin-top:6px}
-        .regime-trend{background:#1a3a1a;color:#8bc34a}
-        .regime-chaos{background:#3a1a1a;color:#ff8a80}
-        .regime-neutral{background:#1a2a3a;color:#90caf9}
-        .algo-detail{max-height:180px;overflow-y:auto;background:#000;border:1px solid #555;border-radius:8px;padding:0.5rem;margin-top:0.6rem;font-size:0.7rem;text-align:left;color:#ccc;display:none}
-        .algo-detail span{display:inline-block;width:70px}
-        .footer{text-align:center;color:#444;font-size:0.7rem;margin-top:1.2rem}
-        .set-bars{display:grid;gap:8px;margin-top:10px;text-align:left}
-        .set-row{display:grid;grid-template-columns:70px 1fr 56px;gap:8px;align-items:center;color:#ddd;font-size:0.78rem}
-        .set-track{background:#222;border-radius:12px;height:10px;overflow:hidden;border:1px solid #333}
-        .set-fill{display:block;height:100%;background:linear-gradient(90deg,#0f0,#ff0);width:0%;transition:width 0.5s}
-        .set-score{text-align:right;color:#ffd700;font-weight:bold}
-        .set-fill.alt{background:linear-gradient(90deg,#0ff,#ff0)}
-        .set-fill.hot{background:linear-gradient(90deg,#f0f,#ff0)}
-        .streak-indicator{font-size:0.9rem;margin-top:5px;color:#ff8888}
-
-        .quality-line{margin-top:6px;font-size:0.82rem;font-weight:bold;padding:5px 8px;border-radius:10px;border:1px solid #333;background:#090916}
-        .quality-strong{color:#00ff99;border-color:#00ff9966;box-shadow:0 0 10px #00ff9933}
-        .quality-medium{color:#ffd966;border-color:#ffd96666}
-        .quality-weak{color:#ff7777;border-color:#ff777766}
-        .quality-skip{color:#ff5555;border-color:#ff555566;box-shadow:0 0 12px #ff555533;background:#170608}
-        .edge-line{font-size:0.74rem;color:#aaa;margin-top:4px;line-height:1.35}
-        .guard-line{margin-top:6px;font-size:0.78rem;padding:6px 8px;border-radius:10px;border:1px solid #333;background:#050511;color:#bbb;line-height:1.35}
-        .guard-play{border-color:#00ff9966;color:#8fffd0}
-        .guard-caution{border-color:#ffd96666;color:#ffd966}
-        .guard-skip{border-color:#ff555566;color:#ff8888;background:#170608}
-        .decision-badge{display:inline-block;margin-top:6px;padding:6px 14px;border-radius:18px;font-size:0.9rem;font-weight:bold;border:1px solid #444}
-        .decision-play{color:#00ff99;border-color:#00ff9966;box-shadow:0 0 10px #00ff9933}
-        .decision-skip{color:#ff5555;border-color:#ff555566;box-shadow:0 0 12px #ff555533}
-        .core-line{font-size:0.74rem;color:#7ee7ff;margin-top:5px;line-height:1.35;border-top:1px dashed #333;padding-top:5px}
-        .core-hot{color:#00ffcc}.core-cold{color:#ffcc66}
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>FAN-TAN GOD MODE v20.0 PRECISION</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,sans-serif}
+body{background:#0b0b1a;color:#e0e0e0;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:12px}
+.container{width:100%;max-width:620px;background:#10102a;border:2px solid #f0c040;border-radius:20px;padding:16px;box-shadow:0 0 50px #f0c04033}
+.title{text-align:center;font-size:1.8rem;color:#f0c040;text-shadow:0 0 15px #f0c040;font-weight:bold;margin-bottom:4px}
+.sub{text-align:center;font-size:.8rem;color:#c084fc;margin-bottom:12px}
+.notice{background:#1b0f20;border:1px solid #c084fc55;border-radius:8px;padding:6px;font-size:.75rem;text-align:center;margin-bottom:10px}
+.history-box{background:#000;border:1px solid #f0c040;border-radius:12px;padding:8px;margin-bottom:10px}
+textarea{width:100%;height:70px;background:#0a0a14;color:#00e676;border:none;resize:none;font-size:1rem;padding:6px;outline:none}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:12px}
+.btn-row button{background:#1e1e3a;border:1px solid #c084fc;color:#c084fc;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:.8rem;transition:all .2s}
+.btn-row button:hover{background:#2a2a5a;box-shadow:0 0 8px #c084fc}
+.num-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}
+.num-btns button{padding:20px;font-size:2.2rem;font-weight:bold;background:#12123a;border:2px solid #f0c040;color:#f0c040;border-radius:16px;cursor:pointer;text-shadow:0 0 10px #f0c040}
+.num-btns button:active{background:#2a2a5a;transform:scale(.95)}
+.prediction-box{background:#000;border:2px solid #c084fc;border-radius:16px;padding:14px;margin:12px 0;text-align:center}
+.pred-best{font-size:2.8rem;font-weight:bold;color:#ffd700;text-shadow:0 0 20px #ffd700;margin:4px 0}
+.conf-bar{height:14px;background:#222;border-radius:8px;overflow:hidden;margin:8px 0}
+.conf-fill{height:100%;background:linear-gradient(90deg,#f0c040,#c084fc);width:0%;transition:width .3s}
+.set-table{width:100%;border-collapse:collapse;margin:8px 0;font-size:.85rem}
+.set-table th{color:#f0c040;border-bottom:1px solid #333;padding:4px}
+.set-table td{padding:4px;text-align:center;border-bottom:1px solid #222}
+.set-table .highlight{background:#1e1e3a;color:#ffd700;font-weight:bold}
+.log-box{background:#000;border:1px solid #f0c040;border-radius:10px;padding:8px;max-height:150px;overflow:auto;margin-top:10px;font-size:.78rem}
+.log-entry{display:grid;grid-template-columns:40px 1fr 60px;gap:6px;padding:2px 0;border-bottom:1px solid #222}
+.win{color:#00e676}.loss{color:#ff5252}
+.footer{text-align:center;color:#555;font-size:.7rem;margin-top:10px}
+</style>
 </head>
 <body>
 <div class="container">
-    <div class="title">🏆 FAN‑TAN ULTIMATE v10.0 PREDICTION CORE 🏆</div>
-    <div class="subtitle">3 SET AI · PREDICTION CORE · EDGE MARKOV · MULTI-WINDOW · AUTO-SKIP</div>
+  <div class="title">FAN-TAN GOD MODE v20.0</div>
+  <div class="sub">DỰ ĐOÁN CHÍNH XÁC NHẤT • ỔN ĐỊNH TUYỆT ĐỐI • AUTO PHÂN TÍCH</div>
+  <div class="notice">
+    Dán lịch sử (chỉ số 1-2-3-4) – tool <b>tự động học & dự đoán</b>. Cùng một dữ liệu luôn cho <b>cùng một kết quả</b>.
+  </div>
 
-    <div class="row">
-        <div class="history-section">
-            <label style="color:#ffd700;font-weight:bold;">📜 LỊCH SỬ</label>
-            <div class="history-box" id="histDisplay">—</div>
-        </div>
-        <div class="stats-section">
-            <div style="color:#ffd700;font-weight:bold;">📊 THỐNG KÊ</div>
-            <div class="win-loss">✅ Thắng: <span id="winCount">0</span></div>
-            <div class="win-loss">❌ Thua: <span id="lossCount">0</span></div>
-            <div class="win-loss">⏸ Bỏ: <span id="skipCount">0</span></div>
-            <div>Tỉ lệ theo lượt đánh: <span id="winRate">0%</span></div>
-            <div style="font-size:0.8rem;margin-top:4px;" id="regimeDisplay" class="regime-badge regime-neutral">⚖️ Trung tính</div>
-            <div id="streakIndicator" class="streak-indicator"></div>
-        </div>
-    </div>
+  <div class="history-box">
+    <textarea id="historyInput" placeholder="1 3 2 4 4 1 2 3 ..."></textarea>
+  </div>
 
-    <div class="input-grid">
-        <button class="num-btn" onclick="app.addNumber(1)">1</button>
-        <button class="num-btn" onclick="app.addNumber(2)">2</button>
-        <button class="num-btn" onclick="app.addNumber(3)">3</button>
-        <button class="num-btn" onclick="app.addNumber(4)">4</button>
-    </div>
+  <div class="btn-row">
+    <button onclick="app.forceAnalyze()">📊 PHÂN TÍCH NGAY</button>
+    <button onclick="app.loadSample()">📋 NẠP MẪU</button>
+    <button onclick="app.undo()">↩ UNDO</button>
+    <button onclick="app.reset()">🗑 RESET</button>
+    <button onclick="app.clearCache()">🧹 XOÁ CACHE</button>
+  </div>
 
-    <div class="action-row">
-        <button class="action-btn" onclick="app.undoLast()">↩ Undo</button>
-        <button class="action-btn" onclick="app.resetAll()">🗑 Reset</button>
-        <button class="action-btn" onclick="app.clearStorage()">🧹 Xoá cache</button>
-        <button class="action-btn" onclick="app.toggleAlgoDetail()">📊 Chi tiết thuật toán</button>
-        <button class="action-btn" onclick="app.runBacktest()">⚡ Backtest</button>
-    </div>
+  <div class="num-btns">
+    <button onclick="app.addNumber(1)">1</button>
+    <button onclick="app.addNumber(2)">2</button>
+    <button onclick="app.addNumber(3)">3</button>
+    <button onclick="app.addNumber(4)">4</button>
+  </div>
 
-    <div class="prediction-area">
-        <div style="color:#ffd700;font-weight:bold;">🔮 DỰ ĐOÁN BỘ BA</div>
-        <div class="pred-set" id="predSet">—</div>
-        <div class="conf-bar"><div class="conf-fill" id="confFill"></div></div>
-        <div id="confText" style="font-size:0.9rem;color:#ddd;">Độ tin cậy: —</div>
-        <div id="qualityText" class="quality-line quality-medium">Tín hiệu: —</div>
-        <div id="decisionBadge" class="decision-badge decision-play">Quyết định: —</div>
-        <div id="guardInfo" class="guard-line guard-caution">Bộ lọc: —</div>
-        <div id="edgeInfo" class="edge-line"></div>
-        <div id="coreInfo" class="core-line"></div>
-        <div class="scores">
-            <div class="score-cell">❶ <span id="s1">—</span></div>
-            <div class="score-cell">❷ <span id="s2">—</span></div>
-            <div class="score-cell">❸ <span id="s3">—</span></div>
-            <div class="score-cell">❹ <span id="s4">—</span></div>
-        </div>
-        <div class="set-bars">
-            <div class="set-row"><span>1-2-3</span><div class="set-track"><span id="bar123" class="set-fill alt"></span></div><span id="setScore123" class="set-score">--</span></div>
-            <div class="set-row"><span>1-2-4</span><div class="set-track"><span id="bar124" class="set-fill"></span></div><span id="setScore124" class="set-score">--</span></div>
-            <div class="set-row"><span>2-3-4</span><div class="set-track"><span id="bar234" class="set-fill hot"></span></div><span id="setScore234" class="set-score">--</span></div>
-        </div>
-        <div id="mcInfo" style="font-size:0.75rem;color:#aaa;margin-top:6px;"></div>
-    </div>
+  <div class="prediction-box">
+    <div style="color:#f0c040;font-weight:bold">DỰ ĐOÁN TỐI ƯU</div>
+    <div class="pred-best" id="bestSetDisplay">-</div>
+    <div class="conf-bar"><div class="conf-fill" id="confFill"></div></div>
+    <div id="confText" style="font-size:.8rem">Độ tin cậy: -</div>
+    <div id="kellyText" style="font-size:.8rem;color:#ffaa00">Kelly gợi ý: -</div>
+    <div id="decisionBadge" style="margin-top:4px;display:inline-block;padding:4px 10px;border-radius:12px;font-size:.8rem;font-weight:bold;background:#1e1e3a;color:#f0c040">SẴN SÀNG</div>
+    <table class="set-table">
+      <tr><th>Bộ số</th><th>Xác suất</th><th>Ưu tiên</th></tr>
+      <tr><td>1-2-3</td><td id="set123">-</td><td id="rank123">-</td></tr>
+      <tr><td>2-3-4</td><td id="set234">-</td><td id="rank234">-</td></tr>
+      <tr><td>1-2-4</td><td id="set124">-</td><td id="rank124">-</td></tr>
+      <tr><td>1-3-4</td><td id="set134">-</td><td id="rank134">-</td></tr>
+    </table>
+  </div>
 
-    <div style="margin-top:1rem;">
-        <strong style="color:#ffd700;">📋 LỊCH SỬ DỰ ĐOÁN</strong>
-        <div id="historyLog" style="max-height:220px;overflow-y:auto;background:#000;border:1px solid #ffd700;border-radius:10px;padding:0.5rem;font-size:0.8rem;"></div>
-    </div>
+  <div class="log-box">
+    <div style="color:#f0c040;font-weight:bold;margin-bottom:4px">📋 LỊCH SỬ DỰ ĐOÁN</div>
+    <div id="logContent">Chưa có dữ liệu</div>
+  </div>
 
-    <div id="algoDetail" class="algo-detail"></div>
-    <div class="footer">HeaNg[Black-Cyber] · v10.0 PREDICTION CORE · Meta Edge AI + Multi-Window Guard</div>
+  <div class="footer">HeaNg[Black-Cyber] • FAN-TAN GOD MODE v20.0 PRECISION • DETERMINISTIC ENSEMBLE</div>
 </div>
 
 <script>
-// ====================== CONFIG ======================
-const CONFIG = {
-    MAX_HISTORY: 700,
-    MIN_HISTORY_FOR_PREDICTION: 10,
-    BACKTEST_MIN_SAMPLES: 18,
-    MONTE_CARLO_SAMPLES: 20000,
-    MONTE_CARLO_MULTI_STEP: 1,
-    STORAGE_VERSION: 10,
-    STORAGE_PREFIX: 'fan_v10_',
-    DEBOUNCE_SAVE_MS: 250,
-    DEV_MODE: false,
-    PRUNE_ACC_THRESHOLD: 0.42,
-    PRUNE_MIN_SAMPLES: 70,
-    PRUNE_RECOVER_THRESHOLD: 0.52,
-    LEARNING_RATE: 0.16,
-    WEIGHT_DECAY: 0.92,
-    WEIGHT_FLOOR: 0.0025,
-    SOFTMAX_TEMPERATURE: 0.115,
-    PROBABILITY_SMOOTHING: 0.07,
-    EDGE_LEARN_MULTIPLIER: 1.55,
-    CONFIDENCE_SHRINK: 0.82,
-    PATTERN_MIN_HITS: 2,
-    RECENT_WINDOW: 36,
-    EDGE_EXCLUSION_WEIGHT: 0.30,
-    CONSENSUS_WEIGHT: 0.10,
-    MIN_STRONG_MARGIN: 0.022,
-    MIN_PLAY_CONFIDENCE: 63,
-    AUTO_SKIP_ENABLED: true,
-    GUARD_MIN_MARGIN: 0.014,
-    GUARD_MIN_CONSENSUS: 0.43,
-    GUARD_MAX_DRIFT: 0.145,
-    GUARD_MIN_EDGE_SAMPLES: 8,
-    GUARD_TIE_PENALTY: 0.20,
-    CORE_META_WEIGHT: 0.135,
-    CORE_EDGE_WINDOWS: [8, 16, 32, 64],
-    CORE_PATTERN_MIN_HITS: 2,
-    CORE_MARKOV_EDGE_WEIGHT: 0.34,
-    CORE_GAP_WEIGHT: 0.22,
-    CORE_WINDOW_WEIGHT: 0.28,
-    CORE_PATTERN_WEIGHT: 0.16
+'use strict';
+
+const CFG = {
+  MAX_HISTORY: 1500,
+  MIN_HISTORY: 8,
+  STORAGE_HIST: 'fan_hist_v20',
+  STORAGE_MODEL: 'fan_model_v20',
+  STORAGE_LOG: 'fan_log_v20',
+  AUTO_DEBOUNCE: 500
 };
 
-// ====================== UTILS ======================
-const Utils = {
-    normalizeScores(s) {
-        const sum = (s[1]||0)+(s[2]||0)+(s[3]||0)+(s[4]||0);
-        if (!sum) return {1:0.25,2:0.25,3:0.25,4:0.25};
-        return {1:s[1]/sum,2:s[2]/sum,3:s[3]/sum,4:s[4]/sum};
-    },
-    entropy(h) {
-        if(!h.length) return 0;
-        const f={1:0,2:0,3:0,4:0}; h.forEach(v=>f[v]++);
-        let e=0; for(let n=1;n<=4;n++){ const p=f[n]/h.length; if(p>0) e-=p*Math.log2(p); }
-        return e;
-    },
-    variance(probs) {
-        const mean = (probs[1]+probs[2]+probs[3]+probs[4])/4;
-        return probs.reduce((s,p)=>s+(p-mean)**2,0)/4;
-    },
-    skewness(probs) {
-        const mean = (probs[1]+probs[2]+probs[3]+probs[4])/4;
-        const variance = this.variance(probs);
-        if (!variance) return 0;
-        const m3 = probs.reduce((s,p)=>s+(p-mean)**3,0)/4;
-        return m3 / Math.pow(variance, 1.5);
-    },
-    kurtosis(probs) {
-        const mean = (probs[1]+probs[2]+probs[3]+probs[4])/4;
-        const variance = this.variance(probs);
-        if (!variance) return 0;
-        const m4 = probs.reduce((s,p)=>s+(p-mean)**4,0)/4;
-        return m4 / (variance**2) - 3;
-    },
-    autocorrelation(hist, lag=1) {
-        if (hist.length <= lag) return 0;
-        let n = hist.length - lag;
-        let mean = hist.reduce((a,b)=>a+b,0)/hist.length;
-        let num=0, den=0;
-        for (let i=0; i<n; i++) {
-            num += (hist[i]-mean)*(hist[i+lag]-mean);
-        }
-        for (let i=0; i<hist.length; i++) den += (hist[i]-mean)**2;
-        return den ? num/den : 0;
-    },
-    detectRegime(h) {
-        if(h.length<12) return 'neutral';
-        const r=h.slice(-12); let ms=1,cur=1, changes=0;
-        for(let i=1;i<r.length;i++){ if(r[i]===r[i-1]){cur++;ms=Math.max(ms,cur);} else {cur=1; changes++;} }
-        const ent=this.entropy(r);
-        const autocorr = this.autocorrelation(r,1);
-        if(ms>=6) return 'trend';
-        if(changes>=8 && ent>1.9) return 'chaos';
-        if(changes>=8) return 'alternating';
-        if(autocorr > 0.3 && ent<1.8) return 'repeating';
-        if(ent<1.6) return 'mean_reversion';
-        if(ms>=3 && changes<=4) return 'transition';
-        if(ent>1.85) return 'breakout';
-        return 'neutral';
-    },
-    clamp(x,min,max){ return Math.max(min, Math.min(max, x)); },
-    safeProb(x){ return this.clamp(Number.isFinite(x) ? x : 0.25, 0.001, 0.999); },
-    blendUniform(scores, smoothing=CONFIG.PROBABILITY_SMOOTHING) {
-        const p = this.normalizeScores(scores || {1:0.25,2:0.25,3:0.25,4:0.25});
-        const out = {};
-        for (let n=1; n<=4; n++) out[n] = p[n]*(1-smoothing) + 0.25*smoothing;
-        return this.normalizeScores(out);
-    },
-    candidateSets() {
-        return [
-            {key:'1-2-3', nums:[1,2,3], missing:4},
-            {key:'1-2-4', nums:[1,2,4], missing:3},
-            {key:'2-3-4', nums:[2,3,4], missing:1}
-        ];
-    },
-    candidateByKey(key) {
-        return this.candidateSets().find(s => s.key === key) || this.candidateSets()[0];
-    },
-    setScoresFromNumberProbs(scores) {
-        const p = this.normalizeScores(scores);
-        const out = {};
-        this.candidateSets().forEach(set => {
-            out[set.key] = set.nums.reduce((sum,n)=>sum+p[n], 0);
-        });
-        return out;
-    },
-    bestSetFromSetScores(setScores) {
-        const rows = this.candidateSets().map(set => ({...set, score: Number(setScores[set.key]) || 0}));
-        rows.sort((a,b) => b.score - a.score || a.key.localeCompare(b.key));
-        return rows[0];
-    },
-    predSetFromScores(scores) {
-        return this.bestSetFromSetScores(this.setScoresFromNumberProbs(scores)).key;
-    },
-    setProbability(scores, predSet) {
-        return this.setScoresFromNumberProbs(scores)[predSet] ?? 0.75;
-    },
-    missingNumberForSet(predSet) {
-        return this.candidateByKey(predSet).missing;
-    },
-    isSetCorrect(predSet, actual) {
-        return this.candidateByKey(predSet).nums.includes(actual);
-    },
-    brierScore(scores, actual) {
-        const p = this.normalizeScores(scores);
-        let s = 0;
-        for (let n=1; n<=4; n++) s += (p[n] - (n===actual ? 1 : 0)) ** 2;
-        return s / 4;
-    },
-    debounce(fn,delay){ let t; return(...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),delay); }; },
-    range(n){ return Array.from({length:n},(_,i)=>i); },
-    setUnion(a,b){ return new Set([...a,...b]); }
+// ========== UTILS ==========
+const U = {
+  nums: [1,2,3,4],
+  sets: [
+    {key:'1-2-3', nums:[1,2,3], missing:4},
+    {key:'2-3-4', nums:[2,3,4], missing:1},
+    {key:'1-2-4', nums:[1,2,4], missing:3},
+    {key:'1-3-4', nums:[1,3,4], missing:2}
+  ],
+  prob(){ return {1:.25,2:.25,3:.25,4:.25}; },
+  normalize(p){let s=0;for(let n of this.nums) s+=Math.max(0,p[n]||0); if(!s) return this.prob(); let o={}; for(let n of this.nums) o[n]=Math.max(0,p[n]||0)/s; return o;},
+  mix(list){let o=this.prob(); let tw=0; for(let it of list){ if(!it||!it.p) continue; let w=Math.max(0,it.w||0); let p=this.normalize(it.p); tw+=w; for(let n of this.nums) o[n]+=p[n]*w; } if(tw) for(let n of this.nums) o[n]/=tw; return this.normalize(o);},
+  setScores(p){p=this.normalize(p); let o={}; for(let s of this.sets) o[s.key]=s.nums.reduce((a,n)=>a+p[n],0); return o;},
+  bestSet(ss){return this.sets.map(s=>({...s,score:ss[s.key]||0})).sort((a,b)=>b.score-a.score)[0];},
+  correct(key,actual){let s=this.sets.find(x=>x.key===key); return s?s.nums.includes(actual):false;},
+  streak(h){if(!h.length) return {num:null,len:0}; let last=h[h.length-1],c=0; for(let i=h.length-1;i>=0&&h[i]===last;i--)c++; return {num:last,len:c};},
+  entropy(h){let f={1:0,2:0,3:0,4:0};for(let v of h)f[v]++;let e=0;for(let n of this.nums){let p=f[n]/h.length;if(p>0)e-=p*Math.log2(p);}return e;},
+  toText(h){return h.join(' ');},
+  parse(txt){return (String(txt||'').match(/[1-4]/g)||[]).map(Number).slice(-CFG.MAX_HISTORY);},
+  hash(h){return h.reduce((a,v)=>a*31+v,0);}
 };
 
-// ====================== STORAGE ======================
-class StorageManager {
-    constructor(ver){ this.version=ver; this.saveDebounced=Utils.debounce(this._saveAll.bind(this), CONFIG.DEBOUNCE_SAVE_MS); }
-    load(key,fb=null){ try{ let d=localStorage.getItem(key); return d?JSON.parse(d):fb; }catch(e){ return fb; } }
-    loadAny(keys,fb=null){ for (const key of keys){ const val=this.load(key, null); if (val!==null) return val; } return fb; }
-    save(key,data){ try{ localStorage.setItem(key,JSON.stringify(data)); }catch(e){} }
-    scheduleSave(key,getFn){ this._pending=this._pending||{}; this._pending[key]=getFn; this.saveDebounced(); }
-    _saveAll(){ if(!this._pending) return; Object.entries(this._pending).forEach(([k,fn])=>this.save(k,fn())); this._pending={}; }
-    clearAll(){ ['fan_hist_v10','fan_wl_v10','fan_weights_v10','fan_algo_stats_v10','fan_set_stats_v10','fan_edge_stats_v10','fan_guard_stats_v10','fan_hist_v9','fan_wl_v9','fan_weights_v9','fan_algo_stats_v9','fan_set_stats_v9','fan_edge_stats_v9','fan_hist_v8','fan_wl_v8','fan_weights_v8','fan_algo_stats_v8','fan_set_stats_v8','fan_hist_v7','fan_wl_v7','fan_weights_v7','fan_algo_stats_v7','fan_hist_v6','fan_wl_v6','fan_weights_v6','fan_algo_stats_v6'].forEach(k=>localStorage.removeItem(k)); }
-}
+// ========== DETERMINISTIC SUB-MODELS ==========
+function freqModel(w,decay){return h=>{let p={1:0,2:0,3:0,4:0};let r=h.slice(-w);for(let i=0;i<r.length;i++)p[r[i]]+=Math.pow(decay,r.length-1-i);return U.normalize(p);};}
+function markovModel(order,w=200,s=.3){return h=>{if(h.length<=order)return U.prob();let key=h.slice(-order).join(',');let cnt={1:s,2:s,3:s,4:s};let start=Math.max(0,h.length-w);for(let i=start;i<=h.length-order-1;i++)if(h.slice(i,i+order).join(',')===key)cnt[h[i+order]]++;return U.normalize(cnt);};}
+function patternModel(len,tol,decay){return h=>{if(h.length<=len)return U.prob();let tail=h.slice(-len),cnt={1:.05,2:.05,3:.05,4:.05};for(let i=0;i<=h.length-len-1;i++){let sim=0;for(let j=0;j<len;j++)if(h[i+j]===tail[j])sim++;if(sim>=len-tol)cnt[h[i+len]]+=(sim/len)*Math.pow(decay,h.length-len-i);}return U.normalize(cnt);};}
+function gapModel(pow=1.2){return h=>{let p={1:0,2:0,3:0,4:0};for(let n of U.nums){let gap=0;for(let i=h.length-1;i>=0;i--)if(h[i]===n){gap=h.length-1-i;break;} p[n]=Math.pow(gap+1,pow);}return U.normalize(p);};}
+function streakModel(mode){return h=>{let st=U.streak(h),p={1:.05,2:.05,3:.05,4:.05};if(!st.num)return U.prob();if(mode==='follow')p[st.num]+=st.len>=2?4+st.len:1.1;else if(mode==='soft'){p[st.num]+=st.len>=2?2.2:0.8;for(let n of U.nums)if(n!==st.num)p[n]+=.35;}else{for(let n of U.nums)if(n!==st.num)p[n]+=st.len>=4?2.2:.45;}return U.normalize(p);};}
 
-// ====================== ALGORITHM CLASS ======================
-class Algorithm {
-    constructor(id,name,category,fn){ 
-        this.id=id; this.name=name; this.category=category; this._predict=fn;
-        this.total=0; this.correct=0; this.weight=0.01; this.accuracy30=0; this.accuracy100=0; this.accuracyAll=0;
-        this.recentWin=0; this.recentLose=0; this.confidence=0.5; this.importance=1;
-        this.skill=0.5; this.brier=0.25; this.logScore=1.386;
-        this.edgeTotal=0; this.edgeCorrect=0;
-        this.enabled=true;
-    }
-    predict(h){ return this._predict(h); }
-    updateStats(correct){
-        this.total++; 
-        if(correct) this.correct++;
-        this.accuracyAll = this.total ? this.correct/this.total : 0;
-    }
-    updateRolling(window, results){
-        if(results.length < window) return;
-        const slice = results.slice(-window);
-        const correctCount = slice.filter(r=>r).length;
-        if(window===30) this.accuracy30 = correctCount / window;
-        else if(window===100) this.accuracy100 = correctCount / window;
-    }
-    setConfidence(conf){ this.confidence = conf; }
-}
-
-// ====================== 61 THUẬT TOÁN (chuyển về xác suất) ======================
-function createAlgorithms(){
-    const algoList = [
-        new Algorithm(1,'basicFreq','frequency',h=>{let f={1:0,2:0,3:0,4:0};h.forEach(v=>f[v]++);let t=h.length||1,s={};for(let i=1;i<=4;i++)s[i]=f[i]/t;return s;}),
-        new Algorithm(2,'recentTrend','frequency',h=>{let r=h.slice(-6),s={1:0,2:0,3:0,4:0};r.forEach((v,i)=>s[v]+=1+i*0.3);let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
-        new Algorithm(3,'timeWeightedFreq','frequency',h=>{let s={1:0,2:0,3:0,4:0},l=h.length;for(let i=0;i<l;i++)s[h[i]]+=Math.pow(0.94,l-1-i);let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
-        new Algorithm(4,'weightedMA','frequency',h=>{if(h.length<5)return{1:0.25,2:0.25,3:0.25,4:0.25};let s={1:0,2:0,3:0,4:0},n=Math.min(10,h.length),r=h.slice(-n);for(let i=0;i<r.length;i++)s[r[i]]+=(i+1)*1.2;let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
-        new Algorithm(5,'weightedRecentFreq','frequency',h=>{if(h.length<5)return{1:0.25,2:0.25,3:0.25,4:0.25};let s={1:0,2:0,3:0,4:0},n=Math.min(8,h.length),r=h.slice(-n);for(let i=0;i<r.length;i++)s[r[i]]+=(1+i*0.4)*2.5;let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
-        new Algorithm(6,'markov1','markov',h=>{if(h.length<2)return{1:0.25,2:0.25,3:0.25,4:0.25};let t={1:{1:0,2:0,3:0,4:0},2:{1:0,2:0,3:0,4:0},3:{1:0,2:0,3:0,4:0},4:{1:0,2:0,3:0,4:0}};for(let i=0;i<h.length-1;i++)t[h[i]][h[i+1]]++;let l=h[h.length-1],x=t[l],s=0;for(let i=1;i<=4;i++)s+=x[i];if(!s)return{1:0.25,2:0.25,3:0.25,4:0.25};let o={};for(let i=1;i<=4;i++)o[i]=x[i]/s;return o;}),
-        new Algorithm(7,'markov2','markov',h=>{if(h.length<3)return{1:0.25,2:0.25,3:0.25,4:0.25};let last2=h[h.length-2]+','+h[h.length-1],trans={};for(let i=0;i<h.length-2;i++){let k=h[i]+','+h[i+1];if(!trans[k])trans[k]={1:0,2:0,3:0,4:0};trans[k][h[i+2]]++;}let np=trans[last2];if(!np)return{1:0.25,2:0.25,3:0.25,4:0.25};let total=np[1]+np[2]+np[3]+np[4];if(!total)return{1:0.25,2:0.25,3:0.25,4:0.25};let s={};for(let i=1;i<=4;i++)s[i]=np[i]/total;return s;}),
-        new Algorithm(8,'markov3','markov',h=>{if(h.length<4)return{1:0.25,2:0.25,3:0.25,4:0.25};let last3=h[h.length-3]+','+h[h.length-2]+','+h[h.length-1],trans={};for(let i=0;i<h.length-3;i++){let k=h[i]+','+h[i+1]+','+h[i+2];if(!trans[k])trans[k]={1:0,2:0,3:0,4:0};trans[k][h[i+3]]++;}let np=trans[last3];if(!np)return{1:0.25,2:0.25,3:0.25,4:0.25};let total=np[1]+np[2]+np[3]+np[4];if(!total)return{1:0.25,2:0.25,3:0.25,4:0.25};let s={};for(let i=1;i<=4;i++)s[i]=np[i]/total;return s;}),
-        new Algorithm(9,'hotPair','pair',h=>{if(h.length<2)return{1:0.25,2:0.25,3:0.25,4:0.25};let last=h[h.length-1],pc={};for(let i=0;i<h.length-1;i++){let k=h[i]+'-'+h[i+1];pc[k]=(pc[k]||0)+1;}let s={1:0,2:0,3:0,4:0};for(let n=1;n<=4;n++)s[n]=Math.min(22,(pc[last+'-'+n]||0)*4.5);let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
-        new Algorithm(10,'hotTriple','pair',h=>{if(h.length<3)return{1:0.25,2:0.25,3:0.25,4:0.25};let last2=h[h.length-2]+','+h[h.length-1],pc={};for(let i=0;i<h.length-2;i++){let k=h[i]+','+h[i+1];if(!pc[k])pc[k]={1:0,2:0,3:0,4:0};pc[k][h[i+2]]++;}let np=pc[last2];if(!np)return{1:0.25,2:0.25,3:0.25,4:0.25};let total=np[1]+np[2]+np[3]+np[4];if(!total)return{1:0.25,2:0.25,3:0.25,4:0.25};let s={};for(let i=1;i<=4;i++)s[i]=np[i]/total;return s;}),
-        new Algorithm(11,'pairContinuation','pattern',h=>{if(h.length<3)return{1:0.25,2:0.25,3:0.25,4:0.25};let last=h[h.length-1],prev=h[h.length-2],s={1:0,2:0,3:0,4:0};if(last===prev)s[last]+=25;else s[last]+=10;let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
-        new Algorithm(12,'delayedReaction','pattern',h=>{if(h.length<5)return{1:0.25,2:0.25,3:0.25,4:0.25};let last2=h.slice(-2),s={1:0,2:0,3:0,4:0};for(let i=0;i<h.length-4;i++){if(h[i]===last2[0]&&h[i+1]===last2[1]){let next=h[i+2];if(next!==undefined)s[next]+=15;}}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
-        new Algorithm(13,'cyclePrediction','cycle',h=>{if(h.length<6)return{1:0.25,2:0.25,3:0.25,4:0.25};let bestCycle=null,bestScore=0;for(let c=2;c<=Math.min(10,Math.floor(h.length/2));c++){let matches=0,checks=Math.min(30,h.length-c);for(let i=0;i<checks;i++)if(h[h.length-1-i]===h[h.length-1-c-i])matches++;let score=checks?matches/checks:0;if(score>bestScore&&score>0.55){bestScore=score;bestCycle=c;}}let s={1:0.25,2:0.25,3:0.25,4:0.25};if(bestCycle)s[h[h.length-bestCycle]]+=22*bestScore;let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
-        new Algorithm(14,'cycleExtended','cycle',h=>{if(h.length<8)return{1:0.25,2:0.25,3:0.25,4:0.25};let bestCycle=null,bestScore=0;for(let c=2;c<=Math.min(15,Math.floor(h.length/2));c++){let matches=0,checks=Math.min(40,h.length-c);for(let i=0;i<checks;i++)if(h[h.length-1-i]===h[h.length-1-c-i])matches++;let score=checks?matches/checks:0;if(score>bestScore&&score>0.5){bestScore=score;bestCycle=c;}}let s={1:0.25,2:0.25,3:0.25,4:0.25};if(bestCycle)s[h[h.length-bestCycle]]+=25*bestScore;let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
-        new Algorithm(15,'fourierCycle','cycle',h=>{if(h.length<8)return{1:0.25,2:0.25,3:0.25,4:0.25};let bestCycle=null,bestScore=0;for(let c=3;c<=Math.min(12,Math.floor(h.length/2));c++){let matches=0,total=0;for(let i=0;i<h.length-c;i++){if(h[i]===h[i+c])matches++;total++;}let score=total?matches/total:0;if(score>bestScore&&score>0.55){bestScore=score;bestCycle=c;}}let s={1:0.25,2:0.25,3:0.25,4:0.25};if(bestCycle&&h.length>=bestCycle)s[h[h.length-bestCycle]]+=28*bestScore;let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
-        new Algorithm(16,'fourierExtend','cycle',h=>{if(h.length<12)return{1:0.25,2:0.25,3:0.25,4:0.25};let bestCycle=null,bestScore=0;for(let c=3;c<=Math.min(20,Math.floor(h.length/2));c++){let matches=0,total=0;for(let i=0;i<h.length-c;i++){if(h[i]===h[i+c])matches++;total++;}let score=total?matches/total:0;if(score>bestScore&&score>0.55){bestScore=score;bestCycle=c;}}let s={1:0.25,2:0.25,3:0.25,4:0.25};if(bestCycle&&h.length>=bestCycle)s[h[h.length-bestCycle]]+=35*bestScore;let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
-        new Algorithm(17,'patternPrediction','pattern',h=>{if(h.length<4)return{1:0.25,2:0.25,3:0.25,4:0.25};let last=h[h.length-1],prev=h[h.length-2],pprev=h[h.length-3],s={1:0,2:0,3:0,4:0};if(last===prev){s[last]+=28;if(prev===pprev)s[last]+=15;}else{if(prev===pprev&&prev!==last)s[prev]+=20;if(h.length>=5&&h[h.length-5]===h[h.length-3]&&h[h.length-4]===h[h.length-2])s[h[h.length-4]]+=18;}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
-        new Algorithm(18,'knnPattern','pattern',h=>{const pl=5;if(h.length<pl+1)return{1:0.25,2:0.25,3:0.25,4:0.25};let lp=h.slice(-pl),s={1:0,2:0,3:0,4:0};for(let i=0;i<=h.length-pl-1;i++){let c=h.slice(i,i+pl),m=0;for(let j=0;j<pl;j++)if(c[j]===lp[j])m++;if(m>=pl-1){let ni=i+pl;if(ni<h.length)s[h[ni]]+=(m/pl)*25;}}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
-        new Algorithm(19,'patternMatch7','pattern',h=>{if(h.length<8)return{1:0.25,2:0.25,3:0.25,4:0.25};let w=h.slice(-7),s={1:0,2:0,3:0,4:0};for(let i=0;i<=h.length-8;i++){let seg=h.slice(i,i+7),sim=0;for(let j=0;j<7;j++)if(seg[j]===w[j])sim++;if(sim>=5){let ni=i+7;if(ni<h.length)s[h[ni]]+=(sim/7)*32;}}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
-        new Algorithm(20,'alternatingPair','alternating',h=>{if(h.length<4)return{1:0.25,2:0.25,3:0.25,4:0.25};let last=h[h.length-1],slast=h[h.length-2],s={1:0,2:0,3:0,4:0};for(let i=0;i<h.length-3;i++){if(h[i]===slast&&h[i+1]===last)s[h[i+2]]+=18;}if(h.length>=4){let a=h[h.length-4],b=h[h.length-3],c=h[h.length-2],d=h[h.length-1];if(a===c&&b===d&&a!==b)s[a]+=22;}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
-        new Algorithm(21,'pairReversal','reversal',h=>{if(h.length<4)return{1:0.25,2:0.25,3:0.25,4:0.25};let last=h[h.length-1],prev=h[h.length-2],s={1:0,2:0,3:0,4:0},pat=prev+','+last;for(let i=0;i<h.length-2;i++){if(h[i]+','+h[i+1]===pat){let next=h[i+2];if(next!==undefined)s[next]+=18;}}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
-        new Algorithm(22,'streakReversal','reversal',h=>{if(h.length<4)return{1:0.25,2:0.25,3:0.25,4:0.25};let last=h[h.length-1],streak=0;for(let i=h.length-1;i>=0&&h[i]===last;i--)streak++;let s={1:0,2:0,3:0,4:0};if(streak>=2){let others=[1,2,3,4].filter(n=>n!==last);others.forEach(o=>s[o]+=15+streak*2);}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
-        new Algorithm(23,'streakMomentum','streak',h=>{if(h.length<6)return{1:0.25,2:0.25,3:0.25,4:0.25};let last=h[h.length-1],cnt=0;for(let i=h.length-1;i>=0&&h[i]===last;i--)cnt++;let s={1:0,2:0,3:0,4:0};if(cnt>=1)s[last]=cnt>=2?30:18;let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
-        new Algorithm(24,'streakContinuation','streak',h=>{if(h.length<2)return{1:0.25,2:0.25,3:0.25,4:0.25};let last=h[h.length-1],prev=h[h.length-2],s={1:0,2:0,3:0,4:0};if(last===prev){let streak=2;for(let i=h.length-3;i>=0&&h[i]===last;i--)streak++;s[last]+=Math.min(40,15+streak*4);}else s[last]+=8;let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
-        new Algorithm(25,'extremeStreakBoost','streak',h=>{if(h.length<4)return{1:0.25,2:0.25,3:0.25,4:0.25};let last=h[h.length-1],streak=0;for(let i=h.length-1;i>=0&&h[i]===last;i--)streak++;let s={1:0,2:0,3:0,4:0};if(streak>=4)s[last]+=Math.min(50,20+streak*5);else if(streak>=2)s[last]+=15;let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
-        new Algorithm(26,'adaptiveMomentum','momentum',h=>{if(h.length<6)return{1:0.25,2:0.25,3:0.25,4:0.25};let s={1:0,2:0,3:0,4:0},last=h[h.length-1],streak=0;for(let i=h.length-1;i>=0&&h[i]===last;i--)streak++;if(streak>=2){let prev=h[h.length-streak-1]||0,prevStreak=0;for(let i=h.length-streak-2;i>=0&&h[i]===prev;i--)prevStreak++;if(prevStreak<streak)s[last]+=35;else{let missing=[1,2,3,4].filter(n=>n!==last);missing.forEach(m=>s[m]+=15);}}else{let recent=h.slice(-4);for(let n=1;n<=4;n++)if(recent.includes(n))s[n]+=10;}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
-        new Algorithm(27,'trendStrength','trend',h=>{if(h.length<12)return{1:0.25,2:0.25,3:0.25,4:0.25};let recent=h.slice(-12),changes=0;for(let i=1;i<recent.length;i++)if(recent[i]!==recent[i-1])changes++;let s={1:0.25,2:0.25,3:0.25,4:0.25},avg=changes/11;if(avg<0.4){let l6=recent.slice(-6),f={1:0,2:0,3:0,4:0};l6.forEach(v=>f[v]++);let maxF=Math.max(...Object.values(f));for(let n=1;n<=4;n++)if(f[n]===maxF)s[n]+=30;}else if(avg>0.7){let l6=recent.slice(-6),missing=[1,2,3,4].filter(n=>!l6.includes(n));missing.forEach(m=>s[m]+=20);}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
-        new Algorithm(28,'trendReversal','reversal',h=>{if(h.length<4)return{1:0.25,2:0.25,3:0.25,4:0.25};let r=h.slice(-3);if(r[0]!==r[1]&&r[1]!==r[2]&&r[0]!==r[2]){let missing=[1,2,3,4].find(x=>!r.includes(x));let s={1:0,2:0,3:0,4:0};s[missing]=22;let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}return{1:0.25,2:0.25,3:0.25,4:0.25};}),
-        new Algorithm(29,'breakoutReversal','reversal',h=>{if(h.length<5)return{1:0.25,2:0.25,3:0.25,4:0.25};let last=h[h.length-1],prev=h[h.length-2],streak=1;for(let i=h.length-2;i>=0&&h[i]===prev;i--)streak++;let s={1:0.25,2:0.25,3:0.25,4:0.25};if(streak>=4&&last!==prev){let recent=h.slice(-6);for(let n=1;n<=4;n++)if(!recent.includes(n))s[n]+=20;for(let n=1;n<=4;n++)if(n!==prev)s[n]+=12;}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
-        new Algorithm(30,'reversalAfterStreak','reversal',h=>{if(h.length<4)return{1:0.25,2:0.25,3:0.25,4:0.25};let last=h[h.length-1],streak=0;for(let i=h.length-1;i>=0&&h[i]===last;i--)streak++;let s={1:0.25,2:0.25,3:0.25,4:0.25};if(streak>=3){let others=[1,2,3,4].filter(n=>n!==last);others.forEach(o=>s[o]+=20);if(h.length>=6){let before=h.slice(-6-streak,-streak);if(before.length){let freq={};before.forEach(v=>freq[v]=(freq[v]||0)+1);let maxF=Math.max(...Object.values(freq));for(let n=1;n<=4;n++)if(freq[n]===maxF)s[n]+=12;}}}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
-        new Algorithm(31,'streakBreaker','streak',h=>{if(h.length<4)return{1:0.25,2:0.25,3:0.25,4:0.25};let last=h[h.length-1],streak=0;for(let i=h.length-1;i>=0&&h[i]===last;i--)streak++;let s={1:0.25,2:0.25,3:0.25,4:0.25};if(streak>=3){let others=[1,2,3,4].filter(n=>n!==last);others.forEach(o=>s[o]+=25+streak*3);}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
-        new Algorithm(32,'trendAcceleration','trend',h=>{if(h.length<6)return{1:0.25,2:0.25,3:0.25,4:0.25};let recent=h.slice(-6),changes=0;for(let i=1;i<recent.length;i++)if(recent[i]!==recent[i-1])changes++;let s={1:0.25,2:0.25,3:0.25,4:0.25};if(changes<=2){let last=h[h.length-1];s[last]+=25;}else if(changes>=4){let last=h[h.length-1],others=[1,2,3,4].filter(n=>n!==last);others.forEach(o=>s[o]+=15);}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
-        new Algorithm(33,'streakBreak','streak',h=>{if(h.length<10)return{1:0.25,2:0.25,3:0.25,4:0.25};let lastSeen={1:null,2:null,3:null,4:null},len=h.length;for(let i=len-1;i>=0;i--)if(lastSeen[h[i]]===null)lastSeen[h[i]]=i;let s={1:0,2:0,3:0,4:0};for(let n=1;n<=4;n++){let steps=lastSeen[n]!==null?len-1-lastSeen[n]:len;s[n]=Math.min(30,steps*2.5);}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
-        new Algorithm(34,'adaptiveAbsence','absence',h=>{if(h.length<8)return{1:0.25,2:0.25,3:0.25,4:0.25};let lastSeen={1:null,2:null,3:null,4:null},len=h.length;for(let i=len-1;i>=0;i--)if(lastSeen[h[i]]===null)lastSeen[h[i]]=i;let s={1:0,2:0,3:0,4:0};for(let n=1;n<=4;n++){let steps=lastSeen[n]!==null?len-1-lastSeen[n]:len;s[n]=Math.min(50,Math.pow(steps,1.5)*1.2);}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
-        new Algorithm(35,'gapDetector','absence',h=>{if(h.length<6)return{1:0.25,2:0.25,3:0.25,4:0.25};let lastSeen={1:-1,2:-1,3:-1,4:-1};for(let i=h.length-1;i>=0;i--)if(lastSeen[h[i]]===-1)lastSeen[h[i]]=i;let s={1:0,2:0,3:0,4:0},len=h.length;for(let n=1;n<=4;n++){let gap=lastSeen[n]===-1?len:len-1-lastSeen[n];s[n]=Math.min(40,gap*gap*0.4);}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
-        new Algorithm(36,'meanReversion','reversion',h=>{if(h.length<8)return{1:0.25,2:0.25,3:0.25,4:0.25};let lastSeen={1:-1,2:-1,3:-1,4:-1};for(let i=h.length-1;i>=0;i--)if(lastSeen[h[i]]===-1)lastSeen[h[i]]=i;let s={1:0,2:0,3:0,4:0},len=h.length;for(let n=1;n<=4;n++){let steps=lastSeen[n]===-1?len:len-1-lastSeen[n];if(steps>=3)s[n]+=Math.min(35,steps*2.5);}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
-        new Algorithm(37,'harmonicReturn','reversion',h=>{if(h.length<10)return{1:0.25,2:0.25,3:0.25,4:0.25};let freq={1:0,2:0,3:0,4:0},total=h.length;h.forEach(v=>freq[v]++);let s={1:0.25,2:0.25,3:0.25,4:0.25};for(let n=1;n<=4;n++){let rate=freq[n]/total;if(rate<0.20)s[n]+=(0.25-rate)*100;}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
-        new Algorithm(38,'entropyBased','entropy',h=>{if(h.length<8)return{1:0.25,2:0.25,3:0.25,4:0.25};let freq={1:0,2:0,3:0,4:0};h.forEach(v=>freq[v]++);let total=h.length,entropy=0;for(let n=1;n<=4;n++){let p=freq[n]/total;if(p>0)entropy-=p*Math.log2(p);}let s={1:0.25,2:0.25,3:0.25,4:0.25};if(entropy>1.8){let recent=h.slice(-6),missing=[1,2,3,4].filter(n=>!recent.includes(n));missing.forEach(m=>s[m]+=25);}else{let recent=h.slice(-6),hot={};recent.forEach(v=>hot[v]=(hot[v]||0)+1);let maxF=Math.max(...Object.values(hot));for(let n=1;n<=4;n++)if(hot[n]===maxF)s[n]+=30;}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
-        new Algorithm(39,'bayesianInference','statistical',h=>{if(h.length<6)return{1:0.25,2:0.25,3:0.25,4:0.25};let prior={1:0.25,2:0.25,3:0.25,4:0.25},likelihood={1:0,2:0,3:0,4:0},total=h.length;h.forEach(v=>likelihood[v]++);for(let n=1;n<=4;n++)likelihood[n]/=total;let post={};for(let n=1;n<=4;n++)post[n]=prior[n]*likelihood[n];let lastSeen={};for(let i=h.length-1;i>=0;i--){if(!(h[i]in lastSeen))lastSeen[h[i]]=h.length-1-i;}for(let n=1;n<=4;n++){let steps=lastSeen[n]!==undefined?lastSeen[n]:h.length;post[n]+=Math.min(15,steps*0.5);}let sum=post[1]+post[2]+post[3]+post[4];if(sum)for(let i=1;i<=4;i++)post[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return post;}),
-        new Algorithm(40,'gradientBoost','ensemble',h=>{if(h.length<6)return{1:0.25,2:0.25,3:0.25,4:0.25};let base={1:0,2:0,3:0,4:0},f={1:0,2:0,3:0,4:0};h.forEach(v=>f[v]++);let t=h.length||1;for(let i=1;i<=4;i++)base[i]=f[i]/t;let recent={1:0,2:0,3:0,4:0},r=h.slice(-6);r.forEach((v,i)=>recent[v]+=1+i*0.3);let sumRec=recent[1]+recent[2]+recent[3]+recent[4];if(sumRec)for(let i=1;i<=4;i++)recent[i]/=sumRec;let m1={1:0.25,2:0.25,3:0.25,4:0.25};if(h.length>=2){let trans={1:{1:0,2:0,3:0,4:0},2:{1:0,2:0,3:0,4:0},3:{1:0,2:0,3:0,4:0},4:{1:0,2:0,3:0,4:0}};for(let i=0;i<h.length-1;i++)trans[h[i]][h[i+1]]++;let last=h[h.length-1],x=trans[last],sumM=0;for(let i=1;i<=4;i++)sumM+=x[i];if(sumM)for(let i=1;i<=4;i++)m1[i]=x[i]/sumM;}let s={};for(let n=1;n<=4;n++)s[n]=base[n]*0.6+recent[n]*0.4+m1[n]*0.2;let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
-        new Algorithm(41,'randomForestMimic','ensemble',h=>{if(h.length<8)return{1:0.25,2:0.25,3:0.25,4:0.25};let s={1:0,2:0,3:0,4:0},last3=h.slice(-3),freq3={1:0,2:0,3:0,4:0};last3.forEach(v=>freq3[v]++);let max3=Math.max(...Object.values(freq3));for(let n=1;n<=4;n++)if(freq3[n]===max3)s[n]+=20;if(h.length>=5){let patt=h.slice(-5),matches={};for(let i=0;i<=h.length-6;i++){let seg=h.slice(i,i+5),sim=0;for(let j=0;j<5;j++)if(seg[j]===patt[j])sim++;if(sim>=4){let next=h[i+5];matches[next]=(matches[next]||0)+1;}}let maxMatch=Math.max(...Object.values(matches).concat([0]));for(let n=1;n<=4;n++)if(matches[n]===maxMatch)s[n]+=25;}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
-        new Algorithm(42,'lstmLike','deep',h=>{if(h.length<10)return{1:0.25,2:0.25,3:0.25,4:0.25};let s={1:0,2:0,3:0,4:0},window=h.slice(-8);for(let i=0;i<=h.length-8;i++){let seg=h.slice(i,i+8),sim=0;for(let j=0;j<8;j++)if(seg[j]===window[j])sim++;if(sim>=6){let ni=i+8;if(ni<h.length)s[h[ni]]+=(sim/8)*30;}}let recent=h.slice(-4);for(let n=1;n<=4;n++)if(recent.includes(n))s[n]+=5;let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
-        new Algorithm(43,'volatilityAdjust','volatility',h=>{if(h.length<8)return{1:0.25,2:0.25,3:0.25,4:0.25};let recent=h.slice(-8),freq={1:0,2:0,3:0,4:0};recent.forEach(v=>freq[v]++);let maxF=Math.max(...Object.values(freq)),s={1:0,2:0,3:0,4:0};for(let n=1;n<=4;n++)if(freq[n]===maxF)s[n]+=30;let last=h[h.length-1],others=[1,2,3,4].filter(n=>n!==last);if(freq[last]<2)others.forEach(o=>s[o]+=10);let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
-        new Algorithm(44,'antiStreak','streak',h=>{if(h.length<6)return{1:0.25,2:0.25,3:0.25,4:0.25};let last=h[h.length-1],streak=0;for(let i=h.length-1;i>=0&&h[i]===last;i--)streak++;let s={1:0.25,2:0.25,3:0.25,4:0.25};if(streak>=4){let others=[1,2,3,4].filter(n=>n!==last);others.forEach(o=>s[o]+=35);}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
-        new Algorithm(45,'trendBreak','trend',h=>{if(h.length<8)return{1:0.25,2:0.25,3:0.25,4:0.25};let last=h[h.length-1],streak=0;for(let i=h.length-1;i>=0&&h[i]===last;i--)streak++;let s={1:0.25,2:0.25,3:0.25,4:0.25};if(streak>=3){let freq={1:0,2:0,3:0,4:0},window=h.slice(-12);window.forEach(v=>freq[v]=(freq[v]||0)+1);let minF=Math.min(...Object.values(freq));for(let n=1;n<=4;n++)if(freq[n]===minF)s[n]+=25;}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
-        new Algorithm(46,'smartSkip','misc',h=>{if(h.length<10)return{1:0.25,2:0.25,3:0.25,4:0.25};let recent=h.slice(-10),freq={1:0,2:0,3:0,4:0};recent.forEach(v=>freq[v]++);let entropy=0;for(let n=1;n<=4;n++){let p=freq[n]/10;if(p>0)entropy-=p*Math.log2(p);}let s={1:0.25,2:0.25,3:0.25,4:0.25};if(entropy>1.5){let last=h[h.length-1],others=[1,2,3,4].filter(n=>n!==last);others.forEach(o=>s[o]+=10);}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
-        new Algorithm(47,'zigzagDetector','alternating',h=>{if(h.length<5)return{1:0.25,2:0.25,3:0.25,4:0.25};let s={1:0,2:0,3:0,4:0},recent=h.slice(-5),isAlt=true;for(let i=1;i<5;i++)if(recent[i]===recent[i-1]){isAlt=false;break;}if(isAlt){let set=new Set(h.slice(-4));if(set.size===4)s[h[h.length-4]]+=35;else{let last=h[h.length-1],prev=h[h.length-2],opp=[1,2,3,4].filter(n=>n!==last&&n!==prev);opp.forEach(o=>s[o]+=20);}}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
-        new Algorithm(48,'specificAlternating','alternating',h=>{if(h.length<6)return{1:0.25,2:0.25,3:0.25,4:0.25};let s={1:0,2:0,3:0,4:0},r=h.slice(-6),a=r[0],b=r[1],ok=true;for(let i=2;i<6;i++)if((i%2===0&&r[i]!==a)||(i%2===1&&r[i]!==b)){ok=false;break;}if(ok&&a!==b){s[a]+=40;s[b]+=15;}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
-        new Algorithm(49,'suddenReversal','reversal',h=>{if(h.length<6)return{1:0.25,2:0.25,3:0.25,4:0.25};let s={1:0,2:0,3:0,4:0},r=h.slice(-6),ch=0;for(let i=1;i<6;i++)if(r[i]!==r[i-1])ch++;if(ch>=4){let last=h[h.length-1];[1,2,3,4].filter(n=>n!==last).forEach(o=>s[o]+=25);}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
-        new Algorithm(50,'longAlternating','alternating',h=>{if(h.length<8)return{1:0.25,2:0.25,3:0.25,4:0.25};let s={1:0,2:0,3:0,4:0},streak=0;for(let i=h.length-1;i>0;i--){if(h[i]!==h[i-1])streak++;else break;}if(streak>=4){let last=h[h.length-1];[1,2,3,4].filter(n=>n!==last).forEach(o=>s[o]+=30);let freq={1:0,2:0,3:0,4:0};h.slice(-8).forEach(v=>freq[v]++);let min=Math.min(...Object.values(freq));for(let n=1;n<=4;n++)if(freq[n]===min)s[n]+=15;}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
-        new Algorithm(51,'alternatingAdaptive','alternating',h=>{if(h.length<8)return{1:0.25,2:0.25,3:0.25,4:0.25};let r=h.slice(-8),ch=0;for(let i=1;i<8;i++)if(r[i]!==r[i-1])ch++;if(ch>=6){let zigzag={1:0,2:0,3:0,4:0},spec={1:0,2:0,3:0,4:0};if(h.length>=5){let recent=h.slice(-5),isAlt=true;for(let i=1;i<5;i++)if(recent[i]===recent[i-1])isAlt=false;if(isAlt){let set=new Set(h.slice(-4));if(set.size===4)zigzag[h[h.length-4]]+=35;else{let last=h[h.length-1],prev=h[h.length-2];[1,2,3,4].filter(n=>n!==last&&n!==prev).forEach(o=>zigzag[o]+=20);}}}if(h.length>=6){let r2=h.slice(-6),a=r2[0],b=r2[1],ok=true;for(let i=2;i<6;i++)if((i%2===0&&r2[i]!==a)||(i%2===1&&r2[i]!==b))ok=false;if(ok&&a!==b){spec[a]+=40;spec[b]+=15;}}let s={};for(let n=1;n<=4;n++)s[n]=zigzag[n]*0.5+spec[n]*0.5;let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}return{1:0.25,2:0.25,3:0.25,4:0.25};}),
-        new Algorithm(52,'bridgeBreakDetect','pattern',h=>{if(h.length<5)return{1:0.25,2:0.25,3:0.25,4:0.25};let last=h[h.length-1],prev=h[h.length-2],streak=0;for(let i=h.length-2;i>=0&&h[i]===prev;i--)streak++;let s={1:0,2:0,3:0,4:0};if(streak>=3&&last!==prev){let others=[1,2,3,4].filter(n=>n!==prev);others.forEach(o=>s[o]+=30+streak*3);}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
-        new Algorithm(53,'chaosPattern41441','chaos',h=>{if(h.length<5)return{1:0.25,2:0.25,3:0.25,4:0.25};let last5=h.slice(-5).join(''),s={1:0,2:0,3:0,4:0};if(['41441','14114','14414','41141'].includes(last5)){let freq={1:0,2:0,3:0,4:0};h.slice(-8).forEach(v=>freq[v]++);let minF=Math.min(...Object.values(freq));for(let n=1;n<=4;n++)if(freq[n]===minF)s[n]+=35;}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
-        new Algorithm(54,'historyRepeat5','pattern',h=>{if(h.length<6)return{1:0.25,2:0.25,3:0.25,4:0.25};let pat=h.slice(-5),s={1:0,2:0,3:0,4:0};for(let i=0;i<=h.length-6;i++){let seg=h.slice(i,i+5);if(seg.every((v,idx)=>v===pat[idx])){let ni=i+5;if(ni<h.length)s[h[ni]]+=28;}}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
-        new Algorithm(55,'entropyReversalBoost','entropy',h=>{if(h.length<8)return{1:0.25,2:0.25,3:0.25,4:0.25};let freq={1:0,2:0,3:0,4:0};h.forEach(v=>freq[v]++);let total=h.length,entropy=0;for(let n=1;n<=4;n++){let p=freq[n]/total;if(p>0)entropy-=p*Math.log2(p);}let s={1:0.25,2:0.25,3:0.25,4:0.25};if(entropy>1.9){let recent=h.slice(-6),missing=[1,2,3,4].filter(n=>!recent.includes(n));missing.forEach(m=>s[m]+=22);}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}),
-        new Algorithm(56,'vShapeReversal','pattern',h=>{if(h.length<5)return{1:0.25,2:0.25,3:0.25,4:0.25};let r=h.slice(-5),s={1:0,2:0,3:0,4:0},up=0,down=0;for(let i=1;i<5;i++){if(r[i]>r[i-1])up++;else if(r[i]<r[i-1])down++;}if(up>=2&&down>=1&&r[4]<r[3])for(let n=1;n<=2;n++)s[n]+=25;if(down>=2&&up>=1&&r[4]>r[3])for(let n=3;n<=4;n++)s[n]+=25;let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
-        new Algorithm(57,'fiboCycle','cycle',h=>{if(h.length<8)return{1:0.25,2:0.25,3:0.25,4:0.25};let cycles=[2,3,5,8],s={1:0,2:0,3:0,4:0};cycles.forEach(c=>{if(h.length>c)s[h[h.length-c]]+=15;});let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
-        new Algorithm(58,'bridgeRebound','pattern',h=>{if(h.length<6)return{1:0.25,2:0.25,3:0.25,4:0.25};let last=h[h.length-1],prev=h[h.length-2],s={1:0,2:0,3:0,4:0},streak=0;for(let i=h.length-2;i>=0&&h[i]===prev;i--)streak++;if(streak>=3&&last!==prev){let rebound=0;for(let i=streak+2;i<h.length-2;i++)if(h[i]===prev&&h[i-1]!==prev&&h[i-2]===prev)rebound++;if(rebound>=1)s[prev]+=35;}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
-        new Algorithm(59,'pattern41441Prediction','chaos',h=>{if(h.length<5)return{1:0.25,2:0.25,3:0.25,4:0.25};let pat=h.slice(-5);if(pat.join('')!=='41441')return{1:0.25,2:0.25,3:0.25,4:0.25};let s={1:0,2:0,3:0,4:0};for(let i=0;i<=h.length-6;i++){if(h.slice(i,i+5).join('')==='41441'){let next=h[i+5];if(next)s[next]+=40;}}if(!s[1]&&!s[2]&&!s[3]&&!s[4]){s[2]+=25;s[3]+=20;}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;}),
-        new Algorithm(60,'threeDistinctReversal','reversal',h=>{if(h.length<4)return{1:0.25,2:0.25,3:0.25,4:0.25};let r=h.slice(-3);if(r[0]!==r[1]&&r[1]!==r[2]&&r[0]!==r[2]){let missing=[1,2,3,4].find(x=>!r.includes(x));let s={1:0,2:0,3:0,4:0};s[missing]=30;let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;return s;}return{1:0.25,2:0.25,3:0.25,4:0.25};}),
-        new Algorithm(61,'recentVsGlobalReversal','reversal',h=>{if(h.length<8)return{1:0.25,2:0.25,3:0.25,4:0.25};let global={1:0,2:0,3:0,4:0},recent={1:0,2:0,3:0,4:0};h.forEach(v=>global[v]++);for(let i=Math.max(0,h.length-6);i<h.length;i++)recent[h[i]]++;let s={1:0,2:0,3:0,4:0};for(let n=1;n<=4;n++){let gRate=global[n]/h.length,rRate=recent[n]/6;if(gRate>0.25&&rRate<0.1)s[n]+=28;}let sum=s[1]+s[2]+s[3]+s[4];if(sum)for(let i=1;i<=4;i++)s[i]/=sum;else return{1:0.25,2:0.25,3:0.25,4:0.25};return s;})
+// ========== ENSEMBLE ENGINE ==========
+class PrecisionEngine {
+  constructor(){
+    this.models = [
+      {name:'freq6', fn:freqModel(6,0.92), weight:1.0},
+      {name:'freq12', fn:freqModel(12,0.88), weight:1.0},
+      {name:'freq24', fn:freqModel(24,0.85), weight:1.0},
+      {name:'freq50', fn:freqModel(50,0.9), weight:1.0},
+      {name:'markov1', fn:markovModel(1,120,0.3), weight:1.0},
+      {name:'markov2', fn:markovModel(2,180,0.25), weight:1.0},
+      {name:'markov3', fn:markovModel(3,250,0.2), weight:1.0},
+      {name:'pat4', fn:patternModel(4,0,0.99), weight:1.0},
+      {name:'pat5', fn:patternModel(5,1,0.985), weight:1.0},
+      {name:'pat6', fn:patternModel(6,1,0.98), weight:1.0},
+      {name:'gap', fn:gapModel(1.3), weight:1.0},
+      {name:'streak_f', fn:streakModel('follow'), weight:1.0},
+      {name:'streak_s', fn:streakModel('soft'), weight:1.0},
+      {name:'streak_a', fn:streakModel('anti'), weight:1.0}
     ];
-    algoList.forEach(a=>{
-        a.weight = 1 / algoList.length;
-        a.importance = a.weight;
-        a.skill = 0.5;
-        a.confidence = 0.5;
+    this.trainingLog = [];
+    this.lastHash = null;
+    this.lastPred = null;
+    this.loadModel();
+  }
+  // backtest để tối ưu trọng số (deterministic)
+  train(h){
+    if(h.length < CFG.MIN_HISTORY) return;
+    // đánh giá từng model trên toàn bộ lịch sử (bắt đầu từ TRAIN_START)
+    const start = 12;
+    let scores = {};
+    for(let m of this.models) scores[m.name] = 0;
+    for(let i=start; i<h.length; i++){
+      let prefix = h.slice(0,i);
+      let actual = h[i];
+      for(let m of this.models){
+        let p = m.fn(prefix);
+        let ss = U.setScores(p);
+        let best = U.bestSet(ss);
+        if(U.correct(best.key, actual)) scores[m.name]++;
+      }
+    }
+    let total = h.length - start;
+    // gán trọng số dựa trên hiệu suất (tối thiểu 0.3)
+    for(let m of this.models){
+      let acc = scores[m.name] / Math.max(1, total);
+      m.weight = Math.max(0.3, Math.min(2.5, acc * 2.5)); // scale
+    }
+    this.saveModel();
+  }
+  predict(h){
+    if(h.length < CFG.MIN_HISTORY) return this.emptyPred();
+    // nếu lịch sử không đổi so với lần trước, trả về kết quả đã lưu
+    let hash = U.hash(h);
+    if(this.lastHash === hash && this.lastPred) return this.lastPred;
+    // nếu chưa train hoặc lịch sử thay đổi, train lại
+    if(this.lastHash !== hash) {
+      this.train(h);
+    }
+    let items = this.models.map(m => ({p: m.fn(h), w: m.weight}));
+    let finalP = U.mix(items);
+    let ss = U.setScores(finalP);
+    // điều chỉnh theo streak
+    let st = U.streak(h);
+    if(st.num && st.len >= 2){
+      for(let s of U.sets){
+        if(s.nums.includes(st.num)) ss[s.key] += 0.15;
+        else ss[s.key] -= 0.12;
+      }
+    }
+    // điều chỉnh theo entropy: nếu entropy cao, giảm bớt ảnh hưởng của streak
+    let ent = U.entropy(h);
+    if(ent > 1.8) { // hỗn loạn, giảm streak boost
+      for(let s of U.sets){
+        if(st.num && s.nums.includes(st.num)) ss[s.key] -= 0.1;
+      }
+    }
+    let best = U.bestSet(ss);
+    let conf = Math.min(98, Math.max(35, best.score * 100));
+    let pred = {p: finalP, ss, best, conf};
+    // cache
+    this.lastHash = hash;
+    this.lastPred = pred;
+    return pred;
+  }
+  emptyPred(){
+    let p = U.prob(), ss = U.setScores(p), best = U.bestSet(ss);
+    return {p, ss, best, conf: 40};
+  }
+  learn(act, pred){
+    let ok = U.correct(pred.best.key, act) ? 1 : 0;
+    this.trainingLog.unshift({act, set: pred.best.key, ok});
+    if(this.trainingLog.length > 80) this.trainingLog.pop();
+    // lưu log
+    localStorage.setItem(CFG.STORAGE_LOG, JSON.stringify(this.trainingLog));
+  }
+  reset(){
+    this.trainingLog = [];
+    this.lastHash = null;
+    this.lastPred = null;
+    localStorage.removeItem(CFG.STORAGE_LOG);
+    // reset weights về mặc định
+    for(let m of this.models) m.weight = 1.0;
+    this.saveModel();
+  }
+  saveModel(){
+    let data = {weights: {}};
+    for(let m of this.models) data.weights[m.name] = m.weight;
+    localStorage.setItem(CFG.STORAGE_MODEL, JSON.stringify(data));
+  }
+  loadModel(){
+    let raw = localStorage.getItem(CFG.STORAGE_MODEL);
+    if(raw){
+      try{
+        let data = JSON.parse(raw);
+        if(data.weights){
+          for(let m of this.models){
+            if(data.weights[m.name] !== undefined) m.weight = data.weights[m.name];
+          }
+        }
+      }catch(e){}
+    }
+    let logRaw = localStorage.getItem(CFG.STORAGE_LOG);
+    if(logRaw){
+      try{ this.trainingLog = JSON.parse(logRaw); }catch(e){}
+    }
+  }
+  kelly(p){ let b=1; return (b*p - (1-p))/b; }
+}
+
+// ========== UI ==========
+class App {
+  constructor(){
+    this.engine = new PrecisionEngine();
+    this.history = [];
+    this.pred = null;
+    this.autoTimer = null;
+    let saved = localStorage.getItem(CFG.STORAGE_HIST);
+    if(saved){
+      try{ let arr = JSON.parse(saved); if(Array.isArray(arr)) this.history = arr.map(Number).filter(x=>x>=1&&x<=4).slice(-CFG.MAX_HISTORY); }catch(e){}
+    }
+    document.getElementById('historyInput').value = U.toText(this.history);
+    if(this.history.length >= CFG.MIN_HISTORY){
+      this.pred = this.engine.predict(this.history);
+    }
+    this.render();
+    let ta = document.getElementById('historyInput');
+    ta.addEventListener('input', () => {
+      clearTimeout(this.autoTimer);
+      this.autoTimer = setTimeout(() => this.autoAnalyze(), CFG.AUTO_DEBOUNCE);
     });
-    return algoList;
+  }
+  autoAnalyze(){
+    let h = U.parse(document.getElementById('historyInput').value);
+    // so sánh với history hiện tại, nếu không đổi thì không cần train lại
+    if(h.join(',') === this.history.join(',') && this.pred) {
+      // vẫn render để chắc
+    } else {
+      this.history = h;
+      localStorage.setItem(CFG.STORAGE_HIST, JSON.stringify(h));
+      if(h.length >= CFG.MIN_HISTORY){
+        this.pred = this.engine.predict(h);
+      } else {
+        this.engine.reset();
+        this.pred = this.engine.emptyPred();
+      }
+    }
+    this.render();
+  }
+  forceAnalyze(){
+    // ép buộc phân tích lại (có thể train lại nếu lịch sử đã thay đổi)
+    let h = U.parse(document.getElementById('historyInput').value);
+    this.history = h;
+    localStorage.setItem(CFG.STORAGE_HIST, JSON.stringify(h));
+    if(h.length >= CFG.MIN_HISTORY){
+      this.engine.lastHash = null; // xóa cache để train lại
+      this.pred = this.engine.predict(h);
+    } else {
+      this.engine.reset();
+      this.pred = this.engine.emptyPred();
+    }
+    this.render();
+  }
+  loadSample(){
+    let s = '3 2 3 4 3 4 4 3 1 4 1 3 1 3 3 4 3 2 1 3 2 1 3 1 2 4 3 3 1 2 1 2 4 1 1 2 4 2 1 4 1 1 3 3 2 4 2 1 1 1 2 2 2 3 3 4 4';
+    document.getElementById('historyInput').value = s;
+    this.autoAnalyze();
+  }
+  addNumber(n){
+    if(this.pred && this.history.length >= CFG.MIN_HISTORY) this.engine.learn(n, this.pred);
+    this.history.push(n);
+    if(this.history.length > CFG.MAX_HISTORY) this.history.shift();
+    document.getElementById('historyInput').value = U.toText(this.history);
+    localStorage.setItem(CFG.STORAGE_HIST, JSON.stringify(this.history));
+    if(this.history.length >= CFG.MIN_HISTORY){
+      this.engine.lastHash = null;
+      this.pred = this.engine.predict(this.history);
+    } else {
+      this.pred = this.engine.emptyPred();
+    }
+    this.render();
+  }
+  undo(){
+    if(!this.history.length) return;
+    this.history.pop();
+    document.getElementById('historyInput').value = U.toText(this.history);
+    localStorage.setItem(CFG.STORAGE_HIST, JSON.stringify(this.history));
+    if(this.history.length >= CFG.MIN_HISTORY){
+      this.engine.lastHash = null;
+      this.pred = this.engine.predict(this.history);
+    } else {
+      this.engine.reset();
+      this.pred = this.engine.emptyPred();
+    }
+    this.render();
+  }
+  reset(){
+    if(!confirm('Xoá hết lịch sử?')) return;
+    this.history = [];
+    document.getElementById('historyInput').value = '';
+    localStorage.setItem(CFG.STORAGE_HIST, '[]');
+    this.engine.reset();
+    this.pred = this.engine.emptyPred();
+    this.render();
+  }
+  clearCache(){
+    if(!confirm('Xoá cache model & log?')) return;
+    localStorage.removeItem(CFG.STORAGE_HIST);
+    localStorage.removeItem(CFG.STORAGE_MODEL);
+    localStorage.removeItem(CFG.STORAGE_LOG);
+    this.engine.reset();
+    this.pred = null;
+    this.render();
+  }
+  render(){
+    let pred = this.pred;
+    if(!pred) pred = this.engine.emptyPred();
+    document.getElementById('bestSetDisplay').textContent = pred.best.key;
+    document.getElementById('confFill').style.width = pred.conf + '%';
+    document.getElementById('confText').textContent = 'Độ tin cậy: ' + pred.conf.toFixed(1) + '%';
+    let kelly = this.engine.kelly(pred.best.score) * 100;
+    document.getElementById('kellyText').textContent = 'Kelly gợi ý: ' + kelly.toFixed(1) + '% vốn';
+    let badge = document.getElementById('decisionBadge');
+    if(pred.conf >= 75) {
+      badge.textContent = 'TÍN HIỆU MẠNH'; badge.style.color = '#00e676';
+    } else if(pred.conf >= 60) {
+      badge.textContent = 'CẢNH BÁO'; badge.style.color = '#ffd966';
+    } else {
+      badge.textContent = 'RỦI RO CAO'; badge.style.color = '#ff5252';
+    }
+    let ss = pred.ss;
+    document.getElementById('set123').textContent = (ss['1-2-3']*100).toFixed(1) + '%';
+    document.getElementById('set234').textContent = (ss['2-3-4']*100).toFixed(1) + '%';
+    document.getElementById('set124').textContent = (ss['1-2-4']*100).toFixed(1) + '%';
+    document.getElementById('set134').textContent = (ss['1-3-4']*100).toFixed(1) + '%';
+    let sets = U.sets.map(s => ({key: s.key, score: ss[s.key]})).sort((a,b) => b.score - a.score);
+    let ranks = {}; sets.forEach((s,i) => ranks[s.key] = i+1);
+    document.getElementById('rank123').textContent = ranks['1-2-3'];
+    document.getElementById('rank234').textContent = ranks['2-3-4'];
+    document.getElementById('rank124').textContent = ranks['1-2-4'];
+    document.getElementById('rank134').textContent = ranks['1-3-4'];
+    let rows = document.querySelectorAll('.set-table tr');
+    rows.forEach(r => r.classList.remove('highlight'));
+    rows.forEach(r => { if(r.cells[0] && r.cells[0].textContent === pred.best.key) r.classList.add('highlight'); });
+    let logHtml = this.engine.trainingLog.slice(0,25).map(x =>
+      `<div class="log-entry"><span>${x.act}</span><span>→ ${x.set}</span><span class="${x.ok?'win':'loss'}">${x.ok?'WIN':'LOSS'}</span></div>`
+    ).join('');
+    document.getElementById('logContent').innerHTML = logHtml || 'Chưa có dữ liệu';
+  }
 }
 
-// ====================== ADAPTIVE WEIGHT ENGINE ======================
-class AdaptiveWeightEngine {
-    constructor(algorithms){
-        this.algorithms = algorithms;
-        this.rollingResults = {};
-        this.algorithms.forEach(a=>{ this.rollingResults[a.id]=[]; });
-        this.normalize();
-    }
-    update(history, actual){
-        const edgeCase = (actual === 1 || actual === 4);
-        for (let algo of this.algorithms){
-            if (!algo.enabled && algo.total < CONFIG.PRUNE_MIN_SAMPLES) algo.enabled = true;
-            const norm = Utils.blendUniform(algo.predict(history));
-            const predSet = Utils.predSetFromScores(norm);
-            const isCorrect = Utils.isSetCorrect(predSet, actual);
-            const pActual = Utils.safeProb(norm[actual]);
-            const brier = Utils.brierScore(norm, actual);
-            const brierReward = 1 - Utils.clamp(brier / 0.75, 0, 1);
-            const probReward = Utils.clamp(pActual * 2.35, 0, 1);
-            // Khi kết quả là 2 hoặc 3, cả hai bộ đều thắng nên tín hiệu thắng/thua không phân biệt được thuật toán.
-            // Vì vậy edge 1/4 được học mạnh hơn; còn 2/3 chủ yếu dùng xác suất đúng số để chống ảo chính xác.
-            const setReward = edgeCase ? (isCorrect ? 1 : 0) : 0.5;
-            const instantSkill = 0.36*probReward + 0.34*brierReward + 0.30*setReward;
-            const lr = Utils.clamp(CONFIG.LEARNING_RATE * (edgeCase ? CONFIG.EDGE_LEARN_MULTIPLIER : 1), 0.02, 0.42);
-            algo.skill = algo.skill*(1-lr) + instantSkill*lr;
-            algo.brier = algo.brier*CONFIG.WEIGHT_DECAY + brier*(1-CONFIG.WEIGHT_DECAY);
-            algo.logScore = algo.logScore*CONFIG.WEIGHT_DECAY + (-Math.log(pActual))*(1-CONFIG.WEIGHT_DECAY);
-            algo.updateStats(isCorrect);
-            if (edgeCase) { algo.edgeTotal++; if (isCorrect) algo.edgeCorrect++; }
-            this.rollingResults[algo.id].push(isCorrect);
-            if (this.rollingResults[algo.id].length > 100) this.rollingResults[algo.id].shift();
-            algo.updateRolling(30, this.rollingResults[algo.id]);
-            algo.updateRolling(100, this.rollingResults[algo.id]);
-            algo.confidence = Utils.clamp(0.25 + algo.skill*0.75, 0.05, 0.99);
-        }
-        this.normalize();
-    }
-    normalize(){
-        const active = this.algorithms.filter(a=>a.enabled);
-        if (!active.length) this.algorithms.forEach(a=>a.enabled=true);
-        const enabled = this.algorithms.filter(a=>a.enabled);
-        const maxSkill = Math.max(...enabled.map(a=>{
-            const sampleFactor = Utils.clamp(a.total / 35, 0.25, 1);
-            return 0.5 + (a.skill - 0.5) * sampleFactor;
-        }));
-        const raw = new Map();
-        let rawTotal = 0;
-        for (const a of this.algorithms){
-            if (!a.enabled){ raw.set(a, 0); continue; }
-            const sampleFactor = Utils.clamp(a.total / 35, 0.25, 1);
-            const adjustedSkill = 0.5 + (a.skill - 0.5) * sampleFactor;
-            const edgeFactor = a.edgeTotal >= 15 ? (0.85 + 0.30*(a.edgeCorrect/Math.max(1,a.edgeTotal))) : 1;
-            const val = Math.exp((adjustedSkill - maxSkill) / CONFIG.SOFTMAX_TEMPERATURE) * edgeFactor;
-            raw.set(a, val);
-            rawTotal += val;
-        }
-        const floor = CONFIG.WEIGHT_FLOOR;
-        const enabledCount = Math.max(1, enabled.length);
-        const freeMass = Math.max(0.1, 1 - floor*enabledCount);
-        for (const a of this.algorithms){
-            if (!a.enabled){ a.weight = floor; a.importance = 0; continue; }
-            a.weight = floor + freeMass * (raw.get(a) / (rawTotal || 1));
-            a.importance = a.weight * a.confidence;
-        }
-    }
-    reliability(){
-        const enabled = this.algorithms.filter(a=>a.enabled);
-        if (!enabled.length) return 0.55;
-        const avgSkill = enabled.reduce((s,a)=>s+a.skill*a.weight,0) / enabled.reduce((s,a)=>s+a.weight,0);
-        return Utils.clamp(0.45 + (avgSkill-0.5)*1.8, 0.35, 0.95);
-    }
-    prune(){
-        for (let a of this.algorithms){
-            const edgeAcc = a.edgeTotal ? a.edgeCorrect/a.edgeTotal : 0.5;
-            if (a.total >= CONFIG.PRUNE_MIN_SAMPLES && a.skill < CONFIG.PRUNE_ACC_THRESHOLD && edgeAcc < 0.48){
-                a.enabled = false;
-            } else if (!a.enabled && a.total >= CONFIG.PRUNE_MIN_SAMPLES && (a.skill > CONFIG.PRUNE_RECOVER_THRESHOLD || edgeAcc > 0.56)){
-                a.enabled = true;
-            }
-        }
-        this.normalize();
-    }
-    exportState(){
-        return this.algorithms.map(a=>({id:a.id, weight:a.weight, total:a.total, correct:a.correct, accuracy30:a.accuracy30, accuracy100:a.accuracy100, accuracyAll:a.accuracyAll, skill:a.skill, brier:a.brier, logScore:a.logScore, edgeTotal:a.edgeTotal, edgeCorrect:a.edgeCorrect, enabled:a.enabled}));
-    }
-    importState(rows){
-        if (!Array.isArray(rows)) return;
-        const byId = new Map(rows.map(r=>[r.id,r]));
-        for (const a of this.algorithms){
-            const r = byId.get(a.id);
-            if (!r) continue;
-            Object.assign(a, {
-                weight: r.weight ?? a.weight,
-                total: r.total ?? 0,
-                correct: r.correct ?? 0,
-                accuracy30: r.accuracy30 ?? 0,
-                accuracy100: r.accuracy100 ?? 0,
-                accuracyAll: r.accuracyAll ?? 0,
-                skill: r.skill ?? 0.5,
-                brier: r.brier ?? 0.25,
-                logScore: r.logScore ?? 1.386,
-                edgeTotal: r.edgeTotal ?? 0,
-                edgeCorrect: r.edgeCorrect ?? 0,
-                enabled: r.enabled !== false
-            });
-        }
-        this.normalize();
-    }
-}
-
-// ====================== MARKOV ENGINE ======================
-class MarkovEngine {
-    static buildTransitionMatrix(hist, order){
-        const map = new Map();
-        for (let i=order; i<hist.length; i++){
-            const key = hist.slice(i-order, i).join(',');
-            const next = hist[i];
-            if (!map.has(key)) map.set(key, [0,0,0,0]);
-            const counts = map.get(key);
-            counts[next-1]++;
-        }
-        return map;
-    }
-    static predict(hist, order){
-        if (hist.length < order) return {1:0.25,2:0.25,3:0.25,4:0.25};
-        const mat = this.buildTransitionMatrix(hist, order);
-        const key = hist.slice(-order).join(',');
-        const counts = mat.get(key) || [1,1,1,1]; // Laplace smoothing
-        const total = counts.reduce((a,b)=>a+b,0);
-        return {1:counts[0]/total,2:counts[1]/total,3:counts[2]/total,4:counts[3]/total};
-    }
-    static adaptiveOrder(hist){
-        let bestOrder = 1, bestEntropy = 999;
-        for (let order=1; order<=4; order++){
-            if (hist.length < order+10) continue;
-            const mat = this.buildTransitionMatrix(hist, order);
-            let entropySum = 0, rowCount = 0;
-            for (let [, counts] of mat){
-                const total = counts.reduce((a,b)=>a+b,0);
-                let ent = 0;
-                for (let i=0; i<4; i++){
-                    const p = counts[i]/total;
-                    if (p>0) ent -= p*Math.log2(p);
-                }
-                entropySum += ent;
-                rowCount++;
-            }
-            const avgEntropy = rowCount ? entropySum/rowCount : 0;
-            if (avgEntropy < bestEntropy){
-                bestEntropy = avgEntropy;
-                bestOrder = order;
-            }
-        }
-        return bestOrder;
-    }
-}
-
-// ====================== BAYESIAN ENGINE ======================
-class BayesianEngine {
-    constructor(){
-        this.globalCounts = {1:1,2:1,3:1,4:1};
-        this.transition = {1:{1:1,2:1,3:1,4:1},2:{1:1,2:1,3:1,4:1},3:{1:1,2:1,3:1,4:1},4:{1:1,2:1,3:1,4:1}};
-    }
-    update(hist, actual){
-        if (!hist.length) return;
-        const last = hist[hist.length-1];
-        this.globalCounts[actual] = (this.globalCounts[actual]||1) + 1;
-        if (!this.transition[last]) this.transition[last] = {1:1,2:1,3:1,4:1};
-        this.transition[last][actual] = (this.transition[last][actual]||1) + 1;
-    }
-    predict(hist){
-        if (!hist.length) return {1:0.25,2:0.25,3:0.25,4:0.25};
-        const last = hist[hist.length-1];
-        const row = this.transition[last] || {1:1,2:1,3:1,4:1};
-        const rowTotal = row[1]+row[2]+row[3]+row[4];
-        const globalTotal = this.globalCounts[1]+this.globalCounts[2]+this.globalCounts[3]+this.globalCounts[4];
-        const recent = {1:1,2:1,3:1,4:1};
-        hist.slice(-CONFIG.RECENT_WINDOW).forEach(v=>recent[v]++);
-        const recentTotal = recent[1]+recent[2]+recent[3]+recent[4];
-        const rowStrength = Utils.clamp((rowTotal-4)/18, 0.25, 0.65);
-        const recentStrength = hist.length < 40 ? 0.25 : 0.30;
-        const globalStrength = 1 - rowStrength - recentStrength;
-        const out = {};
-        for (let n=1;n<=4;n++){
-            out[n] = (row[n]/rowTotal)*rowStrength + (recent[n]/recentTotal)*recentStrength + (this.globalCounts[n]/globalTotal)*globalStrength;
-        }
-        return Utils.blendUniform(out, 0.04);
-    }
-}
-
-// ====================== HMM (đơn giản) ======================
-class HiddenMarkovModel {
-    constructor(){
-        this.states = 4;
-        this.transition = Array.from({length:4},()=>[0.25,0.25,0.25,0.25]);
-        this.stateBelief = [0.25,0.25,0.25,0.25];
-    }
-    update(hist){
-        if (hist.length < 5) return;
-        const counts = Array.from({length:4},()=>[1,1,1,1]);
-        const recent = hist.slice(-80);
-        for (let i=0; i<recent.length-1; i++) counts[recent[i]-1][recent[i+1]-1]++;
-        for (let s=0; s<4; s++){
-            const total = counts[s].reduce((a,b)=>a+b,0);
-            this.transition[s] = counts[s].map(v=>v/total);
-        }
-        const last = hist[hist.length-1]-1;
-        this.stateBelief = [0.05,0.05,0.05,0.05];
-        this.stateBelief[last] = 0.85;
-    }
-    predict(hist){
-        if (!hist.length) return {1:0.25,2:0.25,3:0.25,4:0.25};
-        const nextBelief = [0,0,0,0];
-        for (let i=0; i<4; i++) for (let j=0; j<4; j++) nextBelief[j] += this.stateBelief[i] * this.transition[i][j];
-        const recent = {1:1,2:1,3:1,4:1};
-        hist.slice(-20).forEach(v=>recent[v]++);
-        const rt = recent[1]+recent[2]+recent[3]+recent[4];
-        const pred = {};
-        for (let n=1; n<=4; n++) pred[n] = nextBelief[n-1]*0.72 + (recent[n]/rt)*0.28;
-        return Utils.blendUniform(pred, 0.05);
-    }
-}
-
-// ====================== MONTE CARLO ENGINE ======================
-class MonteCarloEngine {
-    static simulate(probs, samples=CONFIG.MONTE_CARLO_SAMPLES){
-        const dist = Utils.normalizeScores(probs);
-        const setScores = Utils.setScoresFromNumberProbs(dist);
-        return {
-            set123: setScores['1-2-3'],
-            set124: setScores['1-2-4'],
-            set234: setScores['2-3-4'],
-            variance123: setScores['1-2-3']*(1-setScores['1-2-3'])/samples,
-            variance124: setScores['1-2-4']*(1-setScores['1-2-4'])/samples,
-            variance234: setScores['2-3-4']*(1-setScores['2-3-4'])/samples
-        };
-    }
-}
-
-// ====================== PATTERN DATABASE ======================
-class PatternDatabase {
-    constructor(){
-        this.patterns = new Map();
-    }
-    addPattern(seq, next){
-        const key = seq.join(',');
-        if (!this.patterns.has(key)) this.patterns.set(key, [0,0,0,0]);
-        const counts = this.patterns.get(key);
-        counts[next-1]++;
-    }
-    getPrediction(hist, maxLength=8){
-        if (hist.length < 3) return null;
-        const out = {1:0,2:0,3:0,4:0};
-        let totalWeight = 0;
-        for (let len=Math.min(maxLength, hist.length); len>=3; len--){
-            const key = hist.slice(-len).join(',');
-            const counts = this.patterns.get(key);
-            if (!counts) continue;
-            const hits = counts.reduce((a,b)=>a+b,0);
-            if (hits < CONFIG.PATTERN_MIN_HITS) continue;
-            const weight = len * Math.log2(hits+1);
-            const smoothedTotal = hits + 4;
-            for (let n=1; n<=4; n++) out[n] += ((counts[n-1]+1)/smoothedTotal) * weight;
-            totalWeight += weight;
-        }
-        if (!totalWeight) return null;
-        for (let n=1; n<=4; n++) out[n] /= totalWeight;
-        return Utils.blendUniform(out, 0.04);
-    }
-    update(hist, actual){
-        for (let len=3; len<=8; len++){
-            if (hist.length >= len){
-                const seq = hist.slice(-len);
-                this.addPattern(seq, actual);
-            }
-        }
-    }
-}
-
-
-
-// ====================== EDGE EXCLUSION LEARNER ======================
-class EdgeExclusionLearner {
-    constructor(){
-        this.edgeCounts = {1:3,3:3,4:3};
-        this.transition = {};
-        for (let last=1; last<=4; last++) this.transition[last] = {1:2,3:2,4:2};
-        this.patterns = new Map();
-        this.emaCorrect = 0.50;
-        this.total = 0;
-    }
-    normalizeRisk(risk){
-        const keys = [1,3,4];
-        let sum = keys.reduce((s,n)=>s+(Number(risk[n])||0),0);
-        if (!sum) return {1:1/3,3:1/3,4:1/3};
-        const out = {};
-        keys.forEach(n=>out[n] = Utils.clamp(risk[n]/sum, 0.02, 0.92));
-        sum = keys.reduce((s,n)=>s+out[n],0);
-        keys.forEach(n=>out[n] /= sum);
-        return out;
-    }
-    recentEdgeFreq(history, window=28){
-        const r = history.slice(-window).filter(v=>v===1||v===3||v===4);
-        const out = {1:1,3:1,4:1};
-        r.forEach(v=>out[v]++);
-        const total = out[1]+out[3]+out[4];
-        return {1:out[1]/total,3:out[3]/total,4:out[4]/total};
-    }
-    gapRisk(history){
-        const out = {1:0,3:0,4:0};
-        [1,3,4].forEach(n=>{
-            let gap = history.length;
-            for (let i=history.length-1; i>=0; i--){ if (history[i]===n){ gap=history.length-1-i; break; } }
-            out[n] = Utils.clamp((gap+1) / 18, 0.05, 0.75);
-        });
-        return this.normalizeRisk(out);
-    }
-    patternRisk(history){
-        if (history.length < 6) return {1:1/3,3:1/3,4:1/3};
-        const out = {1:1,3:1,4:1};
-        let hitWeight = 3;
-        for (let len=Math.min(7, history.length); len>=3; len--){
-            const key = history.slice(-len).join(',');
-            const row = this.patterns.get(key);
-            if (!row) continue;
-            const hits = row[1]+row[3]+row[4];
-            if (hits < 2) continue;
-            const w = len * Math.log2(hits+1);
-            [1,3,4].forEach(n=>out[n] += (row[n]+1)/(hits+3)*w);
-            hitWeight += w;
-        }
-        [1,3,4].forEach(n=>out[n] /= hitWeight);
-        return this.normalizeRisk(out);
-    }
-    predict(numberScores, history, regime='neutral'){
-        const p = Utils.normalizeScores(numberScores);
-        const recent = this.recentEdgeFreq(history, Math.min(42, Math.max(18, history.length)));
-        const gaps = this.gapRisk(history);
-        const pattern = this.patternRisk(history);
-        const last = history.length ? history[history.length-1] : 1;
-        const transRow = this.transition[last] || {1:2,3:2,4:2};
-        const transTotal = transRow[1]+transRow[3]+transRow[4];
-        const globalTotal = this.edgeCounts[1]+this.edgeCounts[3]+this.edgeCounts[4];
-        const trans = {1:transRow[1]/transTotal,3:transRow[3]/transTotal,4:transRow[4]/transTotal};
-        const global = {1:this.edgeCounts[1]/globalTotal,3:this.edgeCounts[3]/globalTotal,4:this.edgeCounts[4]/globalTotal};
-        const regimeGapWeight = (regime==='mean_reversion' || regime==='chaos' || regime==='breakout') ? 0.18 : 0.10;
-        const regimeRecentWeight = (regime==='trend' || regime==='repeating') ? 0.26 : 0.20;
-        const raw = {};
-        [1,3,4].forEach(n=>{
-            raw[n] = p[n]*0.27 + trans[n]*0.18 + recent[n]*regimeRecentWeight + pattern[n]*0.18 + gaps[n]*regimeGapWeight + global[n]*(0.19-regimeGapWeight*0.35);
-        });
-        const risk = this.normalizeRisk(raw);
-        const setScores = {
-            '1-2-3': Utils.clamp(1 - risk[4], 0.50, 0.98),
-            '1-2-4': Utils.clamp(1 - risk[3], 0.50, 0.98),
-            '2-3-4': Utils.clamp(1 - risk[1], 0.50, 0.98)
-        };
-        const ranking = Utils.candidateSets().map(set=>({...set, score:setScores[set.key], missRisk:risk[set.missing]})).sort((a,b)=>b.score-a.score || a.key.localeCompare(b.key));
-        const margin = ranking[0].score - ranking[1].score;
-        const strength = Utils.clamp((this.total/65), 0.10, 1) * Utils.clamp(0.55 + (this.emaCorrect-0.50)*1.4, 0.35, 0.95);
-        return {risk, setScores, ranking, bestKey:ranking[0].key, margin, strength};
-    }
-    update(history, actual, predictedSet){
-        if (!(actual===1 || actual===3 || actual===4)) return;
-        const last = history.length ? history[history.length-1] : null;
-        this.edgeCounts[actual] = (this.edgeCounts[actual] || 2) + 1;
-        if (last){
-            if (!this.transition[last]) this.transition[last] = {1:2,3:2,4:2};
-            this.transition[last][actual] = (this.transition[last][actual] || 2) + 1;
-        }
-        for (let len=3; len<=7; len++){
-            if (history.length >= len){
-                const key = history.slice(-len).join(',');
-                if (!this.patterns.has(key)) this.patterns.set(key, {1:1,3:1,4:1});
-                this.patterns.get(key)[actual]++;
-            }
-        }
-        if (predictedSet){
-            this.total++;
-            const ok = Utils.isSetCorrect(predictedSet, actual);
-            const lr = this.total < 45 ? 0.10 : 0.045;
-            this.emaCorrect = this.emaCorrect*(1-lr) + (ok ? 1 : 0)*lr;
-        }
-    }
-    exportState(){
-        return {edgeCounts:this.edgeCounts, transition:this.transition, patterns:Array.from(this.patterns.entries()), emaCorrect:this.emaCorrect, total:this.total};
-    }
-    importState(state){
-        if (!state || typeof state !== 'object') return;
-        if (state.edgeCounts) this.edgeCounts = {...this.edgeCounts, ...state.edgeCounts};
-        if (state.transition) this.transition = {...this.transition, ...state.transition};
-        if (Array.isArray(state.patterns)) this.patterns = new Map(state.patterns);
-        this.emaCorrect = Number.isFinite(state.emaCorrect) ? state.emaCorrect : this.emaCorrect;
-        this.total = Number.isFinite(state.total) ? state.total : this.total;
-    }
-}
-
-// ====================== THREE-SET CANDIDATE ENGINE ======================
-class CandidateSetEngine {
-    constructor(){
-        this.stats = {};
-        Utils.candidateSets().forEach(set => {
-            this.stats[set.key] = {total:0, correct:0, ema:0.75, brier:0.1875};
-        });
-    }
-    recentFreq(history, window=18){
-        const r = history.slice(-window);
-        const t = Math.max(1, r.length);
-        const f = {1:0,2:0,3:0,4:0};
-        r.forEach(v=>f[v]++);
-        for (let n=1;n<=4;n++) f[n] = f[n] / t;
-        return f;
-    }
-    gaps(history){
-        const gaps = {1:history.length,2:history.length,3:history.length,4:history.length};
-        for (let n=1; n<=4; n++){
-            for (let i=history.length-1; i>=0; i--){
-                if (history[i] === n){ gaps[n] = history.length - 1 - i; break; }
-            }
-        }
-        return gaps;
-    }
-    patternSetBoost(history){
-        if (history.length < 8) return null;
-        const counts = {1:1,2:1,3:1,4:1};
-        let weightTotal = 4;
-        for (let len=Math.min(8, history.length-1); len>=3; len--){
-            const tail = history.slice(-len).join(',');
-            for (let i=0; i<=history.length-len-1; i++){
-                if (history.slice(i, i+len).join(',') === tail){
-                    const next = history[i+len];
-                    if (next){
-                        const w = len / 3;
-                        counts[next] += w;
-                        weightTotal += w;
-                    }
-                }
-            }
-        }
-        const p = {1:counts[1]/weightTotal,2:counts[2]/weightTotal,3:counts[3]/weightTotal,4:counts[4]/weightTotal};
-        return Utils.setScoresFromNumberProbs(p);
-    }
-    scoreSets(numberScores, history, reliability=0.55){
-        const p = Utils.normalizeScores(numberScores);
-        const base = Utils.setScoresFromNumberProbs(p);
-        const regime = Utils.detectRegime(history);
-        const freq = this.recentFreq(history, Math.min(CONFIG.RECENT_WINDOW, Math.max(12, history.length)));
-        const gaps = this.gaps(history);
-        const pattern = this.patternSetBoost(history) || base;
-        const out = {};
-        const learnedWeight = Utils.clamp((history.length - CONFIG.MIN_HISTORY_FOR_PREDICTION) / 90, 0.08, 0.26) * reliability;
-        Utils.candidateSets().forEach(set => {
-            const stat = this.stats[set.key] || {ema:0.75,total:0};
-            const missing = set.missing;
-            const missingHotRisk = Utils.clamp(freq[missing] * 1.35, 0, 0.45);
-            const gapRisk = Utils.clamp((gaps[missing] - 3) / 18, 0, 0.40);
-            let regimeSignal;
-            if (regime === 'trend' || regime === 'repeating') {
-                regimeSignal = Utils.clamp(base[set.key] - missingHotRisk*0.55 + (freq[missing] < 0.10 ? 0.05 : 0), 0.45, 0.98);
-            } else if (regime === 'mean_reversion' || regime === 'chaos' || regime === 'breakout') {
-                regimeSignal = Utils.clamp(base[set.key] - gapRisk*0.45 - missingHotRisk*0.20, 0.45, 0.98);
-            } else {
-                regimeSignal = Utils.clamp(base[set.key] - missingHotRisk*0.35 - gapRisk*0.20, 0.45, 0.98);
-            }
-            const learned = Utils.clamp(stat.ema || 0.75, 0.45, 0.97);
-            const raw = base[set.key]*0.50 + pattern[set.key]*0.18 + regimeSignal*(0.32-learnedWeight) + learned*learnedWeight;
-            out[set.key] = Utils.clamp(raw, 0.45, 0.98);
-        });
-        const ranking = Utils.candidateSets().map(set => ({...set, score: out[set.key]})).sort((a,b)=>b.score-a.score || a.key.localeCompare(b.key));
-        return {scores: out, bestKey: ranking[0].key, bestScore: ranking[0].score, secondScore: ranking[1].score, margin: ranking[0].score - ranking[1].score, ranking};
-    }
-    update(actual, setScores){
-        Utils.candidateSets().forEach(set => {
-            const stat = this.stats[set.key];
-            const ok = set.nums.includes(actual);
-            const pred = Utils.clamp(setScores?.[set.key] ?? 0.75, 0.001, 0.999);
-            stat.total++;
-            if (ok) stat.correct++;
-            const lr = stat.total < 40 ? 0.10 : 0.045;
-            stat.ema = stat.ema*(1-lr) + (ok ? 1 : 0)*lr;
-            stat.brier = stat.brier*0.92 + ((pred - (ok ? 1 : 0)) ** 2)*0.08;
-        });
-    }
-    exportState(){ return JSON.parse(JSON.stringify(this.stats)); }
-    importState(stats){
-        if (!stats || typeof stats !== 'object') return;
-        Utils.candidateSets().forEach(set => {
-            if (stats[set.key]) this.stats[set.key] = {...this.stats[set.key], ...stats[set.key]};
-        });
-    }
-}
-
-
-
-// ====================== META PREDICTION CORE v10 ======================
-class MetaPredictionCore {
-    static softmax(items, temp=0.085){
-        const vals = Object.values(items);
-        const max = Math.max(...vals);
-        const exps = {}; let sum = 0;
-        Object.entries(items).forEach(([k,v])=>{ exps[k] = Math.exp((v-max)/Math.max(0.01,temp)); sum += exps[k]; });
-        const out = {}; Object.keys(items).forEach(k=> out[k] = sum ? exps[k]/sum : 1/Object.keys(items).length);
-        return out;
-    }
-    static windowRisk(history){
-        const risk = {1:0.33,3:0.33,4:0.33};
-        let totalW = 0;
-        CONFIG.CORE_EDGE_WINDOWS.forEach((win, idx)=>{
-            if (history.length < Math.max(6, Math.floor(win/2))) return;
-            const r = history.slice(-win).filter(v=>v===1 || v===3 || v===4);
-            const w = 1 / (idx + 1);
-            totalW += w;
-            const denom = r.length + 3;
-            [1,3,4].forEach(n=>{
-                const c = r.filter(v=>v===n).length + 1;
-                risk[n] += (c/denom) * w;
-            });
-        });
-        const base = totalW ? totalW : 1;
-        [1,3,4].forEach(n=> risk[n] = risk[n] / (1 + base));
-        const sum = risk[1]+risk[3]+risk[4];
-        [1,3,4].forEach(n=> risk[n] = sum ? risk[n]/sum : 1/3);
-        return risk;
-    }
-    static gapRisk(history){
-        const raw = {1:0,3:0,4:0};
-        [1,3,4].forEach(n=>{
-            let gap = history.length;
-            for (let i=history.length-1;i>=0;i--){ if (history[i]===n){ gap = history.length-1-i; break; } }
-            // Lâu chưa ra thì rủi ro bật lại cao hơn, nhưng không để áp đảo.
-            raw[n] = Utils.clamp(0.22 + Math.log1p(gap)/Math.log(18), 0.18, 0.92);
-        });
-        const sum = raw[1]+raw[3]+raw[4];
-        [1,3,4].forEach(n=> raw[n] = sum ? raw[n]/sum : 1/3);
-        return raw;
-    }
-    static edgeMarkovRisk(history){
-        const last = history[history.length-1];
-        const last2 = history.length>=2 ? history[history.length-2]+','+history[history.length-1] : null;
-        const risk = {1:1,3:1,4:1};
-        let hit1 = 0, hit2 = 0;
-        for (let i=0;i<history.length-1;i++){
-            if (history[i] === last && (history[i+1]===1 || history[i+1]===3 || history[i+1]===4)) { risk[history[i+1]] += 2.0; hit1++; }
-        }
-        if (last2){
-            for (let i=0;i<history.length-2;i++){
-                if ((history[i]+','+history[i+1]) === last2 && (history[i+2]===1 || history[i+2]===3 || history[i+2]===4)) { risk[history[i+2]] += 3.2; hit2++; }
-            }
-        }
-        const strength = Utils.clamp((hit1*0.12 + hit2*0.22), 0, 1);
-        const sum = risk[1]+risk[3]+risk[4];
-        [1,3,4].forEach(n=> risk[n] = sum ? risk[n]/sum : 1/3);
-        return {risk, strength, hit1, hit2};
-    }
-    static patternRisk(history){
-        const risk = {1:1,3:1,4:1};
-        let hits = 0;
-        for (let len=3; len<=7; len++){
-            if (history.length <= len+1) continue;
-            const pat = history.slice(-len).join(',');
-            for (let i=0; i<=history.length-len-1; i++){
-                if (history.slice(i,i+len).join(',') === pat){
-                    const next = history[i+len];
-                    if (next===1 || next===3 || next===4){
-                        const simW = 1 + (len-3)*0.25;
-                        risk[next] += simW;
-                        hits += simW;
-                    }
-                }
-            }
-        }
-        const strength = Utils.clamp(hits / 9, 0, 1);
-        const sum = risk[1]+risk[3]+risk[4];
-        [1,3,4].forEach(n=> risk[n] = sum ? risk[n]/sum : 1/3);
-        return {risk, strength, hits};
-    }
-    static predict(history, baseScores, regime){
-        const win = this.windowRisk(history);
-        const gap = this.gapRisk(history);
-        const mk = this.edgeMarkovRisk(history);
-        const pat = this.patternRisk(history);
-        const baseRisk = {1:baseScores[1],3:baseScores[3],4:baseScores[4]};
-        const riskRaw = {1:0,3:0,4:0};
-        [1,3,4].forEach(n=>{
-            riskRaw[n] =
-                baseRisk[n] * 0.18 +
-                win[n] * CONFIG.CORE_WINDOW_WEIGHT +
-                gap[n] * CONFIG.CORE_GAP_WEIGHT +
-                mk.risk[n] * CONFIG.CORE_MARKOV_EDGE_WEIGHT +
-                pat.risk[n] * CONFIG.CORE_PATTERN_WEIGHT;
-        });
-        const risk = this.softmax(riskRaw, regime === 'chaos' ? 0.13 : 0.095);
-        // Bộ tốt là bộ LOẠI TRỪ số có rủi ro thấp nhất.
-        const setScores = {
-            '1-2-3': 1 - risk[4],
-            '1-2-4': 1 - risk[3],
-            '2-3-4': 1 - risk[1]
-        };
-        const rankedRisk = [1,3,4].map(n=>({n, risk:risk[n]})).sort((a,b)=>a.risk-b.risk);
-        const bestMissing = rankedRisk[0].n;
-        const bestKey = bestMissing===4 ? '1-2-3' : (bestMissing===3 ? '1-2-4' : '2-3-4');
-        const spread = rankedRisk[1].risk - rankedRisk[0].risk;
-        const strength = Utils.clamp(spread*3.2 + mk.strength*0.22 + pat.strength*0.18, 0, 1);
-        return {risk, setScores, bestMissing, bestKey, strength, spread, markovHits:mk.hit1+mk.hit2, patternHits:pat.hits};
-    }
-}
-
-// ====================== RISK / AUTO-SKIP GUARD ======================
-class RiskGuardEngine {
-    static freq(history, window){
-        const r = history.slice(-window);
-        const f = {1:1,2:1,3:1,4:1};
-        r.forEach(v=>{ if (f[v] !== undefined) f[v]++; });
-        const total = f[1]+f[2]+f[3]+f[4];
-        return {1:f[1]/total,2:f[2]/total,3:f[3]/total,4:f[4]/total};
-    }
-    static kl(p,q){
-        let out = 0;
-        for (let n=1;n<=4;n++) out += p[n] * Math.log((p[n]||0.001)/(q[n]||0.001));
-        return out;
-    }
-    static js(p,q){
-        const m = {1:(p[1]+q[1])/2,2:(p[2]+q[2])/2,3:(p[3]+q[3])/2,4:(p[4]+q[4])/2};
-        return Math.max(0, (this.kl(p,m)+this.kl(q,m))/2);
-    }
-    static edgeSamples(history, window=36){
-        return history.slice(-window).filter(v=>v===1 || v===3 || v===4).length;
-    }
-    static edgeEntropy(history, window=36){
-        const r = history.slice(-window).filter(v=>v===1 || v===3 || v===4);
-        if (!r.length) return 1;
-        const f = {1:0,3:0,4:0}; r.forEach(v=>f[v]++);
-        let e = 0;
-        [1,3,4].forEach(n=>{ const p=f[n]/r.length; if(p>0)e-=p*Math.log2(p); });
-        return e / Math.log2(3);
-    }
-    static streakNoise(history){
-        if (history.length < 10) return 0;
-        const r = history.slice(-12);
-        let changes = 0;
-        for (let i=1;i<r.length;i++) if (r[i]!==r[i-1]) changes++;
-        const ent = Utils.entropy(r)/2;
-        return Utils.clamp(changes/11*0.55 + ent*0.45, 0, 1);
-    }
-    static assess(history, pred){
-        const recent = this.freq(history, Math.min(14, history.length));
-        const baseline = this.freq(history, Math.min(70, history.length));
-        const drift = this.js(recent, baseline);
-        const edgeN = this.edgeSamples(history, 36);
-        const edgeEntropy = this.edgeEntropy(history, 36);
-        const tieRisk = Utils.clamp(1 - (pred.margin || 0) / 0.055, 0, 1);
-        const lowConsensus = Utils.clamp((CONFIG.GUARD_MIN_CONSENSUS - (pred.consensus || 0)) / CONFIG.GUARD_MIN_CONSENSUS, 0, 1);
-        const lowMargin = Utils.clamp((CONFIG.GUARD_MIN_MARGIN - (pred.margin || 0)) / CONFIG.GUARD_MIN_MARGIN, 0, 1);
-        const driftRisk = Utils.clamp(drift / CONFIG.GUARD_MAX_DRIFT, 0, 1);
-        const edgeRisk = Utils.clamp((CONFIG.GUARD_MIN_EDGE_SAMPLES - edgeN) / CONFIG.GUARD_MIN_EDGE_SAMPLES, 0, 1);
-        const noise = this.streakNoise(history);
-        const risk = Utils.clamp(lowMargin*0.27 + lowConsensus*0.22 + driftRisk*0.20 + edgeRisk*0.16 + tieRisk*0.10 + edgeEntropy*0.03 + noise*0.02, 0, 1);
-        const reasons = [];
-        if (lowMargin > 0.15) reasons.push('3 bộ sát điểm');
-        if (lowConsensus > 0.10) reasons.push('AI chưa đồng thuận');
-        if (drift > CONFIG.GUARD_MAX_DRIFT) reasons.push('lịch sử gần đổi nhịp');
-        if (edgeN < CONFIG.GUARD_MIN_EDGE_SAMPLES) reasons.push('ít mẫu phân biệt 1/3/4');
-        if (edgeEntropy > 0.92 && pred.margin < 0.020) reasons.push('biên 1/3/4 đang loạn');
-        let playMode = 'PLAY';
-        let guardClass = 'play';
-        let guardLabel = 'ĐÁNH ĐƯỢC';
-        let grade = 'A';
-        if (CONFIG.AUTO_SKIP_ENABLED && (risk >= 0.58 || pred.confidence < CONFIG.MIN_PLAY_CONFIDENCE || (pred.signalClass==='weak' && risk >= 0.42))) {
-            playMode = 'SKIP'; guardClass = 'skip'; guardLabel = 'BỎ LƯỢT'; grade = 'C';
-        } else if (risk >= 0.36 || pred.signalClass === 'weak') {
-            guardClass = 'caution'; guardLabel = 'CẨN TRỌNG'; grade = 'B';
-        }
-        const penalty = Utils.clamp(risk * 18 + (playMode==='SKIP'?7:0), 0, 28);
-        return {playMode, guardClass, guardLabel, grade, risk, penalty, drift, edgeN, edgeEntropy, tieRisk, reasons};
-    }
-}
-
-// ====================== PREDICTION ENGINE TONG ======================
-class PredictionEngine {
-    constructor(algorithms, weightEngine){
-        this.algorithms = algorithms;
-        this.weightEngine = weightEngine;
-        this.markov = new MarkovEngine();
-        this.bayesian = new BayesianEngine();
-        this.hmm = new HiddenMarkovModel();
-        this.patternDB = new PatternDatabase();
-        this.setEngine = new CandidateSetEngine();
-        this.edgeLearner = new EdgeExclusionLearner();
-        this.cache = new Map();
-    }
-    ensemble(history){
-        const final = {1:0,2:0,3:0,4:0};
-        let totalWeight = 0;
-        for (let algo of this.algorithms){
-            if (!algo.enabled) continue;
-            const scores = Utils.blendUniform(algo.predict(history));
-            const w = algo.weight;
-            for (let n=1; n<=4; n++) final[n] += scores[n] * w;
-            totalWeight += w;
-        }
-        if (totalWeight) for (let n=1; n<=4; n++) final[n] /= totalWeight;
-        else return {1:0.25,2:0.25,3:0.25,4:0.25};
-        return Utils.blendUniform(final, 0.03);
-    }
-    regimeMix(regime){
-        const regimeWeights = {
-            trend:          {ensemble:0.34, markov:0.28, bayesian:0.12, pattern:0.18, hmm:0.08},
-            chaos:          {ensemble:0.40, markov:0.12, bayesian:0.24, pattern:0.10, hmm:0.14},
-            alternating:    {ensemble:0.24, markov:0.24, bayesian:0.15, pattern:0.27, hmm:0.10},
-            repeating:      {ensemble:0.26, markov:0.20, bayesian:0.14, pattern:0.30, hmm:0.10},
-            mean_reversion: {ensemble:0.35, markov:0.14, bayesian:0.26, pattern:0.14, hmm:0.11},
-            transition:     {ensemble:0.30, markov:0.16, bayesian:0.29, pattern:0.14, hmm:0.11},
-            breakout:       {ensemble:0.25, markov:0.18, bayesian:0.34, pattern:0.12, hmm:0.11},
-            neutral:        {ensemble:0.38, markov:0.18, bayesian:0.22, pattern:0.12, hmm:0.10}
-        };
-        return regimeWeights[regime] || regimeWeights.neutral;
-    }
-    predict(history){
-        if (history.length < CONFIG.MIN_HISTORY_FOR_PREDICTION) return null;
-        const cacheKey = history.length + ':' + history.slice(-24).join(',') + ':' + this.algorithms.map(a=>a.weight.toFixed(4)).join('|');
-        if (this.cache.has(cacheKey)) return this.cache.get(cacheKey);
-        const ensembleScores = this.ensemble(history);
-        const order = MarkovEngine.adaptiveOrder(history);
-        const markovScores = Utils.blendUniform(MarkovEngine.predict(history, order), 0.05);
-        const bayesianScores = this.bayesian.predict(history);
-        const patternScores = this.patternDB.getPrediction(history, 8);
-        const hmmScores = this.hmm.predict(history);
-        const regime = Utils.detectRegime(history);
-        const w = this.regimeMix(regime);
-        const combined = {1:0,2:0,3:0,4:0};
-        const mix = (src, weight) => { for(let n=1;n<=4;n++) combined[n] += src[n]*weight; };
-        mix(ensembleScores, w.ensemble);
-        mix(markovScores, w.markov);
-        mix(bayesianScores, w.bayesian);
-        mix(patternScores || {1:0.25,2:0.25,3:0.25,4:0.25}, w.pattern);
-        mix(hmmScores, w.hmm);
-        let normalized = Utils.blendUniform(combined, CONFIG.PROBABILITY_SMOOTHING);
-        const reliability = this.weightEngine.reliability();
-        const setEval = this.setEngine.scoreSets(normalized, history, reliability);
-        const edgeEval = this.edgeLearner.predict(normalized, history, regime);
-        const metaEval = MetaPredictionCore.predict(history, normalized, regime);
-        const sourceVotes = [];
-        const voteFromScores = (label, src, weight=1) => {
-            const key = Utils.predSetFromScores(src);
-            sourceVotes.push({label, key, weight});
-        };
-        voteFromScores('ensemble', ensembleScores, 1.05);
-        voteFromScores('markov', markovScores, 0.95);
-        voteFromScores('bayes', bayesianScores, 1.00);
-        voteFromScores('hmm', hmmScores, 0.80);
-        if (patternScores) voteFromScores('pattern', patternScores, 1.15);
-        sourceVotes.push({label:'edge', key:edgeEval.bestKey, weight:1.25});
-        sourceVotes.push({label:'core', key:metaEval.bestKey, weight:1.10 + metaEval.strength*0.55});
-        const voteScore = {'1-2-3':0,'1-2-4':0,'2-3-4':0};
-        let voteTotal = 0;
-        sourceVotes.forEach(v=>{ voteScore[v.key] += v.weight; voteTotal += v.weight; });
-        const consensusKey = Object.entries(voteScore).sort((a,b)=>b[1]-a[1])[0][0];
-        const consensus = voteTotal ? voteScore[consensusKey]/voteTotal : 1/3;
-        const edgeWeight = Utils.clamp(CONFIG.EDGE_EXCLUSION_WEIGHT * edgeEval.strength, 0.06, CONFIG.EDGE_EXCLUSION_WEIGHT);
-        const consensusWeight = Utils.clamp(CONFIG.CONSENSUS_WEIGHT * consensus, 0.025, CONFIG.CONSENSUS_WEIGHT);
-        const metaWeight = Utils.clamp(CONFIG.CORE_META_WEIGHT * (0.40 + metaEval.strength), 0.045, CONFIG.CORE_META_WEIGHT);
-        const setScores = {};
-        Utils.candidateSets().forEach(set=>{
-            const consensusScore = set.key === consensusKey ? 0.86 : 0.70;
-            const raw = setEval.scores[set.key]*(1-edgeWeight-consensusWeight-metaWeight) + edgeEval.setScores[set.key]*edgeWeight + metaEval.setScores[set.key]*metaWeight + consensusScore*consensusWeight;
-            setScores[set.key] = Utils.clamp(raw, 0.45, 0.985);
-        });
-        const setRanking = Utils.candidateSets().map(set=>({...set, score:setScores[set.key], missRisk:edgeEval.risk[set.missing]})).sort((a,b)=>b.score-a.score || a.key.localeCompare(b.key));
-        const predSet = setRanking[0].key;
-        const selectedProb = setScores[predSet];
-        const margin = Math.max(0, setRanking[0].score - setRanking[1].score);
-        const decisiveSignal = Math.max(normalized[1], normalized[3], normalized[4]) - Math.min(normalized[1], normalized[3], normalized[4]);
-        const signalScore = Utils.clamp((margin/0.055)*0.38 + (consensus-1/3)*0.58 + reliability*0.16 + decisiveSignal*0.38 + metaEval.strength*0.22, 0, 1);
-        let signalLabel = 'YẾU - NÊN QUAN SÁT';
-        let signalClass = 'weak';
-        let playAdvice = '3 bộ đang sát điểm, không nên tin tuyệt đối bộ #1.';
-        if (signalScore >= 0.66 && margin >= CONFIG.MIN_STRONG_MARGIN && consensus >= 0.50) {
-            signalLabel = 'MẠNH - ƯU TIÊN BỘ #1';
-            signalClass = 'strong';
-            playAdvice = 'Bộ #1 có đồng thuận AI và khoảng cách đủ tốt.';
-        } else if (signalScore >= 0.43 && margin >= 0.010) {
-            signalLabel = 'VỪA - ĐI NHẸ';
-            signalClass = 'medium';
-            playAdvice = 'Có tín hiệu nhưng chưa đủ mạnh, nên giảm kỳ vọng.';
-        }
-        let confidence = (selectedProb*0.62 + reliability*0.08 + margin*1.00 + decisiveSignal*0.07 + consensus*0.11 + signalScore*0.10 + metaEval.strength*0.07) * 100;
-        if (signalClass === 'weak') confidence = Math.min(confidence, 68);
-        if (signalClass === 'medium') confidence = Math.min(confidence, 82);
-        confidence = Utils.clamp(confidence, 50, 97);
-        let provisional = {predSet, confidence, margin, consensus, signalClass, signalScore};
-        const guard = RiskGuardEngine.assess(history, provisional);
-        confidence = Utils.clamp(confidence - guard.penalty, 45, 97);
-        if (guard.playMode === 'SKIP') {
-            signalLabel = 'BỎ LƯỢT - NHIỄU';
-            signalClass = 'skip';
-            playAdvice = 'Auto-skip đang bật: bỏ lượt này để giữ tỉ lệ, không ép đánh.';
-        } else if (guard.guardClass === 'caution' && signalClass === 'strong') {
-            signalLabel = 'VỪA - ĐI NHẸ';
-            signalClass = 'medium';
-            playAdvice = 'Bộ #1 vẫn đứng đầu nhưng bộ lọc phát hiện rủi ro, nên giảm lực.';
-        }
-        const mc = MonteCarloEngine.simulate(normalized);
-        const result = { scores:normalized, predSet, confidence, setScores, setRanking, selectedProb, set123:setScores['1-2-3'], set124:setScores['1-2-4'], set234:setScores['2-3-4'], mc, order, regime, margin, reliability, decisiveSignal, edgeRisk:edgeEval.risk, edgeStrength:edgeEval.strength, metaEval, consensus, consensusKey, signalScore, signalLabel, signalClass, playAdvice, guard, playMode:guard.playMode };
-        this.cache.set(cacheKey, result);
-        if (this.cache.size > 500) this.cache.clear();
-        return result;
-    }
-    updateModels(history, actual){
-        const prior = history.length >= CONFIG.MIN_HISTORY_FOR_PREDICTION ? this.predict(history) : null;
-        if (prior && prior.setScores) this.setEngine.update(actual, prior.setScores);
-        if (prior) this.edgeLearner.update(history, actual, prior.predSet);
-        this.bayesian.update(history, actual);
-        this.patternDB.update(history, actual);
-        this.hmm.update([...history, actual]);
-        this.cache.clear();
-    }
-}
-
-// ====================== BACKTEST ENGINE ======================
-class BacktestEngine {
-    static run(history){
-        if (history.length < CONFIG.BACKTEST_MIN_SAMPLES) return null;
-        const algorithms = createAlgorithms();
-        const weightEngine = new AdaptiveWeightEngine(algorithms);
-        const engine = new PredictionEngine(algorithms, weightEngine);
-        const results = [];
-        for (let i=CONFIG.MIN_HISTORY_FOR_PREDICTION; i<history.length; i++){
-            const train = history.slice(0,i);
-            const actual = history[i];
-            const pred = engine.predict(train);
-            if (!pred) continue;
-            const correct = Utils.isSetCorrect(pred.predSet, actual);
-            const pWin = Utils.clamp(Utils.setProbability(pred.scores, pred.predSet), 0.001, 0.999);
-            const edge = (actual !== 2);
-            const edgeCorrect = edge ? correct : null;
-            const ranking = pred.setRanking ? pred.setRanking.map(x=>x.key+':'+(x.score*100).toFixed(1)).join(' > ') : pred.predSet;
-            const skipped = pred.playMode === 'SKIP';
-            results.push({actual, pred:pred.predSet, correct, confidence:pred.confidence, pWin, edge, edgeCorrect, ranking, brier:Utils.brierScore(pred.scores, actual), signalClass:pred.signalClass, skipped, coreStrength:pred.metaEval ? pred.metaEval.strength : 0});
-            weightEngine.update(train, actual);
-            engine.updateModels(train, actual);
-            if (i % 20 === 0) weightEngine.prune();
-        }
-        const total = results.length || 1;
-        const correctCount = results.filter(r=>r.correct).length;
-        const edgeRows = results.filter(r=>r.edge);
-        const edgeTotal = edgeRows.length || 1;
-        const edgeCorrect = edgeRows.filter(r=>r.edgeCorrect).length;
-        const accuracy = correctCount/total;
-        const edgeAccuracy = edgeCorrect/edgeTotal;
-        const avgConfidence = results.reduce((s,r)=>s+r.confidence,0)/total;
-        const logLoss = results.reduce((s,r)=>s - (r.correct?Math.log(r.pWin):Math.log(1-r.pWin)),0)/total;
-        const brier = results.reduce((s,r)=>s+r.brier,0)/total;
-        const strongRows = results.filter(r=>r.signalClass==='strong');
-        const mediumRows = results.filter(r=>r.signalClass==='medium');
-        const weakRows = results.filter(r=>r.signalClass==='weak');
-        const skipRows = results.filter(r=>r.skipped);
-        const playRows = results.filter(r=>!r.skipped);
-        const coreRows = results.filter(r=>r.coreStrength>=0.45);
-        const rate = rows => rows.length ? rows.filter(r=>r.correct).length/rows.length : 0;
-        const edgeRate = rows => { const er = rows.filter(r=>r.edge); return er.length ? er.filter(r=>r.edgeCorrect).length/er.length : 0; };
-        return { accuracy, edgeAccuracy, avgConfidence, logLoss, brier, total:results.length, edgeTotal:edgeRows.length, strongTotal:strongRows.length, strongAccuracy:rate(strongRows), mediumTotal:mediumRows.length, mediumAccuracy:rate(mediumRows), weakTotal:weakRows.length, weakAccuracy:rate(weakRows), playTotal:playRows.length, playAccuracy:rate(playRows), playEdgeAccuracy:edgeRate(playRows), skipTotal:skipRows.length, coreTotal:coreRows.length, coreAccuracy:rate(coreRows) };
-    }
-}
-
-// ====================== UI MANAGER ======================
-class UIManager {
-    constructor() {
-        this.elements = {
-            histDisplay: document.getElementById('histDisplay'),
-            predSet: document.getElementById('predSet'),
-            confFill: document.getElementById('confFill'),
-            confText: document.getElementById('confText'),
-            s1: document.getElementById('s1'), s2: document.getElementById('s2'), s3: document.getElementById('s3'), s4: document.getElementById('s4'),
-            bar123: document.getElementById('bar123'), bar124: document.getElementById('bar124'), bar234: document.getElementById('bar234'),
-            setScore123: document.getElementById('setScore123'), setScore124: document.getElementById('setScore124'), setScore234: document.getElementById('setScore234'),
-            mcInfo: document.getElementById('mcInfo'),
-            qualityText: document.getElementById('qualityText'), decisionBadge: document.getElementById('decisionBadge'), guardInfo: document.getElementById('guardInfo'), edgeInfo: document.getElementById('edgeInfo'), coreInfo: document.getElementById('coreInfo'),
-            winCount: document.getElementById('winCount'), lossCount: document.getElementById('lossCount'),
-            skipCount: document.getElementById('skipCount'), winRate: document.getElementById('winRate'),
-            regimeDisplay: document.getElementById('regimeDisplay'),
-            historyLog: document.getElementById('historyLog'),
-            algoDetail: document.getElementById('algoDetail'),
-            streakIndicator: document.getElementById('streakIndicator')
-        };
-    }
-    updateHistory(history) {
-        this.elements.histDisplay.textContent = history.length ? history.join(' ') : '—';
-    }
-    updatePrediction(prediction) {
-        const { scores, predSet, confidence, setScores, setRanking } = prediction;
-        this.elements.predSet.textContent = predSet;
-        this.elements.predSet.style.color = '#ff0';
-        this.elements.confFill.style.width = Math.min(100, confidence) + '%';
-        this.elements.confText.textContent = `Độ tin cậy: ${confidence.toFixed(1)}%`;
-        for (let n=1; n<=4; n++) this.elements['s'+n].textContent = (scores[n]*100).toFixed(1)+'%';
-        const rows = [ ['123','1-2-3'], ['124','1-2-4'], ['234','2-3-4'] ];
-        rows.forEach(([id,key]) => {
-            const val = Math.max(0, Math.min(100, (setScores?.[key] ?? 0) * 100));
-            this.elements['bar'+id].style.width = val.toFixed(1)+'%';
-            this.elements['setScore'+id].textContent = val.toFixed(1)+'%';
-        });
-        const ranking = (setRanking || []).map((r,i)=>`#${i+1} ${r.key} ${(r.score*100).toFixed(1)}%`).join(' | ');
-        this.elements.mcInfo.innerHTML = `AI xếp hạng bộ: ${ranking}`;
-        const cls = prediction.signalClass || 'medium';
-        this.elements.qualityText.className = 'quality-line quality-' + cls;
-        this.elements.qualityText.textContent = `Tín hiệu: ${prediction.signalLabel || '—'} · ${prediction.playAdvice || ''}`;
-        const guard = prediction.guard || {};
-        const isSkip = prediction.playMode === 'SKIP';
-        this.elements.decisionBadge.className = 'decision-badge ' + (isSkip ? 'decision-skip' : 'decision-play');
-        this.elements.decisionBadge.textContent = isSkip ? `Quyết định: BỎ LƯỢT · vẫn ưu tiên ${prediction.predSet}` : `Quyết định: THEO BỘ #1 · ${prediction.predSet}`;
-        const reasons = (guard.reasons && guard.reasons.length) ? guard.reasons.join(', ') : 'tín hiệu đủ sạch';
-        this.elements.guardInfo.className = 'guard-line guard-' + (guard.guardClass || 'caution');
-        this.elements.guardInfo.innerHTML = `Bộ lọc v10: ${guard.guardLabel || '—'} · điểm rủi ro ${((guard.risk||0)*100).toFixed(0)}% · drift ${((guard.drift||0)*100).toFixed(1)}% · mẫu 1/3/4 ${guard.edgeN ?? 0}/36 · ${reasons}`;
-        if (prediction.edgeRisk) {
-            this.elements.edgeInfo.innerHTML = `AI loại trừ: rủi ro ra 1 ${(prediction.edgeRisk[1]*100).toFixed(1)}% · ra 3 ${(prediction.edgeRisk[3]*100).toFixed(1)}% · ra 4 ${(prediction.edgeRisk[4]*100).toFixed(1)}% · đồng thuận ${(prediction.consensus*100).toFixed(0)}%`;
-        } else this.elements.edgeInfo.innerHTML = '';
-        if (prediction.metaEval) {
-            const m = prediction.metaEval;
-            this.elements.coreInfo.innerHTML = `Core v10: né <b class="core-hot">${m.bestMissing}</b> → ${m.bestKey} · lực ${(m.strength*100).toFixed(0)}% · spread ${(m.spread*100).toFixed(1)}% · Markov ${m.markovHits} · Pattern ${m.patternHits.toFixed(1)}`;
-        } else this.elements.coreInfo.innerHTML = '';
-    }
-    updateStats(wins, losses, skips, winRate, regime, streak) {
-        this.elements.winCount.textContent = wins;
-        this.elements.lossCount.textContent = losses;
-        this.elements.skipCount.textContent = skips || 0;
-        this.elements.winRate.textContent = (winRate*100).toFixed(1)+'%';
-        const map = {
-            trend: ['📈 BỆT','regime-trend'], chaos: ['🎲 HỖN LOẠN','regime-chaos'],
-            alternating: ['🔄 XEN KẼ','regime-chaos'], repeating: ['🔁 LẶP','regime-trend'],
-            mean_reversion: ['↩️ HỒI','regime-neutral'], transition: ['🔀 CHUYỂN','regime-neutral'],
-            breakout: ['🚀 BỨT','regime-trend'], neutral: ['⚖️ TRUNG TÍNH','regime-neutral']
-        };
-        const [txt, cls] = map[regime] || map.neutral;
-        this.elements.regimeDisplay.textContent = txt;
-        this.elements.regimeDisplay.className = 'regime-badge '+cls;
-        this.elements.streakIndicator.textContent = streak>0 ? `⚠️ Chuỗi thua: ${streak}` : '';
-    }
-    addLogEntry(actual, predicted, correct) {
-        const entry = document.createElement('div'); entry.className = 'log-entry';
-        const mark = correct===null ? '⏸' : (correct?'✅':'❌');
-        const cls = correct===null ? 'draw' : (correct?'win':'loss');
-        entry.innerHTML = `<span class="log-num">${actual}</span><span class="log-pred">→ ${predicted}</span><span class="log-result ${cls}">${mark}</span>`;
-        this.elements.historyLog.prepend(entry);
-        if (this.elements.historyLog.children.length > 100) this.elements.historyLog.removeChild(this.elements.historyLog.lastChild);
-    }
-    updateAlgoDetail(algorithms) {
-        let html = '<b>🔥 CHI TIẾT THUẬT TOÁN</b><br>';
-        algorithms.forEach(a => {
-            const acc = a.total ? (a.accuracyAll*100).toFixed(1) : '—';
-            const edge = a.edgeTotal ? (a.edgeCorrect/a.edgeTotal*100).toFixed(1) : '—';
-            html += `<span>${a.name}</span> w:${(a.weight*100).toFixed(1)}% skill:${(a.skill*100).toFixed(1)} edge:${edge}% on:${a.enabled}<br>`;
-        });
-        this.elements.algoDetail.innerHTML = html;
-    }
-}
-
-// ====================== MAIN APP ======================
-class FanTanApp {
-    constructor() {
-        this.storage = new StorageManager(CONFIG.STORAGE_VERSION);
-        this.algorithms = createAlgorithms();
-        this.weightEngine = new AdaptiveWeightEngine(this.algorithms);
-        this.engine = new PredictionEngine(this.algorithms, this.weightEngine);
-        this.ui = new UIManager();
-        this.history = [];
-        this.wins = 0; this.losses = 0; this.skips = 0; this.consecutiveLosses = 0;
-        this.algoDetailVisible = false;
-        this.loadData();
-        this.updateUI();
-    }
-    loadData() {
-        this.history = this.storage.loadAny(['fan_hist_v10','fan_hist_v9','fan_hist_v8','fan_hist_v7','fan_hist_v6'], []);
-        const wl = this.storage.loadAny(['fan_wl_v10','fan_wl_v9','fan_wl_v8','fan_wl_v7','fan_wl_v6'], {win:0, loss:0, skip:0});
-        this.wins = wl.win || 0;
-        this.losses = wl.loss || 0;
-        this.skips = wl.skip || 0;
-        const savedStats = this.storage.load('fan_algo_stats_v10', null) || this.storage.load('fan_algo_stats_v9', null) || this.storage.load('fan_algo_stats_v8', null) || this.storage.load('fan_algo_stats_v7', null);
-        if (savedStats) this.weightEngine.importState(savedStats);
-        else {
-            const savedWeights = this.storage.load('fan_weights_v6', null);
-            if (savedWeights && savedWeights.length === this.algorithms.length) savedWeights.forEach((w,i)=> this.algorithms[i].weight = w);
-        }
-        this.rebuildModelsFromHistory();
-        const savedSetStats = this.storage.load('fan_set_stats_v10', null) || this.storage.load('fan_set_stats_v9', null) || this.storage.load('fan_set_stats_v8', null);
-        if (savedSetStats) this.engine.setEngine.importState(savedSetStats);
-        const savedEdgeStats = this.storage.load('fan_edge_stats_v10', null) || this.storage.load('fan_edge_stats_v9', null);
-        if (savedEdgeStats) this.engine.edgeLearner.importState(savedEdgeStats);
-    }
-    saveData() {
-        this.storage.scheduleSave('fan_hist_v10', ()=> this.history);
-        this.storage.scheduleSave('fan_wl_v10', ()=> ({win:this.wins, loss:this.losses, skip:this.skips}));
-        this.storage.scheduleSave('fan_weights_v10', ()=> this.algorithms.map(a=>a.weight));
-        this.storage.scheduleSave('fan_algo_stats_v10', ()=> this.weightEngine.exportState());
-        this.storage.scheduleSave('fan_set_stats_v10', ()=> this.engine.setEngine.exportState());
-        this.storage.scheduleSave('fan_edge_stats_v10', ()=> this.engine.edgeLearner.exportState());
-    }
-    rebuildModelsFromHistory() {
-        this.engine = new PredictionEngine(this.algorithms, this.weightEngine);
-        for (let i=1; i<this.history.length; i++){
-            this.engine.updateModels(this.history.slice(0,i), this.history[i]);
-        }
-    }
-    addNumber(num) {
-        if (this.history.length >= CONFIG.MIN_HISTORY_FOR_PREDICTION) {
-            const prediction = this.engine.predict(this.history);
-            if (prediction) {
-                const correct = Utils.isSetCorrect(prediction.predSet, num);
-                if (prediction.playMode === 'SKIP') {
-                    this.skips++;
-                    this.ui.addLogEntry(num, 'BỎ ' + prediction.predSet, null);
-                } else if (correct) { this.wins++; this.consecutiveLosses=0; this.ui.addLogEntry(num, prediction.predSet, true); }
-                else { this.losses++; this.consecutiveLosses++; this.ui.addLogEntry(num, prediction.predSet, false); }
-                this.weightEngine.update(this.history, num, prediction.predSet);
-                this.engine.updateModels(this.history, num);
-                if ((this.wins+this.losses) % 20 === 0) this.weightEngine.prune();
-                this.saveData();
-            }
-        }
-        this.history.push(num);
-        if (this.history.length > CONFIG.MAX_HISTORY) this.history = this.history.slice(-CONFIG.MAX_HISTORY);
-        this.updateUI();
-    }
-    undoLast() {
-        if (!this.history.length) return;
-        this.history.pop();
-        this.updateUI();
-    }
-    resetAll() {
-        this.history = []; this.wins = 0; this.losses = 0; this.skips = 0; this.consecutiveLosses = 0;
-        this.algorithms.forEach(a=>{ a.total=0; a.correct=0; a.weight=1/this.algorithms.length; a.enabled=true; a.skill=0.5; a.edgeTotal=0; a.edgeCorrect=0; });
-        this.weightEngine = new AdaptiveWeightEngine(this.algorithms);
-        this.engine = new PredictionEngine(this.algorithms, this.weightEngine);
-        this.saveData();
-        this.updateUI();
-        document.getElementById('historyLog').innerHTML = '';
-    }
-    clearStorage() { this.storage.clearAll(); this.resetAll(); }
-    toggleAlgoDetail() {
-        this.algoDetailVisible = !this.algoDetailVisible;
-        this.ui.elements.algoDetail.style.display = this.algoDetailVisible ? 'block' : 'none';
-        if (this.algoDetailVisible) this.ui.updateAlgoDetail(this.algorithms);
-    }
-    runBacktest() {
-        if (this.history.length < CONFIG.BACKTEST_MIN_SAMPLES) { alert('Cần ít nhất 18 số!'); return; }
-        const result = BacktestEngine.run(this.history);
-        if (result) {
-            alert(`Backtest walk-forward: ${result.total} ván
-Lượt ĐÁNH sau lọc: ${result.playTotal} · thắng ${(result.playAccuracy*100).toFixed(1)}%
-Mẫu 1/3/4 sau lọc đúng: ${(result.playEdgeAccuracy*100).toFixed(1)}%
-Bỏ lượt: ${result.skipTotal}
-Core v10 mạnh: ${(result.coreAccuracy*100).toFixed(1)}% (${result.coreTotal} mẫu)
-Tỉ lệ nếu ép đánh mọi ván: ${(result.accuracy*100).toFixed(1)}%
-Mẫu phân biệt 1/3/4 đúng: ${(result.edgeAccuracy*100).toFixed(1)}% (${result.edgeTotal} mẫu)
-Tín hiệu MẠNH: ${(result.strongAccuracy*100).toFixed(1)}% (${result.strongTotal} mẫu)
-Tín hiệu VỪA: ${(result.mediumAccuracy*100).toFixed(1)}% (${result.mediumTotal} mẫu)
-Tín hiệu YẾU/SKIP: ${(result.weakAccuracy*100).toFixed(1)}% (${result.weakTotal} mẫu)
-Độ tin cậy TB: ${result.avgConfidence.toFixed(1)}%
-Brier: ${result.brier.toFixed(3)}
-LogLoss: ${result.logLoss.toFixed(3)}`);
-        }
-    }
-    updateUI() {
-        this.ui.updateHistory(this.history);
-        const regime = Utils.detectRegime(this.history);
-        const winRate = this.wins+this.losses ? this.wins/(this.wins+this.losses) : 0;
-        this.ui.updateStats(this.wins, this.losses, this.skips, winRate, regime, this.consecutiveLosses);
-        if (this.history.length >= CONFIG.MIN_HISTORY_FOR_PREDICTION) {
-            const pred = this.engine.predict(this.history);
-            if (pred) this.ui.updatePrediction(pred);
-        } else {
-            ['predSet','confFill','confText','qualityText','decisionBadge','guardInfo','edgeInfo','coreInfo','s1','s2','s3','s4','bar123','bar124','bar234','setScore123','setScore124','setScore234','mcInfo'].forEach(id=>{
-                if (id==='predSet') this.ui.elements.predSet.textContent='-';
-                else if (id==='confFill') this.ui.elements.confFill.style.width='0%';
-                else if (id==='confText') this.ui.elements.confText.textContent='Độ tin cậy: —';
-                else if (id==='qualityText') { this.ui.elements.qualityText.textContent='Tín hiệu: —'; this.ui.elements.qualityText.className='quality-line quality-medium'; }
-                else if (id==='decisionBadge') { this.ui.elements.decisionBadge.textContent='Quyết định: —'; this.ui.elements.decisionBadge.className='decision-badge decision-play'; }
-                else if (id==='guardInfo') { this.ui.elements.guardInfo.textContent='Bộ lọc: —'; this.ui.elements.guardInfo.className='guard-line guard-caution'; }
-                else if (id==='edgeInfo') this.ui.elements.edgeInfo.innerHTML='';
-                else if (id==='coreInfo') this.ui.elements.coreInfo.innerHTML='';
-                else if (id.startsWith('s') && this.ui.elements[id]) this.ui.elements[id].textContent='—';
-                else if (id.startsWith('bar')) this.ui.elements[id].style.width='0%';
-                else if (id.startsWith('setScore')) this.ui.elements[id].textContent='--';
-                else if (id==='mcInfo') this.ui.elements.mcInfo.innerHTML='';
-            });
-        }
-    }
-}
-window.app = new FanTanApp();
+window.app = new App();
 </script>
 </body>
 </html>
