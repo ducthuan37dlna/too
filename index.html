@@ -3,51 +3,71 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>FAN-TAN GOD MODE v20.0 PRECISION</title>
+<title>FAN-TAN GOD MODE v21.0 MANUAL</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,sans-serif}
-body{background:#0b0b1a;color:#e0e0e0;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:12px}
-.container{width:100%;max-width:620px;background:#10102a;border:2px solid #f0c040;border-radius:20px;padding:16px;box-shadow:0 0 50px #f0c04033}
-.title{text-align:center;font-size:1.8rem;color:#f0c040;text-shadow:0 0 15px #f0c040;font-weight:bold;margin-bottom:4px}
-.sub{text-align:center;font-size:.8rem;color:#c084fc;margin-bottom:12px}
-.notice{background:#1b0f20;border:1px solid #c084fc55;border-radius:8px;padding:6px;font-size:.75rem;text-align:center;margin-bottom:10px}
-.history-box{background:#000;border:1px solid #f0c040;border-radius:12px;padding:8px;margin-bottom:10px}
-textarea{width:100%;height:70px;background:#0a0a14;color:#00e676;border:none;resize:none;font-size:1rem;padding:6px;outline:none}
+:root{
+  --bg:#080817;--panel:#10102a;--panel2:#15153a;--gold:#f0c040;--purple:#c084fc;--green:#00e676;--red:#ff5252;--orange:#ffaa00;--text:#e9e9f5;--muted:#9696b4;--line:#33334d;--black:#05050c
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,-apple-system,BlinkMacSystemFont,sans-serif}
+body{background:radial-gradient(circle at 10% 0,#2a1955 0,#080817 32%,#05050c 100%);color:var(--text);display:flex;justify-content:center;align-items:flex-start;min-height:100vh;padding:12px}
+.container{width:100%;max-width:760px;background:linear-gradient(180deg,#121230,#0d0d22);border:2px solid var(--gold);border-radius:20px;padding:16px;box-shadow:0 0 50px #f0c04033}
+.title{text-align:center;font-size:1.72rem;color:var(--gold);text-shadow:0 0 15px #f0c040;font-weight:900;margin-bottom:4px;letter-spacing:.5px}
+.sub{text-align:center;font-size:.8rem;color:var(--purple);margin-bottom:12px;font-weight:700}
+.notice{background:#1b0f20;border:1px solid #c084fc55;border-radius:10px;padding:8px;font-size:.78rem;line-height:1.45;text-align:center;margin-bottom:10px;color:#ddd}
+.history-box{background:#000;border:1px solid var(--gold);border-radius:12px;padding:8px;margin-bottom:8px}
+textarea{width:100%;height:92px;background:#0a0a14;color:var(--green);border:none;resize:vertical;font-size:1rem;padding:8px;outline:none;line-height:1.45}
+textarea:focus{box-shadow:0 0 0 2px #c084fc55;border-radius:8px}
+.help{font-size:.72rem;color:var(--muted);line-height:1.45;margin:4px 0 10px;text-align:center}
 .btn-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:12px}
-.btn-row button{background:#1e1e3a;border:1px solid #c084fc;color:#c084fc;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:.8rem;transition:all .2s}
-.btn-row button:hover{background:#2a2a5a;box-shadow:0 0 8px #c084fc}
+button{background:#1e1e3a;border:1px solid var(--purple);color:var(--purple);border-radius:9px;padding:7px 12px;cursor:pointer;font-size:.8rem;font-weight:800;transition:all .16s}
+button:hover{background:#2a2a5a;box-shadow:0 0 8px #c084fc88;transform:translateY(-1px)}
+button:active{transform:scale(.97)}
+button.primary{background:linear-gradient(135deg,#3a2a12,#1e1e3a);border-color:var(--gold);color:var(--gold)}
 .num-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}
-.num-btns button{padding:20px;font-size:2.2rem;font-weight:bold;background:#12123a;border:2px solid #f0c040;color:#f0c040;border-radius:16px;cursor:pointer;text-shadow:0 0 10px #f0c040}
-.num-btns button:active{background:#2a2a5a;transform:scale(.95)}
-.prediction-box{background:#000;border:2px solid #c084fc;border-radius:16px;padding:14px;margin:12px 0;text-align:center}
-.pred-best{font-size:2.8rem;font-weight:bold;color:#ffd700;text-shadow:0 0 20px #ffd700;margin:4px 0}
-.conf-bar{height:14px;background:#222;border-radius:8px;overflow:hidden;margin:8px 0}
-.conf-fill{height:100%;background:linear-gradient(90deg,#f0c040,#c084fc);width:0%;transition:width .3s}
-.set-table{width:100%;border-collapse:collapse;margin:8px 0;font-size:.85rem}
-.set-table th{color:#f0c040;border-bottom:1px solid #333;padding:4px}
-.set-table td{padding:4px;text-align:center;border-bottom:1px solid #222}
-.set-table .highlight{background:#1e1e3a;color:#ffd700;font-weight:bold}
-.log-box{background:#000;border:1px solid #f0c040;border-radius:10px;padding:8px;max-height:150px;overflow:auto;margin-top:10px;font-size:.78rem}
-.log-entry{display:grid;grid-template-columns:40px 1fr 60px;gap:6px;padding:2px 0;border-bottom:1px solid #222}
-.win{color:#00e676}.loss{color:#ff5252}
-.footer{text-align:center;color:#555;font-size:.7rem;margin-top:10px}
+.num-btns button{padding:18px 8px;font-size:2.15rem;font-weight:900;background:#12123a;border:2px solid var(--gold);color:var(--gold);border-radius:16px;cursor:pointer;text-shadow:0 0 10px #f0c040}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.card{background:#080812;border:1px solid var(--line);border-radius:14px;padding:10px;min-width:0}
+.prediction-box{background:#000;border:2px solid var(--purple);border-radius:16px;padding:14px;margin:12px 0;text-align:center}
+.pred-best{font-size:2.75rem;font-weight:900;color:#ffd700;text-shadow:0 0 20px #ffd700;margin:4px 0;letter-spacing:1px}
+.conf-bar{height:14px;background:#222;border-radius:8px;overflow:hidden;margin:8px 0;border:1px solid #333}
+.conf-fill{height:100%;background:linear-gradient(90deg,var(--red),var(--orange),var(--green));width:0%;transition:width .3s}
+.badge{margin-top:6px;display:inline-block;padding:5px 12px;border-radius:12px;font-size:.8rem;font-weight:900;background:#1e1e3a;color:var(--gold);border:1px solid #333}
+.metric{display:grid;grid-template-columns:1fr 1fr;gap:6px;text-align:left;margin-top:8px;font-size:.78rem}
+.metric div{background:#101020;border:1px solid #252542;border-radius:9px;padding:7px;color:#cfcfe8}
+.metric b{color:var(--gold)}
+.set-table,.detail-table{width:100%;border-collapse:collapse;margin:8px 0;font-size:.82rem;overflow:hidden;border-radius:10px}
+th{color:var(--gold);border-bottom:1px solid #333;padding:6px 4px;background:#141429;font-size:.76rem}
+td{padding:6px 4px;text-align:center;border-bottom:1px solid #222;color:#e8e8f0}
+tr:last-child td{border-bottom:none}
+.highlight{background:#1e1e3a!important;color:#ffd700!important;font-weight:900}
+.section-title{color:var(--gold);font-weight:900;margin:12px 0 6px;font-size:.9rem;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.log-box{background:#000;border:1px solid var(--gold);border-radius:10px;padding:8px;max-height:155px;overflow:auto;margin-top:10px;font-size:.78rem}
+.log-entry{display:grid;grid-template-columns:40px 1fr 60px;gap:6px;padding:3px 0;border-bottom:1px solid #222;align-items:center}.log-entry:last-child{border-bottom:none}
+.win{color:var(--green);font-weight:900}.loss{color:var(--red);font-weight:900}.warn{color:var(--orange);font-weight:900}.good{color:var(--green);font-weight:900}.bad{color:var(--red);font-weight:900}.muted{color:var(--muted)}
+.pill{display:inline-block;padding:3px 7px;border-radius:999px;background:#1e1e3a;border:1px solid #333;color:#ddd;font-weight:800;font-size:.72rem;margin:1px}
+.footer{text-align:center;color:#666;font-size:.7rem;margin-top:10px;line-height:1.45}
+.error{display:none;background:#2a1010;border:1px solid #ff525277;color:#ffd0d0;padding:8px;border-radius:10px;font-size:.78rem;margin:8px 0;line-height:1.45}
+@media(max-width:680px){.container{padding:12px}.grid{grid-template-columns:1fr}.title{font-size:1.42rem}.pred-best{font-size:2.25rem}.num-btns button{font-size:1.8rem;padding:16px 4px}.metric{grid-template-columns:1fr}th,td{font-size:.75rem;padding:5px 3px}}
 </style>
 </head>
 <body>
 <div class="container">
-  <div class="title">FAN-TAN GOD MODE v20.0</div>
-  <div class="sub">DỰ ĐOÁN CHÍNH XÁC NHẤT • ỔN ĐỊNH TUYỆT ĐỐI • AUTO PHÂN TÍCH</div>
+  <div class="title">FAN-TAN GOD MODE v21.0</div>
+  <div class="sub">MANUAL INPUT • BASELINE-CALIBRATED • WALK-FORWARD BACKTEST</div>
   <div class="notice">
-    Dán lịch sử (chỉ số 1-2-3-4) – tool <b>tự động học & dự đoán</b>. Cùng một dữ liệu luôn cho <b>cùng một kết quả</b>.
+    Nhập tay lịch sử chỉ gồm cửa <b>1-2-3-4</b>. Bản v21 sửa độ tin cậy ảo của bản cũ: chơi bộ 3 trong 4 cửa có baseline tự nhiên là <b>75%</b>, nên tín hiệu chỉ mạnh khi vượt baseline và có biên chênh rõ.
   </div>
 
   <div class="history-box">
-    <textarea id="historyInput" placeholder="1 3 2 4 4 1 2 3 ..."></textarea>
+    <textarea id="historyInput" placeholder="Ví dụ: 1 3 2 4 4 1 2 3 ...&#10;Có thể nhập cách nhau bằng dấu cách, dấu phẩy, xuống dòng hoặc bấm nút 1-4 bên dưới."></textarea>
   </div>
+  <div class="help" id="parseInfo">Mặc định: kết quả mới nhất nằm bên phải. Bấm “Đảo thứ tự” nếu dữ liệu bạn dán đang mới nhất bên trái.</div>
+  <div id="errorBox" class="error"></div>
 
   <div class="btn-row">
-    <button onclick="app.forceAnalyze()">📊 PHÂN TÍCH NGAY</button>
+    <button class="primary" onclick="app.forceAnalyze()">📊 PHÂN TÍCH NGAY</button>
     <button onclick="app.loadSample()">📋 NẠP MẪU</button>
+    <button onclick="app.reverseInput()">🔁 ĐẢO THỨ TỰ</button>
     <button onclick="app.undo()">↩ UNDO</button>
     <button onclick="app.reset()">🗑 RESET</button>
     <button onclick="app.clearCache()">🧹 XOÁ CACHE</button>
@@ -61,337 +81,719 @@ textarea{width:100%;height:70px;background:#0a0a14;color:#00e676;border:none;res
   </div>
 
   <div class="prediction-box">
-    <div style="color:#f0c040;font-weight:bold">DỰ ĐOÁN TỐI ƯU</div>
+    <div style="color:#f0c040;font-weight:900">BỘ 3 ƯU TIÊN</div>
     <div class="pred-best" id="bestSetDisplay">-</div>
     <div class="conf-bar"><div class="conf-fill" id="confFill"></div></div>
-    <div id="confText" style="font-size:.8rem">Độ tin cậy: -</div>
-    <div id="kellyText" style="font-size:.8rem;color:#ffaa00">Kelly gợi ý: -</div>
-    <div id="decisionBadge" style="margin-top:4px;display:inline-block;padding:4px 10px;border-radius:12px;font-size:.8rem;font-weight:bold;background:#1e1e3a;color:#f0c040">SẴN SÀNG</div>
-    <table class="set-table">
-      <tr><th>Bộ số</th><th>Xác suất</th><th>Ưu tiên</th></tr>
-      <tr><td>1-2-3</td><td id="set123">-</td><td id="rank123">-</td></tr>
-      <tr><td>2-3-4</td><td id="set234">-</td><td id="rank234">-</td></tr>
-      <tr><td>1-2-4</td><td id="set124">-</td><td id="rank124">-</td></tr>
-      <tr><td>1-3-4</td><td id="set134">-</td><td id="rank134">-</td></tr>
+    <div id="confText" style="font-size:.82rem">Tín hiệu: -</div>
+    <div id="edgeText" style="font-size:.78rem;color:#ffaa00;margin-top:3px">Edge so với baseline 75%: -</div>
+    <div id="decisionBadge" class="badge">SẴN SÀNG</div>
+
+    <div class="metric">
+      <div><b>Mẫu hợp lệ:</b> <span id="sampleCount">0</span></div>
+      <div><b>Bỏ cửa:</b> <span id="missingNum">-</span></div>
+      <div><b>Top số đơn:</b> <span id="topNums">-</span></div>
+      <div><b>Backtest bộ 3:</b> <span id="backtestText">-</span></div>
+    </div>
+
+    <div class="section-title">BẢNG BỘ 3 <span class="muted">phủ dự đoán, không phải cam kết thắng</span></div>
+    <table class="set-table" id="setTable">
+      <thead><tr><th>Bộ số</th><th>Phủ dự đoán</th><th>Edge</th><th>Ưu tiên</th></tr></thead>
+      <tbody>
+        <tr><td>1-2-3</td><td id="set123">-</td><td id="edge123">-</td><td id="rank123">-</td></tr>
+        <tr><td>2-3-4</td><td id="set234">-</td><td id="edge234">-</td><td id="rank234">-</td></tr>
+        <tr><td>1-2-4</td><td id="set124">-</td><td id="edge124">-</td><td id="rank124">-</td></tr>
+        <tr><td>1-3-4</td><td id="set134">-</td><td id="edge134">-</td><td id="rank134">-</td></tr>
+      </tbody>
     </table>
   </div>
 
+  <div class="grid">
+    <div class="card">
+      <div class="section-title">XÁC SUẤT SỐ ĐƠN</div>
+      <table class="detail-table">
+        <thead><tr><th>Số</th><th>AI</th><th>Freq</th><th>Gap</th></tr></thead>
+        <tbody id="numberTable"></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="section-title">TRỌNG SỐ MODEL</div>
+      <table class="detail-table">
+        <thead><tr><th>Model</th><th>W</th><th>Acc3</th></tr></thead>
+        <tbody id="modelTable"></tbody>
+      </table>
+    </div>
+  </div>
+
   <div class="log-box">
-    <div style="color:#f0c040;font-weight:bold;margin-bottom:4px">📋 LỊCH SỬ DỰ ĐOÁN</div>
+    <div style="color:#f0c040;font-weight:900;margin-bottom:4px">📋 LỊCH SỬ CHECK DỰ ĐOÁN</div>
     <div id="logContent">Chưa có dữ liệu</div>
   </div>
 
-  <div class="footer">HeaNg[Black-Cyber] • FAN-TAN GOD MODE v20.0 PRECISION • DETERMINISTIC ENSEMBLE</div>
+  <div class="footer">
+    FAN-TAN GOD MODE v21.0 MANUAL • DETERMINISTIC ENSEMBLE • Không dùng API, không cần mạng, chạy trực tiếp trên trình duyệt.<br>
+    Lưu ý: dữ liệu ngẫu nhiên có thể không có quy luật ổn định; tool chỉ phân tích xác suất từ lịch sử nhập tay.
+  </div>
 </div>
 
 <script>
 'use strict';
 
-const CFG = {
+const CFG = Object.freeze({
   MAX_HISTORY: 1500,
-  MIN_HISTORY: 8,
-  STORAGE_HIST: 'fan_hist_v20',
-  STORAGE_MODEL: 'fan_model_v20',
-  STORAGE_LOG: 'fan_log_v20',
-  AUTO_DEBOUNCE: 500
-};
+  MIN_HISTORY: 12,
+  TRAIN_START: 16,
+  TRAIN_WINDOW: 220,
+  BACKTEST_WINDOW: 90,
+  STORAGE_HIST: 'fan_hist_v21_manual',
+  STORAGE_MODEL: 'fan_model_v21_manual',
+  STORAGE_LOG: 'fan_log_v21_manual',
+  AUTO_DEBOUNCE: 450,
+  BASELINE_SET3: 0.75
+});
 
-// ========== UTILS ==========
 const U = {
-  nums: [1,2,3,4],
+  nums: [1, 2, 3, 4],
   sets: [
-    {key:'1-2-3', nums:[1,2,3], missing:4},
-    {key:'2-3-4', nums:[2,3,4], missing:1},
-    {key:'1-2-4', nums:[1,2,4], missing:3},
-    {key:'1-3-4', nums:[1,3,4], missing:2}
+    { key: '1-2-3', nums: [1, 2, 3], missing: 4 },
+    { key: '2-3-4', nums: [2, 3, 4], missing: 1 },
+    { key: '1-2-4', nums: [1, 2, 4], missing: 3 },
+    { key: '1-3-4', nums: [1, 3, 4], missing: 2 }
   ],
-  prob(){ return {1:.25,2:.25,3:.25,4:.25}; },
-  normalize(p){let s=0;for(let n of this.nums) s+=Math.max(0,p[n]||0); if(!s) return this.prob(); let o={}; for(let n of this.nums) o[n]=Math.max(0,p[n]||0)/s; return o;},
-  mix(list){let o=this.prob(); let tw=0; for(let it of list){ if(!it||!it.p) continue; let w=Math.max(0,it.w||0); let p=this.normalize(it.p); tw+=w; for(let n of this.nums) o[n]+=p[n]*w; } if(tw) for(let n of this.nums) o[n]/=tw; return this.normalize(o);},
-  setScores(p){p=this.normalize(p); let o={}; for(let s of this.sets) o[s.key]=s.nums.reduce((a,n)=>a+p[n],0); return o;},
-  bestSet(ss){return this.sets.map(s=>({...s,score:ss[s.key]||0})).sort((a,b)=>b.score-a.score)[0];},
-  correct(key,actual){let s=this.sets.find(x=>x.key===key); return s?s.nums.includes(actual):false;},
-  streak(h){if(!h.length) return {num:null,len:0}; let last=h[h.length-1],c=0; for(let i=h.length-1;i>=0&&h[i]===last;i--)c++; return {num:last,len:c};},
-  entropy(h){let f={1:0,2:0,3:0,4:0};for(let v of h)f[v]++;let e=0;for(let n of this.nums){let p=f[n]/h.length;if(p>0)e-=p*Math.log2(p);}return e;},
-  toText(h){return h.join(' ');},
-  parse(txt){return (String(txt||'').match(/[1-4]/g)||[]).map(Number).slice(-CFG.MAX_HISTORY);},
-  hash(h){return h.reduce((a,v)=>a*31+v,0);}
+  prob() { return { 1: 0.25, 2: 0.25, 3: 0.25, 4: 0.25 }; },
+  clamp(v, min, max) { return Number.isFinite(v) ? Math.min(max, Math.max(min, v)) : min; },
+  pct(v, d = 1) { return `${(this.clamp(v, -99, 99) * 100).toFixed(d)}%`; },
+  normalize(p) {
+    const out = {};
+    let sum = 0;
+    for (const n of this.nums) {
+      const value = Math.max(0, Number(p && p[n]) || 0);
+      out[n] = value;
+      sum += value;
+    }
+    if (sum <= 0) return this.prob();
+    for (const n of this.nums) out[n] /= sum;
+    return out;
+  },
+  mix(items) {
+    const out = { 1: 0, 2: 0, 3: 0, 4: 0 };
+    let totalWeight = 0;
+    for (const item of items) {
+      if (!item || !item.p) continue;
+      const weight = Math.max(0, Number(item.w) || 0);
+      if (weight <= 0) continue;
+      const p = this.normalize(item.p);
+      totalWeight += weight;
+      for (const n of this.nums) out[n] += p[n] * weight;
+    }
+    if (totalWeight <= 0) return this.prob();
+    for (const n of this.nums) out[n] /= totalWeight;
+    return this.normalize(out);
+  },
+  setCoverage(p) {
+    const prob = this.normalize(p);
+    const out = {};
+    for (const set of this.sets) out[set.key] = set.nums.reduce((acc, n) => acc + prob[n], 0);
+    return out;
+  },
+  rankSets(coverage) {
+    return this.sets.map(s => ({ ...s, coverage: Number(coverage[s.key]) || 0 }))
+      .sort((a, b) => b.coverage - a.coverage || a.key.localeCompare(b.key));
+  },
+  correct(setKey, actual) {
+    const set = this.sets.find(x => x.key === setKey);
+    return Boolean(set && set.nums.includes(actual));
+  },
+  streak(h) {
+    if (!h.length) return { num: null, len: 0 };
+    const last = h[h.length - 1];
+    let len = 0;
+    for (let i = h.length - 1; i >= 0 && h[i] === last; i -= 1) len += 1;
+    return { num: last, len };
+  },
+  entropyFromProb(p) {
+    const prob = this.normalize(p);
+    let e = 0;
+    for (const n of this.nums) {
+      const x = prob[n];
+      if (x > 0) e -= x * Math.log2(x);
+    }
+    return e;
+  },
+  counts(h) {
+    const c = { 1: 0, 2: 0, 3: 0, 4: 0 };
+    for (const v of h) if (c[v] !== undefined) c[v] += 1;
+    return c;
+  },
+  gaps(h) {
+    const g = { 1: h.length, 2: h.length, 3: h.length, 4: h.length };
+    for (const n of this.nums) {
+      for (let i = h.length - 1; i >= 0; i -= 1) {
+        if (h[i] === n) { g[n] = h.length - 1 - i; break; }
+      }
+    }
+    return g;
+  },
+  toText(h) { return h.join(' '); },
+  hash(h) {
+    let hash = 2166136261;
+    for (const v of h) {
+      hash ^= v & 255;
+      hash = Math.imul(hash, 16777619) >>> 0;
+    }
+    return `${h.length}:${hash.toString(16)}`;
+  },
+  safeJsonParse(raw, fallback) {
+    try { return JSON.parse(raw); } catch (_) { return fallback; }
+  },
+  parseManual(raw) {
+    const text = String(raw || '').trim();
+    const warnings = [];
+    if (!text) return { history: [], warnings };
+
+    const pieces = text.split(/[\s,;|\/.-]+/).map(x => x.trim()).filter(Boolean);
+    const history = [];
+    let ignored = 0;
+
+    for (const piece of pieces) {
+      if (/^[1-4]$/.test(piece)) {
+        history.push(Number(piece));
+      } else if (/^[1-4]{2,}$/.test(piece)) {
+        for (const ch of piece) history.push(Number(ch));
+      } else {
+        ignored += 1;
+      }
+    }
+
+    if (ignored > 0) warnings.push(`Đã bỏ qua ${ignored} token không phải cửa 1-4.`);
+    if (history.length > CFG.MAX_HISTORY) {
+      warnings.push(`Lịch sử quá dài, chỉ giữ ${CFG.MAX_HISTORY} kết quả mới nhất.`);
+      return { history: history.slice(-CFG.MAX_HISTORY), warnings };
+    }
+    return { history, warnings };
+  }
 };
 
-// ========== DETERMINISTIC SUB-MODELS ==========
-function freqModel(w,decay){return h=>{let p={1:0,2:0,3:0,4:0};let r=h.slice(-w);for(let i=0;i<r.length;i++)p[r[i]]+=Math.pow(decay,r.length-1-i);return U.normalize(p);};}
-function markovModel(order,w=200,s=.3){return h=>{if(h.length<=order)return U.prob();let key=h.slice(-order).join(',');let cnt={1:s,2:s,3:s,4:s};let start=Math.max(0,h.length-w);for(let i=start;i<=h.length-order-1;i++)if(h.slice(i,i+order).join(',')===key)cnt[h[i+order]]++;return U.normalize(cnt);};}
-function patternModel(len,tol,decay){return h=>{if(h.length<=len)return U.prob();let tail=h.slice(-len),cnt={1:.05,2:.05,3:.05,4:.05};for(let i=0;i<=h.length-len-1;i++){let sim=0;for(let j=0;j<len;j++)if(h[i+j]===tail[j])sim++;if(sim>=len-tol)cnt[h[i+len]]+=(sim/len)*Math.pow(decay,h.length-len-i);}return U.normalize(cnt);};}
-function gapModel(pow=1.2){return h=>{let p={1:0,2:0,3:0,4:0};for(let n of U.nums){let gap=0;for(let i=h.length-1;i>=0;i--)if(h[i]===n){gap=h.length-1-i;break;} p[n]=Math.pow(gap+1,pow);}return U.normalize(p);};}
-function streakModel(mode){return h=>{let st=U.streak(h),p={1:.05,2:.05,3:.05,4:.05};if(!st.num)return U.prob();if(mode==='follow')p[st.num]+=st.len>=2?4+st.len:1.1;else if(mode==='soft'){p[st.num]+=st.len>=2?2.2:0.8;for(let n of U.nums)if(n!==st.num)p[n]+=.35;}else{for(let n of U.nums)if(n!==st.num)p[n]+=st.len>=4?2.2:.45;}return U.normalize(p);};}
+function freqModel(windowSize, decay) {
+  return h => {
+    const p = { 1: 0.2, 2: 0.2, 3: 0.2, 4: 0.2 };
+    const start = Math.max(0, h.length - windowSize);
+    for (let i = start; i < h.length; i += 1) {
+      const age = h.length - 1 - i;
+      p[h[i]] += Math.pow(decay, age);
+    }
+    return U.normalize(p);
+  };
+}
 
-// ========== ENSEMBLE ENGINE ==========
+function markovModel(order, windowSize, smooth) {
+  return h => {
+    if (h.length <= order) return U.prob();
+    const key = h.slice(-order).join(',');
+    const cnt = { 1: smooth, 2: smooth, 3: smooth, 4: smooth };
+    const start = Math.max(0, h.length - windowSize);
+    for (let i = start; i <= h.length - order - 1; i += 1) {
+      if (h.slice(i, i + order).join(',') === key) cnt[h[i + order]] += 1;
+    }
+    return U.normalize(cnt);
+  };
+}
+
+function patternModel(length, tolerance, decay) {
+  return h => {
+    if (h.length <= length) return U.prob();
+    const tail = h.slice(-length);
+    const cnt = { 1: 0.06, 2: 0.06, 3: 0.06, 4: 0.06 };
+    const start = Math.max(0, h.length - 360);
+    for (let i = start; i <= h.length - length - 1; i += 1) {
+      let same = 0;
+      for (let j = 0; j < length; j += 1) if (h[i + j] === tail[j]) same += 1;
+      if (same >= length - tolerance) {
+        const age = h.length - length - i;
+        cnt[h[i + length]] += (same / length) * Math.pow(decay, age);
+      }
+    }
+    return U.normalize(cnt);
+  };
+}
+
+function gapModel(power) {
+  return h => {
+    const g = U.gaps(h);
+    const p = {};
+    for (const n of U.nums) p[n] = Math.pow(g[n] + 1, power);
+    return U.normalize(p);
+  };
+}
+
+function antiGapModel(power) {
+  return h => {
+    const g = U.gaps(h);
+    const p = {};
+    for (const n of U.nums) p[n] = 1 / Math.pow(g[n] + 1, power);
+    return U.normalize(p);
+  };
+}
+
+function streakModel(mode) {
+  return h => {
+    const st = U.streak(h);
+    if (!st.num) return U.prob();
+    const p = { 1: 1, 2: 1, 3: 1, 4: 1 };
+    if (mode === 'follow') {
+      p[st.num] += st.len >= 2 ? 1.2 + st.len * 0.7 : 0.25;
+    } else if (mode === 'anti') {
+      p[st.num] *= st.len >= 3 ? 0.45 : 0.78;
+      for (const n of U.nums) if (n !== st.num) p[n] += st.len >= 3 ? 0.75 : 0.2;
+    } else {
+      p[st.num] += st.len === 2 ? 0.7 : 0.1;
+      if (st.len >= 4) p[st.num] *= 0.55;
+    }
+    return U.normalize(p);
+  };
+}
+
+function alternationModel() {
+  return h => {
+    if (h.length < 8) return U.prob();
+    const p = { 1: 0.4, 2: 0.4, 3: 0.4, 4: 0.4 };
+    const last = h[h.length - 1];
+    const prev = h[h.length - 2];
+    if (last !== prev) p[prev] += 1.3;
+    for (let len = 2; len <= 4; len += 1) {
+      const tail = h.slice(-len).join(',');
+      const before = h.slice(-2 * len, -len).join(',');
+      if (tail === before) for (const n of U.nums) if (n !== last) p[n] += 0.28;
+    }
+    return U.normalize(p);
+  };
+}
+
 class PrecisionEngine {
-  constructor(){
+  constructor() {
     this.models = [
-      {name:'freq6', fn:freqModel(6,0.92), weight:1.0},
-      {name:'freq12', fn:freqModel(12,0.88), weight:1.0},
-      {name:'freq24', fn:freqModel(24,0.85), weight:1.0},
-      {name:'freq50', fn:freqModel(50,0.9), weight:1.0},
-      {name:'markov1', fn:markovModel(1,120,0.3), weight:1.0},
-      {name:'markov2', fn:markovModel(2,180,0.25), weight:1.0},
-      {name:'markov3', fn:markovModel(3,250,0.2), weight:1.0},
-      {name:'pat4', fn:patternModel(4,0,0.99), weight:1.0},
-      {name:'pat5', fn:patternModel(5,1,0.985), weight:1.0},
-      {name:'pat6', fn:patternModel(6,1,0.98), weight:1.0},
-      {name:'gap', fn:gapModel(1.3), weight:1.0},
-      {name:'streak_f', fn:streakModel('follow'), weight:1.0},
-      {name:'streak_s', fn:streakModel('soft'), weight:1.0},
-      {name:'streak_a', fn:streakModel('anti'), weight:1.0}
+      { name: 'freq6', fn: freqModel(6, 0.90), base: 1, weight: 1, acc3: null, logLoss: null },
+      { name: 'freq12', fn: freqModel(12, 0.90), base: 1, weight: 1, acc3: null, logLoss: null },
+      { name: 'freq24', fn: freqModel(24, 0.92), base: 1, weight: 1, acc3: null, logLoss: null },
+      { name: 'freq60', fn: freqModel(60, 0.96), base: 0.9, weight: 1, acc3: null, logLoss: null },
+      { name: 'markov1', fn: markovModel(1, 160, 0.35), base: 1.05, weight: 1, acc3: null, logLoss: null },
+      { name: 'markov2', fn: markovModel(2, 220, 0.28), base: 1, weight: 1, acc3: null, logLoss: null },
+      { name: 'markov3', fn: markovModel(3, 280, 0.24), base: 0.85, weight: 1, acc3: null, logLoss: null },
+      { name: 'pattern4', fn: patternModel(4, 0, 0.992), base: 0.95, weight: 1, acc3: null, logLoss: null },
+      { name: 'pattern5f', fn: patternModel(5, 1, 0.988), base: 0.85, weight: 1, acc3: null, logLoss: null },
+      { name: 'gapHot', fn: gapModel(1.18), base: 0.72, weight: 1, acc3: null, logLoss: null },
+      { name: 'antiGap', fn: antiGapModel(0.8), base: 0.65, weight: 1, acc3: null, logLoss: null },
+      { name: 'streakFollow', fn: streakModel('follow'), base: 0.78, weight: 1, acc3: null, logLoss: null },
+      { name: 'streakAnti', fn: streakModel('anti'), base: 0.82, weight: 1, acc3: null, logLoss: null },
+      { name: 'alternation', fn: alternationModel(), base: 0.72, weight: 1, acc3: null, logLoss: null }
     ];
     this.trainingLog = [];
     this.lastHash = null;
     this.lastPred = null;
+    this.lastBacktest = null;
     this.loadModel();
   }
-  // backtest để tối ưu trọng số (deterministic)
-  train(h){
-    if(h.length < CFG.MIN_HISTORY) return;
-    // đánh giá từng model trên toàn bộ lịch sử (bắt đầu từ TRAIN_START)
-    const start = 12;
-    let scores = {};
-    for(let m of this.models) scores[m.name] = 0;
-    for(let i=start; i<h.length; i++){
-      let prefix = h.slice(0,i);
-      let actual = h[i];
-      for(let m of this.models){
-        let p = m.fn(prefix);
-        let ss = U.setScores(p);
-        let best = U.bestSet(ss);
-        if(U.correct(best.key, actual)) scores[m.name]++;
-      }
+
+  evaluateModel(model, h) {
+    const start = Math.max(CFG.TRAIN_START, h.length - CFG.TRAIN_WINDOW);
+    if (h.length - start < 16) return { weight: model.base, acc3: null, logLoss: null };
+    let hit3 = 0;
+    let loss = 0;
+    let total = 0;
+    for (let i = start; i < h.length; i += 1) {
+      const prefix = h.slice(0, i);
+      const actual = h[i];
+      let p;
+      try { p = U.normalize(model.fn(prefix)); } catch (_) { p = U.prob(); }
+      const coverage = U.setCoverage(p);
+      const best = U.rankSets(coverage)[0];
+      if (U.correct(best.key, actual)) hit3 += 1;
+      loss += -Math.log(U.clamp(p[actual], 0.0001, 0.9999));
+      total += 1;
     }
-    let total = h.length - start;
-    // gán trọng số dựa trên hiệu suất (tối thiểu 0.3)
-    for(let m of this.models){
-      let acc = scores[m.name] / Math.max(1, total);
-      m.weight = Math.max(0.3, Math.min(2.5, acc * 2.5)); // scale
+    const acc3 = hit3 / total;
+    const logLoss = loss / total;
+    const logGain = Math.log(4) - logLoss;
+    const edge3 = acc3 - CFG.BASELINE_SET3;
+    const raw = model.base * Math.exp(logGain * 1.1 + edge3 * 2.4);
+    return { weight: U.clamp(raw, 0.18, 3.2), acc3, logLoss };
+  }
+
+  train(h) {
+    if (h.length < CFG.MIN_HISTORY) return;
+    for (const model of this.models) {
+      const ev = this.evaluateModel(model, h);
+      model.weight = ev.weight;
+      model.acc3 = ev.acc3;
+      model.logLoss = ev.logLoss;
     }
     this.saveModel();
   }
-  predict(h){
-    if(h.length < CFG.MIN_HISTORY) return this.emptyPred();
-    // nếu lịch sử không đổi so với lần trước, trả về kết quả đã lưu
-    let hash = U.hash(h);
-    if(this.lastHash === hash && this.lastPred) return this.lastPred;
-    // nếu chưa train hoặc lịch sử thay đổi, train lại
-    if(this.lastHash !== hash) {
-      this.train(h);
+
+  predictOnly(h) {
+    if (h.length < CFG.MIN_HISTORY) return this.emptyPred();
+    const items = [];
+    for (const model of this.models) {
+      try { items.push({ p: model.fn(h), w: model.weight }); } catch (_) { items.push({ p: U.prob(), w: 0.05 }); }
     }
-    let items = this.models.map(m => ({p: m.fn(h), w: m.weight}));
-    let finalP = U.mix(items);
-    let ss = U.setScores(finalP);
-    // điều chỉnh theo streak
-    let st = U.streak(h);
-    if(st.num && st.len >= 2){
-      for(let s of U.sets){
-        if(s.nums.includes(st.num)) ss[s.key] += 0.15;
-        else ss[s.key] -= 0.12;
-      }
-    }
-    // điều chỉnh theo entropy: nếu entropy cao, giảm bớt ảnh hưởng của streak
-    let ent = U.entropy(h);
-    if(ent > 1.8) { // hỗn loạn, giảm streak boost
-      for(let s of U.sets){
-        if(st.num && s.nums.includes(st.num)) ss[s.key] -= 0.1;
-      }
-    }
-    let best = U.bestSet(ss);
-    let conf = Math.min(98, Math.max(35, best.score * 100));
-    let pred = {p: finalP, ss, best, conf};
-    // cache
+    const p = U.mix(items);
+    const coverage = U.setCoverage(p);
+    const ranked = U.rankSets(coverage);
+    const best = ranked[0];
+    const second = ranked[1] || best;
+    const numsRank = U.nums.map(n => ({ n, p: p[n] })).sort((a, b) => b.p - a.p || a.n - b.n);
+    return { p, coverage, ranked, best, second, numsRank };
+  }
+
+  predict(h) {
+    if (h.length < CFG.MIN_HISTORY) return this.emptyPred();
+    const hash = U.hash(h);
+    if (hash === this.lastHash && this.lastPred) return this.lastPred;
+    this.train(h);
+    const pred = this.predictOnly(h);
+    const backtest = this.backtest(h);
+    pred.backtest = backtest;
+    pred.signal = this.signalScore(h, pred, backtest);
     this.lastHash = hash;
     this.lastPred = pred;
+    this.lastBacktest = backtest;
     return pred;
   }
-  emptyPred(){
-    let p = U.prob(), ss = U.setScores(p), best = U.bestSet(ss);
-    return {p, ss, best, conf: 40};
+
+  signalScore(h, pred, backtest) {
+    const margin = Math.max(0, pred.best.coverage - pred.second.coverage);
+    const setEdge = Math.max(0, pred.best.coverage - CFG.BASELINE_SET3);
+    const entropy = U.entropyFromProb(pred.p);
+    const marginScore = U.clamp(margin / 0.08, 0, 1);
+    const edgeScore = U.clamp(setEdge / 0.08, 0, 1);
+    const entropyScore = U.clamp((2 - entropy) / 0.38, 0, 1);
+    const sampleScore = U.clamp((h.length - CFG.MIN_HISTORY) / 90, 0, 1);
+    const btScore = backtest ? U.clamp((backtest.acc3 - CFG.BASELINE_SET3) / 0.09, 0, 1) : 0;
+    const score = U.clamp(0.28 * marginScore + 0.25 * edgeScore + 0.14 * entropyScore + 0.13 * sampleScore + 0.20 * btScore, 0, 1);
+    return {
+      score,
+      label: score >= 0.70 ? 'TÍN HIỆU MẠNH' : score >= 0.45 ? 'TÍN HIỆU VỪA' : 'RỦI RO CAO',
+      margin,
+      setEdge,
+      entropy
+    };
   }
-  learn(act, pred){
-    let ok = U.correct(pred.best.key, act) ? 1 : 0;
-    this.trainingLog.unshift({act, set: pred.best.key, ok});
-    if(this.trainingLog.length > 80) this.trainingLog.pop();
-    // lưu log
-    localStorage.setItem(CFG.STORAGE_LOG, JSON.stringify(this.trainingLog));
+
+  backtest(h) {
+    if (h.length < CFG.MIN_HISTORY + 25) return null;
+    const start = Math.max(CFG.TRAIN_START + 8, h.length - CFG.BACKTEST_WINDOW);
+    let hit3 = 0;
+    let hit1 = 0;
+    let total = 0;
+    let loss = 0;
+    const saved = this.models.map(m => m.weight);
+    try {
+      for (let i = start; i < h.length; i += 1) {
+        const prefix = h.slice(0, i);
+        for (const model of this.models) {
+          const ev = this.evaluateModel(model, prefix);
+          model.weight = ev.weight;
+        }
+        const pred = this.predictOnly(prefix);
+        const actual = h[i];
+        if (U.correct(pred.best.key, actual)) hit3 += 1;
+        if (pred.numsRank[0] && pred.numsRank[0].n === actual) hit1 += 1;
+        loss += -Math.log(U.clamp(pred.p[actual], 0.0001, 0.9999));
+        total += 1;
+      }
+    } finally {
+      this.models.forEach((m, i) => { m.weight = saved[i]; });
+    }
+    if (!total) return null;
+    return { total, acc3: hit3 / total, acc1: hit1 / total, logLoss: loss / total, edge3: hit3 / total - CFG.BASELINE_SET3 };
   }
-  reset(){
+
+  emptyPred() {
+    const p = U.prob();
+    const coverage = U.setCoverage(p);
+    const ranked = U.rankSets(coverage);
+    const numsRank = U.nums.map(n => ({ n, p: p[n] }));
+    return {
+      p, coverage, ranked, best: ranked[0], second: ranked[1], numsRank,
+      backtest: null,
+      signal: { score: 0, label: 'CHƯA ĐỦ DỮ LIỆU', margin: 0, setEdge: 0, entropy: 2 }
+    };
+  }
+
+  learn(actual, pred) {
+    if (!pred || !pred.best) return;
+    const ok = U.correct(pred.best.key, actual) ? 1 : 0;
+    this.trainingLog.unshift({ actual, set: pred.best.key, ok, time: Date.now() });
+    if (this.trainingLog.length > 100) this.trainingLog.pop();
+    this.saveLog();
+  }
+
+  resetRuntime() {
     this.trainingLog = [];
     this.lastHash = null;
     this.lastPred = null;
-    localStorage.removeItem(CFG.STORAGE_LOG);
-    // reset weights về mặc định
-    for(let m of this.models) m.weight = 1.0;
+    this.lastBacktest = null;
+    for (const model of this.models) {
+      model.weight = model.base;
+      model.acc3 = null;
+      model.logLoss = null;
+    }
     this.saveModel();
+    this.saveLog();
   }
-  saveModel(){
-    let data = {weights: {}};
-    for(let m of this.models) data.weights[m.name] = m.weight;
-    localStorage.setItem(CFG.STORAGE_MODEL, JSON.stringify(data));
+
+  saveModel() {
+    try {
+      const data = { weights: {}, acc3: {}, logLoss: {} };
+      for (const model of this.models) {
+        data.weights[model.name] = model.weight;
+        data.acc3[model.name] = model.acc3;
+        data.logLoss[model.name] = model.logLoss;
+      }
+      localStorage.setItem(CFG.STORAGE_MODEL, JSON.stringify(data));
+    } catch (_) {}
   }
-  loadModel(){
-    let raw = localStorage.getItem(CFG.STORAGE_MODEL);
-    if(raw){
-      try{
-        let data = JSON.parse(raw);
-        if(data.weights){
-          for(let m of this.models){
-            if(data.weights[m.name] !== undefined) m.weight = data.weights[m.name];
-          }
+
+  saveLog() {
+    try { localStorage.setItem(CFG.STORAGE_LOG, JSON.stringify(this.trainingLog)); } catch (_) {}
+  }
+
+  loadModel() {
+    try {
+      const data = U.safeJsonParse(localStorage.getItem(CFG.STORAGE_MODEL), null);
+      if (data && data.weights) {
+        for (const model of this.models) {
+          if (typeof data.weights[model.name] === 'number') model.weight = data.weights[model.name];
+          if (typeof data.acc3?.[model.name] === 'number') model.acc3 = data.acc3[model.name];
+          if (typeof data.logLoss?.[model.name] === 'number') model.logLoss = data.logLoss[model.name];
         }
-      }catch(e){}
-    }
-    let logRaw = localStorage.getItem(CFG.STORAGE_LOG);
-    if(logRaw){
-      try{ this.trainingLog = JSON.parse(logRaw); }catch(e){}
-    }
+      }
+      const log = U.safeJsonParse(localStorage.getItem(CFG.STORAGE_LOG), []);
+      this.trainingLog = Array.isArray(log) ? log.filter(x => x && [1,2,3,4].includes(Number(x.actual))).slice(0, 100) : [];
+    } catch (_) {}
   }
-  kelly(p){ let b=1; return (b*p - (1-p))/b; }
 }
 
-// ========== UI ==========
 class App {
-  constructor(){
+  constructor() {
     this.engine = new PrecisionEngine();
     this.history = [];
-    this.pred = null;
+    this.pred = this.engine.emptyPred();
     this.autoTimer = null;
-    let saved = localStorage.getItem(CFG.STORAGE_HIST);
-    if(saved){
-      try{ let arr = JSON.parse(saved); if(Array.isArray(arr)) this.history = arr.map(Number).filter(x=>x>=1&&x<=4).slice(-CFG.MAX_HISTORY); }catch(e){}
-    }
-    document.getElementById('historyInput').value = U.toText(this.history);
-    if(this.history.length >= CFG.MIN_HISTORY){
-      this.pred = this.engine.predict(this.history);
-    }
-    this.render();
-    let ta = document.getElementById('historyInput');
-    ta.addEventListener('input', () => {
+    this.nodes = {
+      input: document.getElementById('historyInput'),
+      parseInfo: document.getElementById('parseInfo'),
+      errorBox: document.getElementById('errorBox'),
+      bestSet: document.getElementById('bestSetDisplay'),
+      confFill: document.getElementById('confFill'),
+      confText: document.getElementById('confText'),
+      edgeText: document.getElementById('edgeText'),
+      decision: document.getElementById('decisionBadge'),
+      sampleCount: document.getElementById('sampleCount'),
+      missingNum: document.getElementById('missingNum'),
+      topNums: document.getElementById('topNums'),
+      backtestText: document.getElementById('backtestText'),
+      numberTable: document.getElementById('numberTable'),
+      modelTable: document.getElementById('modelTable'),
+      logContent: document.getElementById('logContent')
+    };
+    this.loadSavedHistory();
+    this.nodes.input.addEventListener('input', () => {
       clearTimeout(this.autoTimer);
       this.autoTimer = setTimeout(() => this.autoAnalyze(), CFG.AUTO_DEBOUNCE);
     });
-  }
-  autoAnalyze(){
-    let h = U.parse(document.getElementById('historyInput').value);
-    // so sánh với history hiện tại, nếu không đổi thì không cần train lại
-    if(h.join(',') === this.history.join(',') && this.pred) {
-      // vẫn render để chắc
-    } else {
-      this.history = h;
-      localStorage.setItem(CFG.STORAGE_HIST, JSON.stringify(h));
-      if(h.length >= CFG.MIN_HISTORY){
-        this.pred = this.engine.predict(h);
-      } else {
-        this.engine.reset();
-        this.pred = this.engine.emptyPred();
-      }
-    }
+    this.analyzeCurrent(false);
     this.render();
   }
-  forceAnalyze(){
-    // ép buộc phân tích lại (có thể train lại nếu lịch sử đã thay đổi)
-    let h = U.parse(document.getElementById('historyInput').value);
-    this.history = h;
-    localStorage.setItem(CFG.STORAGE_HIST, JSON.stringify(h));
-    if(h.length >= CFG.MIN_HISTORY){
-      this.engine.lastHash = null; // xóa cache để train lại
-      this.pred = this.engine.predict(h);
+
+  loadSavedHistory() {
+    try {
+      const saved = U.safeJsonParse(localStorage.getItem(CFG.STORAGE_HIST), []);
+      if (Array.isArray(saved)) this.history = saved.map(Number).filter(n => U.nums.includes(n)).slice(-CFG.MAX_HISTORY);
+      this.nodes.input.value = U.toText(this.history);
+    } catch (_) {
+      this.history = [];
+      this.nodes.input.value = '';
+    }
+  }
+
+  saveHistory() {
+    try { localStorage.setItem(CFG.STORAGE_HIST, JSON.stringify(this.history)); } catch (_) {}
+  }
+
+  showError(msg) {
+    this.nodes.errorBox.style.display = msg ? 'block' : 'none';
+    this.nodes.errorBox.textContent = msg || '';
+  }
+
+  autoAnalyze() { this.analyzeCurrent(false); this.render(); }
+
+  forceAnalyze() { this.engine.lastHash = null; this.analyzeCurrent(true); this.render(); }
+
+  analyzeCurrent(force) {
+    const parsed = U.parseManual(this.nodes.input.value);
+    this.history = parsed.history;
+    this.saveHistory();
+    const info = [`Đã đọc ${this.history.length} kết quả hợp lệ.`].concat(parsed.warnings);
+    this.nodes.parseInfo.textContent = info.join(' ');
+    if (this.history.length > 0 && this.history.length < CFG.MIN_HISTORY) {
+      this.pred = this.engine.emptyPred();
+      this.showError(`Cần tối thiểu ${CFG.MIN_HISTORY} kết quả để phân tích ổn định. Hiện có ${this.history.length}.`);
+      return;
+    }
+    this.showError('');
+    if (this.history.length >= CFG.MIN_HISTORY) {
+      if (force) this.engine.lastHash = null;
+      this.pred = this.engine.predict(this.history);
     } else {
-      this.engine.reset();
       this.pred = this.engine.emptyPred();
     }
-    this.render();
   }
-  loadSample(){
-    let s = '3 2 3 4 3 4 4 3 1 4 1 3 1 3 3 4 3 2 1 3 2 1 3 1 2 4 3 3 1 2 1 2 4 1 1 2 4 2 1 4 1 1 3 3 2 4 2 1 1 1 2 2 2 3 3 4 4';
-    document.getElementById('historyInput').value = s;
-    this.autoAnalyze();
-  }
-  addNumber(n){
-    if(this.pred && this.history.length >= CFG.MIN_HISTORY) this.engine.learn(n, this.pred);
+
+  addNumber(n) {
+    if (!U.nums.includes(n)) return;
+    if (this.pred && this.history.length >= CFG.MIN_HISTORY) this.engine.learn(n, this.pred);
     this.history.push(n);
-    if(this.history.length > CFG.MAX_HISTORY) this.history.shift();
-    document.getElementById('historyInput').value = U.toText(this.history);
-    localStorage.setItem(CFG.STORAGE_HIST, JSON.stringify(this.history));
-    if(this.history.length >= CFG.MIN_HISTORY){
-      this.engine.lastHash = null;
-      this.pred = this.engine.predict(this.history);
-    } else {
-      this.pred = this.engine.emptyPred();
-    }
+    if (this.history.length > CFG.MAX_HISTORY) this.history.shift();
+    this.nodes.input.value = U.toText(this.history);
+    this.saveHistory();
+    this.engine.lastHash = null;
+    this.pred = this.history.length >= CFG.MIN_HISTORY ? this.engine.predict(this.history) : this.engine.emptyPred();
+    this.showError('');
     this.render();
   }
-  undo(){
-    if(!this.history.length) return;
+
+  undo() {
+    if (!this.history.length) return;
     this.history.pop();
-    document.getElementById('historyInput').value = U.toText(this.history);
-    localStorage.setItem(CFG.STORAGE_HIST, JSON.stringify(this.history));
-    if(this.history.length >= CFG.MIN_HISTORY){
-      this.engine.lastHash = null;
-      this.pred = this.engine.predict(this.history);
-    } else {
-      this.engine.reset();
-      this.pred = this.engine.emptyPred();
-    }
+    this.nodes.input.value = U.toText(this.history);
+    this.saveHistory();
+    this.engine.lastHash = null;
+    this.pred = this.history.length >= CFG.MIN_HISTORY ? this.engine.predict(this.history) : this.engine.emptyPred();
     this.render();
   }
-  reset(){
-    if(!confirm('Xoá hết lịch sử?')) return;
+
+  reverseInput() {
+    const parsed = U.parseManual(this.nodes.input.value);
+    this.history = parsed.history.reverse();
+    this.nodes.input.value = U.toText(this.history);
+    this.saveHistory();
+    this.engine.lastHash = null;
+    this.pred = this.history.length >= CFG.MIN_HISTORY ? this.engine.predict(this.history) : this.engine.emptyPred();
+    this.nodes.parseInfo.textContent = `Đã đảo thứ tự. Hiện có ${this.history.length} kết quả hợp lệ, mới nhất nằm bên phải.`;
+    this.render();
+  }
+
+  reset() {
+    if (!confirm('Xoá hết lịch sử nhập tay?')) return;
     this.history = [];
-    document.getElementById('historyInput').value = '';
-    localStorage.setItem(CFG.STORAGE_HIST, '[]');
-    this.engine.reset();
+    this.nodes.input.value = '';
+    this.saveHistory();
+    this.engine.resetRuntime();
     this.pred = this.engine.emptyPred();
+    this.showError('');
+    this.nodes.parseInfo.textContent = 'Đã reset. Nhập lịch sử 1-2-3-4 để phân tích lại.';
     this.render();
   }
-  clearCache(){
-    if(!confirm('Xoá cache model & log?')) return;
-    localStorage.removeItem(CFG.STORAGE_HIST);
-    localStorage.removeItem(CFG.STORAGE_MODEL);
-    localStorage.removeItem(CFG.STORAGE_LOG);
-    this.engine.reset();
-    this.pred = null;
+
+  clearCache() {
+    if (!confirm('Xoá cache model và log, giữ nguyên lịch sử nhập tay?')) return;
+    try {
+      localStorage.removeItem(CFG.STORAGE_MODEL);
+      localStorage.removeItem(CFG.STORAGE_LOG);
+    } catch (_) {}
+    this.engine.resetRuntime();
+    this.engine.lastHash = null;
+    this.pred = this.history.length >= CFG.MIN_HISTORY ? this.engine.predict(this.history) : this.engine.emptyPred();
     this.render();
   }
-  render(){
-    let pred = this.pred;
-    if(!pred) pred = this.engine.emptyPred();
-    document.getElementById('bestSetDisplay').textContent = pred.best.key;
-    document.getElementById('confFill').style.width = pred.conf + '%';
-    document.getElementById('confText').textContent = 'Độ tin cậy: ' + pred.conf.toFixed(1) + '%';
-    let kelly = this.engine.kelly(pred.best.score) * 100;
-    document.getElementById('kellyText').textContent = 'Kelly gợi ý: ' + kelly.toFixed(1) + '% vốn';
-    let badge = document.getElementById('decisionBadge');
-    if(pred.conf >= 75) {
-      badge.textContent = 'TÍN HIỆU MẠNH'; badge.style.color = '#00e676';
-    } else if(pred.conf >= 60) {
-      badge.textContent = 'CẢNH BÁO'; badge.style.color = '#ffd966';
-    } else {
-      badge.textContent = 'RỦI RO CAO'; badge.style.color = '#ff5252';
+
+  loadSample() {
+    const sample = '3 2 3 4 3 4 4 3 1 4 1 3 1 3 3 4 3 2 1 3 2 1 3 1 2 4 3 3 1 2 1 2 4 1 1 2 4 2 1 4 1 1 3 3 2 4 2 1 1 1 2 2 2 3 3 4 4 1 3 2 4 1 2 2 3 4 1 4 3 2 2 1 3 4 4 2 1 3';
+    this.nodes.input.value = sample;
+    this.forceAnalyze();
+  }
+
+  setText(id, text) { const node = document.getElementById(id); if (node) node.textContent = text; }
+
+  renderSetTable(pred) {
+    const ranked = pred.ranked;
+    const ranks = {};
+    ranked.forEach((item, i) => { ranks[item.key] = i + 1; });
+    for (const set of U.sets) {
+      const cov = pred.coverage[set.key] || 0;
+      const edge = cov - CFG.BASELINE_SET3;
+      const suffix = set.key.replace(/-/g, '');
+      this.setText(`set${suffix}`, U.pct(cov, 1));
+      this.setText(`edge${suffix}`, `${edge >= 0 ? '+' : ''}${U.pct(edge, 1)}`);
+      this.setText(`rank${suffix}`, ranks[set.key] || '-');
     }
-    let ss = pred.ss;
-    document.getElementById('set123').textContent = (ss['1-2-3']*100).toFixed(1) + '%';
-    document.getElementById('set234').textContent = (ss['2-3-4']*100).toFixed(1) + '%';
-    document.getElementById('set124').textContent = (ss['1-2-4']*100).toFixed(1) + '%';
-    document.getElementById('set134').textContent = (ss['1-3-4']*100).toFixed(1) + '%';
-    let sets = U.sets.map(s => ({key: s.key, score: ss[s.key]})).sort((a,b) => b.score - a.score);
-    let ranks = {}; sets.forEach((s,i) => ranks[s.key] = i+1);
-    document.getElementById('rank123').textContent = ranks['1-2-3'];
-    document.getElementById('rank234').textContent = ranks['2-3-4'];
-    document.getElementById('rank124').textContent = ranks['1-2-4'];
-    document.getElementById('rank134').textContent = ranks['1-3-4'];
-    let rows = document.querySelectorAll('.set-table tr');
-    rows.forEach(r => r.classList.remove('highlight'));
-    rows.forEach(r => { if(r.cells[0] && r.cells[0].textContent === pred.best.key) r.classList.add('highlight'); });
-    let logHtml = this.engine.trainingLog.slice(0,25).map(x =>
-      `<div class="log-entry"><span>${x.act}</span><span>→ ${x.set}</span><span class="${x.ok?'win':'loss'}">${x.ok?'WIN':'LOSS'}</span></div>`
-    ).join('');
-    document.getElementById('logContent').innerHTML = logHtml || 'Chưa có dữ liệu';
+    const rows = document.querySelectorAll('#setTable tbody tr');
+    rows.forEach(row => row.classList.remove('highlight'));
+    rows.forEach(row => { if (row.cells[0] && row.cells[0].textContent === pred.best.key) row.classList.add('highlight'); });
+  }
+
+  renderNumberTable(pred) {
+    const counts = U.counts(this.history);
+    const gaps = U.gaps(this.history);
+    const total = Math.max(1, this.history.length);
+    const rankedNums = pred.numsRank.map(x => x.n);
+    this.nodes.numberTable.innerHTML = U.nums.map(n => {
+      const rank = rankedNums.indexOf(n) + 1;
+      const cls = rank === 1 ? 'good' : rank === 4 ? 'bad' : '';
+      return `<tr><td><span class="pill">${n}</span></td><td class="${cls}">${U.pct(pred.p[n] || 0, 1)}</td><td>${U.pct(counts[n] / total, 1)}</td><td>${gaps[n]}</td></tr>`;
+    }).join('');
+  }
+
+  renderModelTable() {
+    const totalW = this.engine.models.reduce((a, m) => a + Math.max(0, m.weight), 0) || 1;
+    this.nodes.modelTable.innerHTML = this.engine.models
+      .slice()
+      .sort((a, b) => b.weight - a.weight)
+      .slice(0, 8)
+      .map(m => {
+        const acc = m.acc3 === null ? '-' : U.pct(m.acc3, 0);
+        return `<tr><td>${m.name}</td><td>${U.pct(m.weight / totalW, 0)}</td><td>${acc}</td></tr>`;
+      }).join('') || '<tr><td colspan="3">Chưa đủ mẫu</td></tr>';
+  }
+
+  renderLog() {
+    const rows = this.engine.trainingLog.slice(0, 28).map(x => {
+      const ok = x.ok ? 'WIN' : 'LOSS';
+      return `<div class="log-entry"><span>${x.actual}</span><span>→ ${x.set}</span><span class="${x.ok ? 'win' : 'loss'}">${ok}</span></div>`;
+    }).join('');
+    this.nodes.logContent.innerHTML = rows || 'Chưa có dữ liệu';
+  }
+
+  render() {
+    const pred = this.pred || this.engine.emptyPred();
+    const signal = pred.signal || { score: 0, label: 'CHƯA ĐỦ DỮ LIỆU', setEdge: 0 };
+    const scorePct = Math.round(signal.score * 100);
+    this.nodes.bestSet.textContent = pred.best ? pred.best.key : '-';
+    this.nodes.confFill.style.width = `${scorePct}%`;
+    this.nodes.confText.textContent = `Tín hiệu: ${signal.label} • ${scorePct}/100`;
+    this.nodes.edgeText.textContent = `Edge so với baseline 75%: ${signal.setEdge >= 0 ? '+' : ''}${U.pct(signal.setEdge || 0, 1)}`;
+    this.nodes.sampleCount.textContent = String(this.history.length);
+    this.nodes.missingNum.textContent = pred.best ? String(pred.best.missing) : '-';
+    this.nodes.topNums.textContent = pred.numsRank ? pred.numsRank.slice(0, 4).map(x => `${x.n}(${U.pct(x.p, 0)})`).join(' ') : '-';
+    if (pred.backtest) {
+      this.nodes.backtestText.textContent = `${U.pct(pred.backtest.acc3, 1)} (${pred.backtest.total} tay, edge ${pred.backtest.edge3 >= 0 ? '+' : ''}${U.pct(pred.backtest.edge3, 1)})`;
+    } else {
+      this.nodes.backtestText.textContent = 'Cần thêm dữ liệu';
+    }
+    if (signal.score >= 0.70) {
+      this.nodes.decision.textContent = 'TÍN HIỆU MẠNH';
+      this.nodes.decision.style.color = '#00e676';
+    } else if (signal.score >= 0.45) {
+      this.nodes.decision.textContent = 'TÍN HIỆU VỪA';
+      this.nodes.decision.style.color = '#ffd966';
+    } else {
+      this.nodes.decision.textContent = this.history.length >= CFG.MIN_HISTORY ? 'RỦI RO CAO' : 'CHƯA ĐỦ MẪU';
+      this.nodes.decision.style.color = '#ff5252';
+    }
+    this.renderSetTable(pred);
+    this.renderNumberTable(pred);
+    this.renderModelTable();
+    this.renderLog();
   }
 }
 
