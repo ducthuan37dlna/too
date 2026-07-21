@@ -3,800 +3,1215 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>FAN-TAN GOD MODE v21.0 MANUAL</title>
+<title>ĐUÔI GIẢI ĐẶC BIỆT — PREDICTION ENGINE v2.1</title>
 <style>
-:root{
-  --bg:#080817;--panel:#10102a;--panel2:#15153a;--gold:#f0c040;--purple:#c084fc;--green:#00e676;--red:#ff5252;--orange:#ffaa00;--text:#e9e9f5;--muted:#9696b4;--line:#33334d;--black:#05050c
+:root {
+    --bg: #060614;
+    --gold: #f0c040;
+    --purple: #c084fc;
+    --green: #00e676;
+    --red: #ff5252;
+    --orange: #ffaa00;
+    --cyan: #00e5ff;
+    --text: #e9e9f5;
+    --muted: #8888aa;
+    --line: #2a2a40;
+    --card: #08081a;
 }
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,-apple-system,BlinkMacSystemFont,sans-serif}
-body{background:radial-gradient(circle at 10% 0,#2a1955 0,#080817 32%,#05050c 100%);color:var(--text);display:flex;justify-content:center;align-items:flex-start;min-height:100vh;padding:12px}
-.container{width:100%;max-width:760px;background:linear-gradient(180deg,#121230,#0d0d22);border:2px solid var(--gold);border-radius:20px;padding:16px;box-shadow:0 0 50px #f0c04033}
-.title{text-align:center;font-size:1.72rem;color:var(--gold);text-shadow:0 0 15px #f0c040;font-weight:900;margin-bottom:4px;letter-spacing:.5px}
-.sub{text-align:center;font-size:.8rem;color:var(--purple);margin-bottom:12px;font-weight:700}
-.notice{background:#1b0f20;border:1px solid #c084fc55;border-radius:10px;padding:8px;font-size:.78rem;line-height:1.45;text-align:center;margin-bottom:10px;color:#ddd}
-.history-box{background:#000;border:1px solid var(--gold);border-radius:12px;padding:8px;margin-bottom:8px}
-textarea{width:100%;height:92px;background:#0a0a14;color:var(--green);border:none;resize:vertical;font-size:1rem;padding:8px;outline:none;line-height:1.45}
-textarea:focus{box-shadow:0 0 0 2px #c084fc55;border-radius:8px}
-.help{font-size:.72rem;color:var(--muted);line-height:1.45;margin:4px 0 10px;text-align:center}
-.btn-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:12px}
-button{background:#1e1e3a;border:1px solid var(--purple);color:var(--purple);border-radius:9px;padding:7px 12px;cursor:pointer;font-size:.8rem;font-weight:800;transition:all .16s}
-button:hover{background:#2a2a5a;box-shadow:0 0 8px #c084fc88;transform:translateY(-1px)}
-button:active{transform:scale(.97)}
-button.primary{background:linear-gradient(135deg,#3a2a12,#1e1e3a);border-color:var(--gold);color:var(--gold)}
-.num-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}
-.num-btns button{padding:18px 8px;font-size:2.15rem;font-weight:900;background:#12123a;border:2px solid var(--gold);color:var(--gold);border-radius:16px;cursor:pointer;text-shadow:0 0 10px #f0c040}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
-.card{background:#080812;border:1px solid var(--line);border-radius:14px;padding:10px;min-width:0}
-.prediction-box{background:#000;border:2px solid var(--purple);border-radius:16px;padding:14px;margin:12px 0;text-align:center}
-.pred-best{font-size:2.75rem;font-weight:900;color:#ffd700;text-shadow:0 0 20px #ffd700;margin:4px 0;letter-spacing:1px}
-.conf-bar{height:14px;background:#222;border-radius:8px;overflow:hidden;margin:8px 0;border:1px solid #333}
-.conf-fill{height:100%;background:linear-gradient(90deg,var(--red),var(--orange),var(--green));width:0%;transition:width .3s}
-.badge{margin-top:6px;display:inline-block;padding:5px 12px;border-radius:12px;font-size:.8rem;font-weight:900;background:#1e1e3a;color:var(--gold);border:1px solid #333}
-.metric{display:grid;grid-template-columns:1fr 1fr;gap:6px;text-align:left;margin-top:8px;font-size:.78rem}
-.metric div{background:#101020;border:1px solid #252542;border-radius:9px;padding:7px;color:#cfcfe8}
-.metric b{color:var(--gold)}
-.set-table,.detail-table{width:100%;border-collapse:collapse;margin:8px 0;font-size:.82rem;overflow:hidden;border-radius:10px}
-th{color:var(--gold);border-bottom:1px solid #333;padding:6px 4px;background:#141429;font-size:.76rem}
-td{padding:6px 4px;text-align:center;border-bottom:1px solid #222;color:#e8e8f0}
-tr:last-child td{border-bottom:none}
-.highlight{background:#1e1e3a!important;color:#ffd700!important;font-weight:900}
-.section-title{color:var(--gold);font-weight:900;margin:12px 0 6px;font-size:.9rem;display:flex;justify-content:space-between;gap:8px;align-items:center}
-.log-box{background:#000;border:1px solid var(--gold);border-radius:10px;padding:8px;max-height:155px;overflow:auto;margin-top:10px;font-size:.78rem}
-.log-entry{display:grid;grid-template-columns:40px 1fr 60px;gap:6px;padding:3px 0;border-bottom:1px solid #222;align-items:center}.log-entry:last-child{border-bottom:none}
-.win{color:var(--green);font-weight:900}.loss{color:var(--red);font-weight:900}.warn{color:var(--orange);font-weight:900}.good{color:var(--green);font-weight:900}.bad{color:var(--red);font-weight:900}.muted{color:var(--muted)}
-.pill{display:inline-block;padding:3px 7px;border-radius:999px;background:#1e1e3a;border:1px solid #333;color:#ddd;font-weight:800;font-size:.72rem;margin:1px}
-.footer{text-align:center;color:#666;font-size:.7rem;margin-top:10px;line-height:1.45}
-.error{display:none;background:#2a1010;border:1px solid #ff525277;color:#ffd0d0;padding:8px;border-radius:10px;font-size:.78rem;margin:8px 0;line-height:1.45}
-@media(max-width:680px){.container{padding:12px}.grid{grid-template-columns:1fr}.title{font-size:1.42rem}.pred-best{font-size:2.25rem}.num-btns button{font-size:1.8rem;padding:16px 4px}.metric{grid-template-columns:1fr}th,td{font-size:.75rem;padding:5px 3px}}
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+}
+body {
+    background: radial-gradient(circle at 10% 0, #140a28 0, #060614 32%, #020208 100%);
+    color: var(--text);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 8px;
+}
+.container {
+    width: 100%;
+    max-width: 820px;
+    background: linear-gradient(180deg, #0c0c22, #060616);
+    border: 2px solid var(--gold);
+    border-radius: 14px;
+    padding: 14px;
+    box-shadow: 0 0 40px #f0c0401a;
+}
+.title {
+    text-align: center;
+    font-size: 1.4rem;
+    color: var(--gold);
+    text-shadow: 0 0 10px #f0c040;
+    font-weight: 900;
+    letter-spacing: .5px;
+    margin-bottom: 2px;
+}
+.sub {
+    text-align: center;
+    font-size: .68rem;
+    color: var(--purple);
+    margin-bottom: 8px;
+    font-weight: 700;
+}
+.api-section {
+    background: #0a0a1e;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+}
+.api-section input {
+    background: #03030a;
+    border: 1px solid #333;
+    color: var(--cyan);
+    padding: 7px 10px;
+    border-radius: 6px;
+    font-size: .78rem;
+    font-family: 'Cascadia Code', 'Consolas', monospace;
+    flex: 1;
+    min-width: 200px;
+    outline: none;
+}
+.api-section input:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 6px #00e5ff33;
+}
+.api-section button {
+    background: #121230;
+    border: 1px solid var(--cyan);
+    color: var(--cyan);
+    border-radius: 6px;
+    padding: 7px 14px;
+    cursor: pointer;
+    font-size: .75rem;
+    font-weight: 800;
+    transition: all .12s;
+    white-space: nowrap;
+}
+.api-section button:hover {
+    background: #1a1a4a;
+    box-shadow: 0 0 8px #00e5ff44;
+}
+.api-section button.fetching {
+    opacity: .6;
+    pointer-events: none;
+}
+.api-section button.btn-sync {
+    border-color: var(--gold);
+    color: var(--gold);
+}
+.api-section button.btn-sync:hover {
+    box-shadow: 0 0 8px #f0c04044;
+}
+.api-section button.btn-inc {
+    border-color: var(--green);
+    color: var(--green);
+}
+.api-section button.btn-inc:hover {
+    box-shadow: 0 0 8px #00e67644;
+}
+.api-status {
+    width: 100%;
+    text-align: center;
+    font-size: .7rem;
+    color: var(--muted);
+    min-height: 18px;
+    line-height: 1.4;
+}
+.api-status.ok {
+    color: var(--green);
+}
+.api-status.err {
+    color: var(--red);
+}
+.api-status.warn {
+    color: var(--orange);
+}
+.draw-strip {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 6px 0;
+    max-height: 80px;
+    overflow-y: auto;
+}
+.draw-dot {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    font-weight: 900;
+    font-size: .85rem;
+    background: #0a0a20;
+    border: 2px solid #252540;
+    color: #ddd;
+    transition: all .15s;
+    cursor: default;
+    position: relative;
+}
+.draw-dot.hot {
+    border-color: var(--green);
+    color: var(--green);
+    box-shadow: 0 0 6px #00e67644;
+}
+.draw-dot.warm {
+    border-color: var(--gold);
+    color: var(--gold);
+}
+.draw-dot.cold {
+    border-color: #444;
+    color: #666;
+}
+.draw-dot:last-child {
+    border-color: var(--cyan) !important;
+    color: var(--cyan) !important;
+    box-shadow: 0 0 10px #00e5ff66 !important;
+    animation: pulse-latest 1.5s ease-in-out infinite;
+}
+@keyframes pulse-latest {
+    0%, 100% { box-shadow: 0 0 10px #00e5ff66; }
+    50% { box-shadow: 0 0 20px #00e5ffaa; }
+}
+textarea {
+    width: 100%;
+    height: 55px;
+    background: #03030a;
+    color: var(--green);
+    border: 1px solid #333;
+    border-radius: 7px;
+    resize: vertical;
+    font-size: .85rem;
+    padding: 6px;
+    outline: none;
+    line-height: 1.3;
+    font-family: 'Cascadia Code', 'Consolas', monospace;
+}
+textarea:focus {
+    border-color: #c084fc77;
+    box-shadow: 0 0 5px #c084fc33;
+}
+.help {
+    font-size: .66rem;
+    color: var(--muted);
+    line-height: 1.3;
+    margin: 2px 0 5px;
+    text-align: center;
+}
+.btn-row {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 8px;
+}
+button {
+    background: #121230;
+    border: 1px solid var(--purple);
+    color: var(--purple);
+    border-radius: 6px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: .7rem;
+    font-weight: 800;
+    transition: all .12s;
+    white-space: nowrap;
+}
+button:hover {
+    background: #1e1e4a;
+    box-shadow: 0 0 5px #c084fc55;
+    transform: translateY(-1px);
+}
+button:active {
+    transform: scale(.97);
+}
+button.primary {
+    background: linear-gradient(135deg, #281a0a, #121230);
+    border-color: var(--gold);
+    color: var(--gold);
+}
+.prediction-box {
+    background: #010108;
+    border: 2px solid var(--purple);
+    border-radius: 12px;
+    padding: 12px;
+    margin: 8px 0;
+}
+.pred-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+.pred-header .label {
+    color: var(--gold);
+    font-weight: 900;
+    font-size: .82rem;
+}
+.digit-grid {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 5px;
+    margin: 8px 0;
+}
+.digit-cell {
+    text-align: center;
+    padding: 8px 2px;
+    border-radius: 8px;
+    background: #0a0a20;
+    border: 2px solid #1a1a32;
+    transition: all .2s;
+    cursor: default;
+}
+.digit-cell.top7 {
+    border-color: var(--green);
+    background: #081a0e;
+    box-shadow: 0 0 8px #00e67622;
+}
+.digit-cell.top7.best {
+    border-color: #ffd700;
+    background: #1a1808;
+    box-shadow: 0 0 14px #ffd70044;
+    animation: glow-best 2s ease-in-out infinite;
+}
+@keyframes glow-best {
+    0%, 100% { box-shadow: 0 0 14px #ffd70044; }
+    50% { box-shadow: 0 0 24px #ffd70088; }
+}
+.digit-cell.bottom3 {
+    border-color: #3a1010;
+    background: #100808;
+    opacity: .65;
+}
+.digit-cell .d-num {
+    font-size: 1.6rem;
+    font-weight: 900;
+    display: block;
+    line-height: 1;
+}
+.digit-cell.top7 .d-num { color: var(--green); }
+.digit-cell.top7.best .d-num {
+    color: #ffd700;
+    text-shadow: 0 0 12px #ffd700;
+}
+.digit-cell.bottom3 .d-num { color: #662222; }
+.digit-cell .d-prob {
+    font-size: .65rem;
+    color: var(--muted);
+    display: block;
+    margin-top: 2px;
+}
+.digit-cell.top7 .d-prob { color: #88cc88; }
+.summary-bar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    margin: 8px 0;
+    padding: 8px;
+    background: #0a0a18;
+    border-radius: 8px;
+    border: 1px solid #1a1a30;
+}
+.summary-item { text-align: center; }
+.summary-item .s-val {
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: var(--gold);
+}
+.summary-item .s-lbl { font-size: .62rem; color: var(--muted); }
+.conf-bar {
+    height: 8px;
+    background: #1a1a2e;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 6px 0;
+    border: 1px solid #2a2a3e;
+}
+.conf-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff5252, #ff9100, #ffd740, #69f0ae, #00e5ff);
+    width: 0%;
+    transition: width .3s;
+    border-radius: 4px;
+}
+.badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: .74rem;
+    font-weight: 900;
+    background: #121230;
+    color: var(--gold);
+    border: 1px solid #333;
+}
+.metric {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+    text-align: left;
+    margin-top: 6px;
+    font-size: .68rem;
+}
+.metric div {
+    background: #08081a;
+    border: 1px solid #1a1a32;
+    border-radius: 6px;
+    padding: 4px 5px;
+    color: #ccc;
+}
+.metric b { color: var(--gold); }
+.digit-table-wrap { margin: 8px 0; overflow-x: auto; }
+.digit-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .74rem;
+}
+.digit-table th {
+    color: var(--gold);
+    border-bottom: 1px solid #333;
+    padding: 4px 6px;
+    background: #0a0a1e;
+    font-size: .68rem;
+    text-align: center;
+}
+.digit-table td {
+    padding: 5px 6px;
+    text-align: center;
+    border-bottom: 1px solid #18182e;
+    color: #ddd;
+    font-size: .78rem;
+}
+.digit-table tr.top-row td { color: var(--green); font-weight: 900; }
+.digit-table tr.top-row { background: #081a0e; }
+.digit-table tr.bot-row td { color: #662222; }
+.digit-table tr.bot-row { background: #100808; }
+.log-box {
+    background: #010108;
+    border: 1px solid var(--gold);
+    border-radius: 7px;
+    padding: 5px;
+    max-height: 130px;
+    overflow: auto;
+    margin-top: 8px;
+    font-size: .7rem;
+}
+.log-entry {
+    display: grid;
+    grid-template-columns: 80px 1fr 60px 40px;
+    gap: 4px;
+    padding: 1px 0;
+    border-bottom: 1px solid #18182a;
+    align-items: center;
+}
+.log-entry:last-child { border-bottom: none; }
+.win { color: var(--green); font-weight: 900; }
+.loss { color: var(--red); font-weight: 900; }
+.good { color: var(--green); }
+.bad { color: var(--red); }
+.warn { color: var(--orange); }
+.muted { color: var(--muted); }
+.pill {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 999px;
+    background: #121230;
+    border: 1px solid #252540;
+    color: #ccc;
+    font-weight: 800;
+    font-size: .66rem;
+    margin: 1px;
+}
+.regime-tag {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 5px;
+    font-size: .68rem;
+    font-weight: 900;
+    margin: 2px;
+}
+.regime-random { background: #1a1a08; color: #ffaa00; border: 1px solid #ffaa0033; }
+.regime-pattern { background: #081a08; color: #00e676; border: 1px solid #00e67633; }
+.error-box {
+    display: none;
+    background: #1a0808;
+    border: 1px solid #ff525255;
+    color: #ffcccc;
+    padding: 6px;
+    border-radius: 7px;
+    font-size: .7rem;
+    margin: 5px 0;
+}
+.footer {
+    text-align: center;
+    color: #444;
+    font-size: .62rem;
+    margin-top: 8px;
+}
+.countdown {
+    font-weight: 900;
+    color: var(--cyan);
+    font-size: .78rem;
+}
+.section-title {
+    color: var(--gold);
+    font-weight: 900;
+    margin: 8px 0 4px;
+    font-size: .8rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.sync-log {
+    background: #0a0a18;
+    border: 1px solid #1a1a32;
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: .7rem;
+    margin: 4px 0;
+    color: #ccc;
+    min-height: 20px;
+    line-height: 1.4;
+}
+.sync-log .highlight { color: var(--green); font-weight: 900; }
+.sync-log .warn-text { color: var(--orange); }
+@media(max-width:680px) {
+    .container { padding: 8px; }
+    .digit-grid { grid-template-columns: repeat(5, 1fr); }
+    .metric { grid-template-columns: repeat(3, 1fr); }
+    .title { font-size: 1.1rem; }
+    .digit-cell .d-num { font-size: 1.2rem; }
+    .api-section { flex-direction: column; }
+    .api-section input { width: 100%; }
+}
 </style>
 </head>
 <body>
 <div class="container">
-  <div class="title">FAN-TAN GOD MODE v21.0</div>
-  <div class="sub">MANUAL INPUT • BASELINE-CALIBRATED • WALK-FORWARD BACKTEST</div>
-  <div class="notice">
-    Nhập tay lịch sử chỉ gồm cửa <b>1-2-3-4</b>. Bản v21 sửa độ tin cậy ảo của bản cũ: chơi bộ 3 trong 4 cửa có baseline tự nhiên là <b>75%</b>, nên tín hiệu chỉ mạnh khi vượt baseline và có biên chênh rõ.
-  </div>
+    <div class="title">🎯 ĐUÔI GIẢI ĐẶC BIỆT</div>
+    <div class="sub">HIERARCHICAL BAYESIAN • 18-MODEL ENSEMBLE • HURST • SPRT • CHANGEPOINT</div>
 
-  <div class="history-box">
-    <textarea id="historyInput" placeholder="Ví dụ: 1 3 2 4 4 1 2 3 ...&#10;Có thể nhập cách nhau bằng dấu cách, dấu phẩy, xuống dòng hoặc bấm nút 1-4 bên dưới."></textarea>
-  </div>
-  <div class="help" id="parseInfo">Mặc định: kết quả mới nhất nằm bên phải. Bấm “Đảo thứ tự” nếu dữ liệu bạn dán đang mới nhất bên trái.</div>
-  <div id="errorBox" class="error"></div>
+    <!-- API Section -->
+    <div class="api-section">
+        <input type="text" id="apiUrl" value="https://k2d9u.k123b.club/api/front/open/lottery/history/list/game?limitNum=200&gameCode=st45g" placeholder="API URL">
+        <button id="btnFetch" class="btn-sync" onclick="app.fullSyncFromAPI()">📡 NẠP DỮ LIỆU (FULL SYNC)</button>
+        <button id="btnUpdate" class="btn-inc" onclick="app.incrementalUpdate()">🔄 CẬP NHẬT PHIÊN MỚI</button>
+        <div class="api-status" id="apiStatus">Sẵn sàng. Bấm NẠP DỮ LIỆU để đồng bộ toàn bộ, hoặc CẬP NHẬT để thêm phiên mới.</div>
+    </div>
+    <div class="sync-log" id="syncLog" style="display:none"></div>
 
-  <div class="btn-row">
-    <button class="primary" onclick="app.forceAnalyze()">📊 PHÂN TÍCH NGAY</button>
-    <button onclick="app.loadSample()">📋 NẠP MẪU</button>
-    <button onclick="app.reverseInput()">🔁 ĐẢO THỨ TỰ</button>
-    <button onclick="app.undo()">↩ UNDO</button>
-    <button onclick="app.reset()">🗑 RESET</button>
-    <button onclick="app.clearCache()">🧹 XOÁ CACHE</button>
-  </div>
+    <!-- Recent draws visual strip -->
+    <div class="section-title">LỊCH SỬ ĐUÔI GẦN ĐÂY <span class="countdown" id="countdownDisplay"></span></div>
+    <div class="draw-strip" id="drawStrip">—</div>
 
-  <div class="num-btns">
-    <button onclick="app.addNumber(1)">1</button>
-    <button onclick="app.addNumber(2)">2</button>
-    <button onclick="app.addNumber(3)">3</button>
-    <button onclick="app.addNumber(4)">4</button>
-  </div>
+    <!-- Manual input -->
+    <textarea id="historyInput" placeholder="Nhập dãy đuôi: 4 0 3 1 7 2 ... (0-9, cách nhau bởi dấu cách, phẩy, xuống dòng)"></textarea>
+    <div class="help" id="parseInfo">Nhập thủ công hoặc dùng nút API bên trên. Mới nhất bên phải.</div>
+    <div id="errorBox" class="error-box"></div>
 
-  <div class="prediction-box">
-    <div style="color:#f0c040;font-weight:900">BỘ 3 ƯU TIÊN</div>
-    <div class="pred-best" id="bestSetDisplay">-</div>
-    <div class="conf-bar"><div class="conf-fill" id="confFill"></div></div>
-    <div id="confText" style="font-size:.82rem">Tín hiệu: -</div>
-    <div id="edgeText" style="font-size:.78rem;color:#ffaa00;margin-top:3px">Edge so với baseline 75%: -</div>
-    <div id="decisionBadge" class="badge">SẴN SÀNG</div>
-
-    <div class="metric">
-      <div><b>Mẫu hợp lệ:</b> <span id="sampleCount">0</span></div>
-      <div><b>Bỏ cửa:</b> <span id="missingNum">-</span></div>
-      <div><b>Top số đơn:</b> <span id="topNums">-</span></div>
-      <div><b>Backtest bộ 3:</b> <span id="backtestText">-</span></div>
+    <div class="btn-row">
+        <button class="primary" onclick="app.forceAnalyze()">🔮 PHÂN TÍCH</button>
+        <button onclick="app.undo()">↩ UNDO</button>
+        <button onclick="app.reverseInput()">⇄ ĐẢO</button>
+        <button onclick="app.reset()">🗑 RESET</button>
+        <button onclick="app.clearCache()">🧹 XOÁ CACHE</button>
+        <button onclick="app.exportData()">📥 XUẤT</button>
+        <button onclick="app.importData()">📤 NHẬP</button>
+        <button onclick="app.loadSample()">📋 MẪU</button>
     </div>
 
-    <div class="section-title">BẢNG BỘ 3 <span class="muted">phủ dự đoán, không phải cam kết thắng</span></div>
-    <table class="set-table" id="setTable">
-      <thead><tr><th>Bộ số</th><th>Phủ dự đoán</th><th>Edge</th><th>Ưu tiên</th></tr></thead>
-      <tbody>
-        <tr><td>1-2-3</td><td id="set123">-</td><td id="edge123">-</td><td id="rank123">-</td></tr>
-        <tr><td>2-3-4</td><td id="set234">-</td><td id="edge234">-</td><td id="rank234">-</td></tr>
-        <tr><td>1-2-4</td><td id="set124">-</td><td id="edge124">-</td><td id="rank124">-</td></tr>
-        <tr><td>1-3-4</td><td id="set134">-</td><td id="edge134">-</td><td id="rank134">-</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="grid">
-    <div class="card">
-      <div class="section-title">XÁC SUẤT SỐ ĐƠN</div>
-      <table class="detail-table">
-        <thead><tr><th>Số</th><th>AI</th><th>Freq</th><th>Gap</th></tr></thead>
-        <tbody id="numberTable"></tbody>
-      </table>
+    <!-- Prediction Box -->
+    <div class="prediction-box">
+        <div class="pred-header">
+            <span class="label">🎯 DỰ ĐOÁN — TOP 7 ĐUÔI KHẢ NĂNG CAO</span>
+            <span id="decisionBadge" class="badge">SẴN SÀNG</span>
+        </div>
+        <div class="digit-grid" id="digitGrid"></div>
+        <div class="conf-bar"><div class="conf-fill" id="confFill"></div></div>
+        <div id="confText" style="font-size:.76rem;text-align:center">Tín hiệu: —</div>
+        <div class="summary-bar">
+            <div class="summary-item"><div class="s-val" id="bestDigitDisplay">-</div><div class="s-lbl">Đuôi #1</div></div>
+            <div class="summary-item"><div class="s-val" id="eliminatedDisplay">-</div><div class="s-lbl">LOẠI (3 số)</div></div>
+            <div class="summary-item"><div class="s-val" id="edgeDisplay">-</div><div class="s-lbl">Edge</div></div>
+            <div class="summary-item"><div class="s-val" id="kellyDisplay">-</div><div class="s-lbl">Kelly</div></div>
+            <div class="summary-item"><div class="s-val" id="sprtDisplay">-</div><div class="s-lbl">SPRT</div></div>
+        </div>
+        <div id="regimeDisplay" style="text-align:center;margin:4px 0"></div>
+        <div class="metric">
+            <div><b>Mẫu:</b> <span id="sampleCount">0</span></div>
+            <div><b>Độ tin:</b> <span id="confidenceVal">-</span></div>
+            <div><b>Regime:</b> <span id="regimeVal">-</span></div>
+            <div><b>Hurst:</b> <span id="hurstVal">-</span></div>
+            <div><b>Change:</b> <span id="changeVal">-</span></div>
+            <div><b>Sharpe:</b> <span id="sharpeVal">-</span></div>
+            <div><b>Calib:</b> <span id="calibVal">-</span></div>
+            <div><b>Backtest:</b> <span id="backtestText">-</span></div>
+            <div><b>Entropy:</b> <span id="entropyVal">-</span></div>
+            <div><b>Z-Score:</b> <span id="zscoreVal">-</span></div>
+        </div>
+        <div class="digit-table-wrap">
+            <table class="digit-table">
+                <thead><tr><th>Đuôi</th><th>P dự đoán</th><th>Bayes P</th><th>Edge</th><th>Gap</th><th>Tần suất</th><th>Z-Score</th><th>Rank</th></tr></thead>
+                <tbody id="digitTableBody"></tbody>
+            </table>
+        </div>
     </div>
-    <div class="card">
-      <div class="section-title">TRỌNG SỐ MODEL</div>
-      <table class="detail-table">
-        <thead><tr><th>Model</th><th>W</th><th>Acc3</th></tr></thead>
+
+    <div class="section-title">TOP MODEL WEIGHTS</div>
+    <table class="digit-table" style="margin-bottom:6px">
+        <thead><tr><th>Model</th><th>Weight</th><th>Sharpe</th><th>Hit Rate</th></tr></thead>
         <tbody id="modelTable"></tbody>
-      </table>
+    </table>
+
+    <div class="log-box">
+        <div style="color:#f0c040;font-weight:900;margin-bottom:3px">📋 PREDICTION LOG</div>
+        <div id="logContent">Chưa có dữ liệu</div>
     </div>
-  </div>
 
-  <div class="log-box">
-    <div style="color:#f0c040;font-weight:900;margin-bottom:4px">📋 LỊCH SỬ CHECK DỰ ĐOÁN</div>
-    <div id="logContent">Chưa có dữ liệu</div>
-  </div>
+    <details style="margin-top:8px">
+        <summary style="color:var(--muted);font-size:.7rem;cursor:pointer">📋 Dán JSON API thủ công (nếu CORS chặn)</summary>
+        <textarea id="jsonPasteArea" style="height:80px;margin-top:4px;font-size:.7rem" placeholder='Dán toàn bộ JSON response từ API vào đây...'></textarea>
+        <button onclick="app.parsePastedJSON()" style="margin-top:3px;border-color:var(--orange);color:var(--orange)">🔍 PHÂN TÍCH JSON ĐÃ DÁN</button>
+    </details>
 
-  <div class="footer">
-    FAN-TAN GOD MODE v21.0 MANUAL • DETERMINISTIC ENSEMBLE • Không dùng API, không cần mạng, chạy trực tiếp trên trình duyệt.<br>
-    Lưu ý: dữ liệu ngẫu nhiên có thể không có quy luật ổn định; tool chỉ phân tích xác suất từ lịch sử nhập tay.
-  </div>
+    <div class="footer">
+        ĐUÔI GIẢI ĐẶC BIỆT PREDICTION ENGINE v2.1 • API Full Sync + Incremental (Fixed) • Offline-First
+    </div>
 </div>
 
 <script>
 'use strict';
 
 const CFG = Object.freeze({
-  MAX_HISTORY: 1500,
-  MIN_HISTORY: 12,
-  TRAIN_START: 16,
-  TRAIN_WINDOW: 220,
-  BACKTEST_WINDOW: 90,
-  STORAGE_HIST: 'fan_hist_v21_manual',
-  STORAGE_MODEL: 'fan_model_v21_manual',
-  STORAGE_LOG: 'fan_log_v21_manual',
-  AUTO_DEBOUNCE: 450,
-  BASELINE_SET3: 0.75
+    DIGITS: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+    MAX_HISTORY: 5000,
+    MIN_HISTORY: 30,
+    TRAIN_WINDOW: 400,
+    BACKTEST_WINDOW: 200,
+    BASELINE: 0.1,
+    BAYES_PRIOR: 0.5,
+    REGIME_WINDOW: 80,
+    LEARNING_RATE: 0.07,
+    STORAGE_HIST: 'duoi_hist_v2',
+    STORAGE_MODEL: 'duoi_model_v2',
+    STORAGE_LOG: 'duoi_log_v2',
+    STORAGE_API_CACHE: 'duoi_api_cache_v2',
+    AUTO_DEBOUNCE: 400,
+    TOP_N: 7,
+    BOTTOM_N: 3,
+    // Overlap window for incremental sync: how many digits we compare
+    // to find where the API data overlaps with existing history
+    OVERLAP_MATCH_MIN: 5,
+    OVERLAP_SEARCH_WINDOW: 50,
 });
 
 const U = {
-  nums: [1, 2, 3, 4],
-  sets: [
-    { key: '1-2-3', nums: [1, 2, 3], missing: 4 },
-    { key: '2-3-4', nums: [2, 3, 4], missing: 1 },
-    { key: '1-2-4', nums: [1, 2, 4], missing: 3 },
-    { key: '1-3-4', nums: [1, 3, 4], missing: 2 }
-  ],
-  prob() { return { 1: 0.25, 2: 0.25, 3: 0.25, 4: 0.25 }; },
-  clamp(v, min, max) { return Number.isFinite(v) ? Math.min(max, Math.max(min, v)) : min; },
-  pct(v, d = 1) { return `${(this.clamp(v, -99, 99) * 100).toFixed(d)}%`; },
-  normalize(p) {
-    const out = {};
-    let sum = 0;
-    for (const n of this.nums) {
-      const value = Math.max(0, Number(p && p[n]) || 0);
-      out[n] = value;
-      sum += value;
-    }
-    if (sum <= 0) return this.prob();
-    for (const n of this.nums) out[n] /= sum;
-    return out;
-  },
-  mix(items) {
-    const out = { 1: 0, 2: 0, 3: 0, 4: 0 };
-    let totalWeight = 0;
-    for (const item of items) {
-      if (!item || !item.p) continue;
-      const weight = Math.max(0, Number(item.w) || 0);
-      if (weight <= 0) continue;
-      const p = this.normalize(item.p);
-      totalWeight += weight;
-      for (const n of this.nums) out[n] += p[n] * weight;
-    }
-    if (totalWeight <= 0) return this.prob();
-    for (const n of this.nums) out[n] /= totalWeight;
-    return this.normalize(out);
-  },
-  setCoverage(p) {
-    const prob = this.normalize(p);
-    const out = {};
-    for (const set of this.sets) out[set.key] = set.nums.reduce((acc, n) => acc + prob[n], 0);
-    return out;
-  },
-  rankSets(coverage) {
-    return this.sets.map(s => ({ ...s, coverage: Number(coverage[s.key]) || 0 }))
-      .sort((a, b) => b.coverage - a.coverage || a.key.localeCompare(b.key));
-  },
-  correct(setKey, actual) {
-    const set = this.sets.find(x => x.key === setKey);
-    return Boolean(set && set.nums.includes(actual));
-  },
-  streak(h) {
-    if (!h.length) return { num: null, len: 0 };
-    const last = h[h.length - 1];
-    let len = 0;
-    for (let i = h.length - 1; i >= 0 && h[i] === last; i -= 1) len += 1;
-    return { num: last, len };
-  },
-  entropyFromProb(p) {
-    const prob = this.normalize(p);
-    let e = 0;
-    for (const n of this.nums) {
-      const x = prob[n];
-      if (x > 0) e -= x * Math.log2(x);
-    }
-    return e;
-  },
-  counts(h) {
-    const c = { 1: 0, 2: 0, 3: 0, 4: 0 };
-    for (const v of h) if (c[v] !== undefined) c[v] += 1;
-    return c;
-  },
-  gaps(h) {
-    const g = { 1: h.length, 2: h.length, 3: h.length, 4: h.length };
-    for (const n of this.nums) {
-      for (let i = h.length - 1; i >= 0; i -= 1) {
-        if (h[i] === n) { g[n] = h.length - 1 - i; break; }
-      }
-    }
-    return g;
-  },
-  toText(h) { return h.join(' '); },
-  hash(h) {
-    let hash = 2166136261;
-    for (const v of h) {
-      hash ^= v & 255;
-      hash = Math.imul(hash, 16777619) >>> 0;
-    }
-    return `${h.length}:${hash.toString(16)}`;
-  },
-  safeJsonParse(raw, fallback) {
-    try { return JSON.parse(raw); } catch (_) { return fallback; }
-  },
-  parseManual(raw) {
-    const text = String(raw || '').trim();
-    const warnings = [];
-    if (!text) return { history: [], warnings };
+    digits: CFG.DIGITS,
+    prob() { const o = {}; for (const d of this.digits) o[d] = 1 / this.digits.length; return o; },
+    clamp(v, lo, hi) { return Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : lo; },
+    pct(v, d = 1) { return `${(this.clamp(v, -99, 99) * 100).toFixed(d)}%`; },
+    normalize(p) {
+        const o = {}; let s = 0;
+        for (const d of this.digits) { const v = Math.max(0, +(p && p[d]) || 0); o[d] = v; s += v; }
+        if (s <= 0) return this.prob();
+        for (const d of this.digits) o[d] /= s;
+        return o;
+    },
+    mix(items) {
+        const o = {}; for (const d of this.digits) o[d] = 0; let tw = 0;
+        for (const it of items) { if (!it || !it.p) continue; const w = Math.max(0, +it.w || 0); if (w <= 0) continue; const p = this.normalize(it.p); tw += w; for (const d of this.digits) o[d] += p[d] * w; }
+        if (tw <= 0) return this.prob();
+        for (const d of this.digits) o[d] /= tw;
+        return this.normalize(o);
+    },
+    rankDigits(p) { return this.digits.map(d => ({ d, p: p[d] || 0 })).sort((a, b) => b.p - a.p || a.d - b.d); },
+    correct(predictedDigit, actual) { return predictedDigit === actual; },
+    counts(h) { const c = {}; for (const d of this.digits) c[d] = 0; for (const v of h) if (c[v] !== undefined) c[v]++; return c; },
+    gaps(h) { const g = {}; for (const d of this.digits) g[d] = h.length; for (const d of this.digits) { for (let i = h.length - 1; i >= 0; i--) { if (h[i] === d) { g[d] = h.length - 1 - i; break; } } } return g; },
+    toText(h) { return h.join(' '); },
+    hash(h) { let hash = 2166136261; for (const v of h) { hash ^= v & 255; hash = Math.imul(hash, 16777619) >>> 0; } return `${h.length}:${hash.toString(16)}`; },
+    safeJsonParse(raw, fb) { try { return JSON.parse(raw); } catch (_) { return fb; } },
+    parseManual(raw) { const text = String(raw || '').trim(); const w = []; if (!text) return { history: [], warnings: w }; const pieces = text.split(/[\s,;|\/.-]+/).map(x => x.trim()).filter(Boolean); const h = []; let ign = 0; for (const p of pieces) { if (/^[0-9]$/.test(p)) h.push(+p); else if (/^[0-9]{2,}$/.test(p)) { for (const ch of p) { const n = +ch; if (n >= 0 && n <= 9) h.push(n); } } else ign++; } if (ign > 0) w.push(`Bỏ qua ${ign} token.`); if (h.length > CFG.MAX_HISTORY) { w.push(`Giữ ${CFG.MAX_HISTORY} mới nhất.`); return { history: h.slice(-CFG.MAX_HISTORY), warnings: w }; } return { history: h, warnings: w }; },
+    mean(arr) { if (!arr.length) return 0; return arr.reduce((a, b) => a + b, 0) / arr.length; },
+    std(arr) { if (arr.length < 2) return 0; const m = this.mean(arr); return Math.sqrt(arr.reduce((a, b) => a + Math.pow(b - m, 2), 0) / arr.length); },
+    zScore(obs, p0, n) { const se = Math.sqrt(p0 * (1 - p0) / n); return se > 0 ? (obs - p0) / se : 0; },
+    entropy(p) { const pr = this.normalize(p); let e = 0; for (const d of this.digits) { const x = pr[d]; if (x > 0) e -= x * Math.log2(x); } return e; },
+    hurstEstimate(h) {
+        if (h.length < 50) return 0.5; const lags = [4, 8, 16, 32, 64]; const rsValues = [];
+        for (const lag of lags) { if (lag > h.length / 4) continue; const segments = Math.floor(h.length / lag); let rsSum = 0; for (let s = 0; s < segments; s++) { const slice = h.slice(s * lag, (s + 1) * lag); const m = this.mean(slice); let cumDev = 0, maxDev = -Infinity, minDev = Infinity; let ss = 0; for (const v of slice) { cumDev += v - m; if (cumDev > maxDev) maxDev = cumDev; if (cumDev < minDev) minDev = cumDev; ss += Math.pow(v - m, 2); } const r = maxDev - minDev; const std = Math.sqrt(ss / lag); if (std > 0) rsSum += r / std; } rsValues.push(Math.log(rsSum / segments)); }
+        if (rsValues.length < 2) return 0.5; const logLags = lags.slice(0, rsValues.length).map(Math.log); const n = rsValues.length; const mx = this.mean(logLags), my = this.mean(rsValues); let cov = 0, varx = 0; for (let i = 0; i < n; i++) { cov += (logLags[i] - mx) * (rsValues[i] - my); varx += Math.pow(logLags[i] - mx, 2); } return varx > 0 ? this.clamp(cov / varx, .2, .9) : 0.5;
+    },
+    changepointScore(h, window = 40) { if (h.length < window * 2) return 0; const recent = h.slice(-window), older = h.slice(-2 * window, -window); const rc = this.counts(recent), oc = this.counts(older); let chi = 0; for (const d of this.digits) { const e1 = oc[d] / window, e2 = rc[d] / window; chi += Math.pow(e1 - e2, 2) / ((e1 + e2) / 2 + .001); } return this.clamp(chi / 10, 0, 1); },
+    streak(h) { if (!h.length) return { num: null, len: 0 }; const last = h[h.length - 1]; let len = 0; for (let i = h.length - 1; i >= 0 && h[i] === last; i--) len++; return { num: last, len }; },
+    simpleHash(str) { let h = 0; for (let i = 0; i < str.length; i++) { h = ((h << 5) - h) + str.charCodeAt(i); h |= 0; } return Math.abs(h).toString(36); },
+    /**
+     * Find where apiDigits overlaps with existing history.
+     * Walks backward from the end of both arrays comparing sequences.
+     * Returns the number of NEW digits at the end of apiDigits.
+     * If no overlap found, returns apiDigits.length (all new).
+     */
+    findOverlapIndex(apiDigits, existingHistory) {
+        if (!existingHistory.length) return apiDigits.length;
+        if (!apiDigits.length) return 0;
 
-    const pieces = text.split(/[\s,;|\/.-]+/).map(x => x.trim()).filter(Boolean);
-    const history = [];
-    let ignored = 0;
+        const searchWindow = Math.min(CFG.OVERLAP_SEARCH_WINDOW, apiDigits.length, existingHistory.length);
+        const minMatch = Math.min(CFG.OVERLAP_MATCH_MIN, searchWindow);
 
-    for (const piece of pieces) {
-      if (/^[1-4]$/.test(piece)) {
-        history.push(Number(piece));
-      } else if (/^[1-4]{2,}$/.test(piece)) {
-        for (const ch of piece) history.push(Number(ch));
-      } else {
-        ignored += 1;
-      }
-    }
+        // Try matching sequences of increasing length from the tail
+        for (let matchLen = searchWindow; matchLen >= minMatch; matchLen--) {
+            const apiTail = apiDigits.slice(-matchLen);
+            const histTail = existingHistory.slice(-matchLen);
 
-    if (ignored > 0) warnings.push(`Đã bỏ qua ${ignored} token không phải cửa 1-4.`);
-    if (history.length > CFG.MAX_HISTORY) {
-      warnings.push(`Lịch sử quá dài, chỉ giữ ${CFG.MAX_HISTORY} kết quả mới nhất.`);
-      return { history: history.slice(-CFG.MAX_HISTORY), warnings };
-    }
-    return { history, warnings };
-  }
+            // Check if these tails match exactly
+            let match = true;
+            for (let i = 0; i < matchLen; i++) {
+                if (apiTail[i] !== histTail[i]) { match = false; break; }
+            }
+
+            if (match) {
+                // Found overlap — the new digits are everything in apiDigits
+                // that comes BEFORE the overlapping tail
+                const newCount = apiDigits.length - matchLen;
+                return newCount;
+            }
+        }
+
+        // No overlap found — all apiDigits are new (but capped to avoid duplicates)
+        // Do a quick check: is the last digit of history anywhere in apiDigits?
+        const lastHist = existingHistory[existingHistory.length - 1];
+        let lastFoundAt = -1;
+        for (let i = apiDigits.length - 1; i >= 0; i--) {
+            if (apiDigits[i] === lastHist) {
+                // Check the 3 digits before it for a stronger signal
+                if (i >= 2 && existingHistory.length >= 3) {
+                    const apiCtx = apiDigits.slice(Math.max(0, i - 3), i + 1);
+                    const histCtx = existingHistory.slice(-apiCtx.length);
+                    let ctxMatch = true;
+                    for (let j = 0; j < apiCtx.length; j++) {
+                        if (apiCtx[j] !== histCtx[j]) { ctxMatch = false; break; }
+                    }
+                    if (ctxMatch) { lastFoundAt = i; break; }
+                }
+                // Single-digit match is weak but better than nothing
+                if (lastFoundAt < 0) lastFoundAt = i;
+            }
+        }
+
+        if (lastFoundAt >= 0 && lastFoundAt < apiDigits.length - 1) {
+            return apiDigits.length - 1 - lastFoundAt;
+        }
+
+        // True fallback: no overlap detectable, return full length
+        // but we cap at MAX_HISTORY so full sync replaces anyway
+        return apiDigits.length;
+    },
 };
 
-function freqModel(windowSize, decay) {
-  return h => {
-    const p = { 1: 0.2, 2: 0.2, 3: 0.2, 4: 0.2 };
-    const start = Math.max(0, h.length - windowSize);
-    for (let i = start; i < h.length; i += 1) {
-      const age = h.length - 1 - i;
-      p[h[i]] += Math.pow(decay, age);
+// ============ HIERARCHICAL BAYESIAN WITH TIME DECAY (UNCHANGED) ============
+function hierarchicalBayesian(h, alpha = CFG.BAYES_PRIOR, halfLife = 150) {
+    const counts = {}; for (const d of U.digits) counts[d] = alpha;
+    const lambda = Math.log(2) / halfLife; let totalWeight = alpha * U.digits.length;
+    for (let i = h.length - 1; i >= Math.max(0, h.length - 600); i--) { const age = h.length - 1 - i; const w = Math.exp(-lambda * age); counts[h[i]] += w; totalWeight += w; }
+    const p = {}, vars = {}; for (const d of U.digits) { p[d] = counts[d] / totalWeight; const a = counts[d], b = totalWeight - counts[d]; vars[d] = (a * b) / (Math.pow(totalWeight, 2) * (totalWeight + 1)); } return { p, counts, total: totalWeight, vars };
+}
+
+// ============ MODEL DEFINITIONS (22 models, UNCHANGED) ============
+function freqExp(w, decay) { return h => { const p = {}; for (const d of U.digits) p[d] = 0; const st = Math.max(0, h.length - w); for (let i = st; i < h.length; i++) { p[h[i]] += Math.pow(decay, h.length - 1 - i); } return U.normalize(p); }; }
+function markovN(order, w, sm) { return h => { if (h.length <= order) return U.prob(); const key = h.slice(-order).join(','); const cnt = {}; for (const d of U.digits) cnt[d] = sm; const st = Math.max(0, h.length - w); for (let i = st; i <= h.length - order - 1; i++) { if (h.slice(i, i + order).join(',') === key) cnt[h[i + order]]++; } return U.normalize(cnt); }; }
+function patternFuzzy(len, tol, decay) { return h => { if (h.length <= len) return U.prob(); const tail = h.slice(-len); const cnt = {}; for (const d of U.digits) cnt[d] = .02; const st = Math.max(0, h.length - 600); for (let i = st; i <= h.length - len - 1; i++) { let same = 0; for (let j = 0; j < len; j++) if (h[i + j] === tail[j]) same++; if (same >= len - tol) { const age = h.length - len - i; cnt[h[i + len]] += (same / len) * Math.pow(decay, age); } } return U.normalize(cnt); }; }
+function gapPower(pow) { return h => { const g = U.gaps(h); const p = {}; for (const d of U.digits) p[d] = Math.pow(g[d] + 1, pow); return U.normalize(p); }; }
+function antiGapPower(pow) { return h => { const g = U.gaps(h); const p = {}; for (const d of U.digits) p[d] = 1 / Math.pow(g[d] + 1, pow); return U.normalize(p); }; }
+function streakFollow() { return h => { const st = U.streak(h); if (!st.num && st.num !== 0) return U.prob(); const p = {}; for (const d of U.digits) p[d] = 1; p[st.num] += st.len >= 2 ? 1.8 + st.len * .6 : .15; return U.normalize(p); }; }
+function streakBreak() { return h => { const st = U.streak(h); if (!st.num && st.num !== 0) return U.prob(); const p = {}; for (const d of U.digits) p[d] = 1; p[st.num] *= st.len >= 3 ? .3 : .65; for (const d of U.digits) if (d !== st.num) p[d] += st.len >= 3 ? .8 : .2; return U.normalize(p); }; }
+function pairFrequency() { return h => { if (h.length < 25) return U.prob(); const last = h[h.length - 1]; const cnt = {}; for (const d of U.digits) cnt[d] = .05; for (let i = 0; i < h.length - 1; i++) { if (h[i] === last) cnt[h[i + 1]] += Math.exp(-(h.length - 1 - i) / 70); } return U.normalize(cnt); }; }
+function triplePattern() { return h => { if (h.length < 35) return U.prob(); const key = h.slice(-2).join(','); const cnt = {}; for (const d of U.digits) cnt[d] = .03; const st = Math.max(0, h.length - 400); for (let i = st; i < h.length - 2; i++) { if (h.slice(i, i + 2).join(',') === key) cnt[h[i + 2]] += Math.exp(-(h.length - 2 - i) / 60); } return U.normalize(cnt); }; }
+function cycleModel(cycleLen) { return h => { if (h.length < cycleLen * 2) return U.prob(); const cnt = {}; for (const d of U.digits) cnt[d] = .04; const st = Math.max(0, h.length - cycleLen * 10); for (let i = st; i < h.length - cycleLen; i++) { if (h[i] === h[h.length - cycleLen]) cnt[h[i + cycleLen]]++; } return U.normalize(cnt); }; }
+function entropyMR() { return h => { if (h.length < 50) return U.prob(); const wins = [20, 40, 80]; const p = {}; for (const d of U.digits) p[d] = 0; for (const w of wins) { const sub = h.slice(-w); const c = U.counts(sub); const ent = U.entropy(c); const wt = ent < 2.8 ? 1.5 : ent > 3.1 ? .4 : 1; for (const d of U.digits) p[d] += (c[d] / w) * wt; } return U.normalize(p); }; }
+function runLengthModel() { return h => { const st = U.streak(h); if (!st.num && st.num !== 0 || st.len < 2) return U.prob(); const runs = []; let rl = 1; for (let i = 1; i < h.length; i++) { if (h[i] === h[i - 1]) rl++; else { runs.push(rl); rl = 1; } } runs.push(rl); const avgRun = U.mean(runs); const p = {}; for (const d of U.digits) p[d] = .15; if (st.len > avgRun * 1.5) { for (const d of U.digits) if (d !== st.num) p[d] += 1; } else if (st.len < avgRun * .5) { p[st.num] += .6; } return U.normalize(p); }; }
+function recentBias(halfLife) { return h => { const p = {}; for (const d of U.digits) p[d] = 0; const lambda = Math.log(2) / halfLife; for (let i = h.length - 1; i >= Math.max(0, h.length - 300); i--) { p[h[i]] += Math.exp(-lambda * (h.length - 1 - i)); } return U.normalize(p); }; }
+
+// ============ REGIME DETECTION (UNCHANGED) ============
+class RegimeDetector {
+    detect(h) {
+        if (h.length < CFG.REGIME_WINDOW) return { regime: 'insufficient', confidence: 0, hurst: 0.5, changeScore: 0 };
+        const sub = h.slice(-CFG.REGIME_WINDOW); const hurst = U.hurstEstimate(sub); const changeScore = U.changepointScore(h, 50);
+        const bayesP = hierarchicalBayesian(sub, 0.5, 40).p; const maxP = Math.max(...Object.values(bayesP)); const entropy = U.entropy(bayesP); const deviation = maxP - 0.1;
+        let regime, confidence;
+        if (hurst > 0.56 || (deviation > 0.06 && changeScore > 0.25)) { regime = 'patterned'; confidence = U.clamp((hurst - 0.5) * 3.5 + deviation * 15 + changeScore, .25, 1); }
+        else if (hurst < 0.44 && changeScore < .18 && entropy > 3.2) { regime = 'random'; confidence = U.clamp((.5 - hurst) * 3.5 + (3.32 - entropy) * 1.5, .25, 1); }
+        else { regime = 'mixed'; confidence = .5; }
+        return { regime, confidence, hurst, changeScore, entropy, maxP };
     }
-    return U.normalize(p);
-  };
 }
 
-function markovModel(order, windowSize, smooth) {
-  return h => {
-    if (h.length <= order) return U.prob();
-    const key = h.slice(-order).join(',');
-    const cnt = { 1: smooth, 2: smooth, 3: smooth, 4: smooth };
-    const start = Math.max(0, h.length - windowSize);
-    for (let i = start; i <= h.length - order - 1; i += 1) {
-      if (h.slice(i, i + order).join(',') === key) cnt[h[i + order]] += 1;
-    }
-    return U.normalize(cnt);
-  };
+// ============ SPRT (UNCHANGED) ============
+class SPRTMonitor {
+    constructor(h0 = 0.1, h1 = 0.16, alpha = .04, beta = .08) { this.h0 = h0; this.h1 = h1; this.A = (1 - beta) / alpha; this.B = beta / (1 - alpha); this.reset(); }
+    reset() { this.llr = 0; this.n = 0; this.status = 'Chưa đủ'; }
+    update(hit) { this.n++; const lr = (hit ? this.h1 : 1 - this.h1) / (hit ? this.h0 : 1 - this.h0); this.llr += Math.log(lr); if (this.llr >= Math.log(this.A)) this.status = 'EDGE THẬT'; else if (this.llr <= Math.log(this.B)) this.status = 'NGẪU NHIÊN'; else this.status = 'ĐANG TEST'; return { llr: this.llr, n: this.n, status: this.status }; }
 }
 
-function patternModel(length, tolerance, decay) {
-  return h => {
-    if (h.length <= length) return U.prob();
-    const tail = h.slice(-length);
-    const cnt = { 1: 0.06, 2: 0.06, 3: 0.06, 4: 0.06 };
-    const start = Math.max(0, h.length - 360);
-    for (let i = start; i <= h.length - length - 1; i += 1) {
-      let same = 0;
-      for (let j = 0; j < length; j += 1) if (h[i + j] === tail[j]) same += 1;
-      if (same >= length - tolerance) {
-        const age = h.length - length - i;
-        cnt[h[i + length]] += (same / length) * Math.pow(decay, age);
-      }
-    }
-    return U.normalize(cnt);
-  };
+// ============ CALIBRATION TRACKER (UNCHANGED) ============
+class CalibrationTracker {
+    constructor(bins = 10) { this.bins = bins; this.reset(); }
+    reset() { this.binEdges = []; this.binHits = []; this.binTotals = []; for (let i = 0; i < this.bins; i++) { this.binEdges.push((i + 1) / this.bins); this.binHits.push(0); this.binTotals.push(0); } }
+    update(predictedP, actual) { for (let i = 0; i < this.bins; i++) { if (predictedP <= this.binEdges[i]) { this.binTotals[i]++; if (actual) this.binHits[i]++; break; } } }
+    getCalibrationError() { let err = 0, total = 0; for (let i = 0; i < this.bins; i++) { if (this.binTotals[i] > 0) { err += Math.abs(this.binHits[i] / this.binTotals[i] - this.binEdges[i]) * this.binTotals[i]; total += this.binTotals[i]; } } return total > 0 ? err / total : 0; }
 }
 
-function gapModel(power) {
-  return h => {
-    const g = U.gaps(h);
-    const p = {};
-    for (const n of U.nums) p[n] = Math.pow(g[n] + 1, power);
-    return U.normalize(p);
-  };
-}
-
-function antiGapModel(power) {
-  return h => {
-    const g = U.gaps(h);
-    const p = {};
-    for (const n of U.nums) p[n] = 1 / Math.pow(g[n] + 1, power);
-    return U.normalize(p);
-  };
-}
-
-function streakModel(mode) {
-  return h => {
-    const st = U.streak(h);
-    if (!st.num) return U.prob();
-    const p = { 1: 1, 2: 1, 3: 1, 4: 1 };
-    if (mode === 'follow') {
-      p[st.num] += st.len >= 2 ? 1.2 + st.len * 0.7 : 0.25;
-    } else if (mode === 'anti') {
-      p[st.num] *= st.len >= 3 ? 0.45 : 0.78;
-      for (const n of U.nums) if (n !== st.num) p[n] += st.len >= 3 ? 0.75 : 0.2;
-    } else {
-      p[st.num] += st.len === 2 ? 0.7 : 0.1;
-      if (st.len >= 4) p[st.num] *= 0.55;
-    }
-    return U.normalize(p);
-  };
-}
-
-function alternationModel() {
-  return h => {
-    if (h.length < 8) return U.prob();
-    const p = { 1: 0.4, 2: 0.4, 3: 0.4, 4: 0.4 };
-    const last = h[h.length - 1];
-    const prev = h[h.length - 2];
-    if (last !== prev) p[prev] += 1.3;
-    for (let len = 2; len <= 4; len += 1) {
-      const tail = h.slice(-len).join(',');
-      const before = h.slice(-2 * len, -len).join(',');
-      if (tail === before) for (const n of U.nums) if (n !== last) p[n] += 0.28;
-    }
-    return U.normalize(p);
-  };
-}
-
+// ============ PRECISION ENGINE (UNCHANGED) ============
 class PrecisionEngine {
-  constructor() {
-    this.models = [
-      { name: 'freq6', fn: freqModel(6, 0.90), base: 1, weight: 1, acc3: null, logLoss: null },
-      { name: 'freq12', fn: freqModel(12, 0.90), base: 1, weight: 1, acc3: null, logLoss: null },
-      { name: 'freq24', fn: freqModel(24, 0.92), base: 1, weight: 1, acc3: null, logLoss: null },
-      { name: 'freq60', fn: freqModel(60, 0.96), base: 0.9, weight: 1, acc3: null, logLoss: null },
-      { name: 'markov1', fn: markovModel(1, 160, 0.35), base: 1.05, weight: 1, acc3: null, logLoss: null },
-      { name: 'markov2', fn: markovModel(2, 220, 0.28), base: 1, weight: 1, acc3: null, logLoss: null },
-      { name: 'markov3', fn: markovModel(3, 280, 0.24), base: 0.85, weight: 1, acc3: null, logLoss: null },
-      { name: 'pattern4', fn: patternModel(4, 0, 0.992), base: 0.95, weight: 1, acc3: null, logLoss: null },
-      { name: 'pattern5f', fn: patternModel(5, 1, 0.988), base: 0.85, weight: 1, acc3: null, logLoss: null },
-      { name: 'gapHot', fn: gapModel(1.18), base: 0.72, weight: 1, acc3: null, logLoss: null },
-      { name: 'antiGap', fn: antiGapModel(0.8), base: 0.65, weight: 1, acc3: null, logLoss: null },
-      { name: 'streakFollow', fn: streakModel('follow'), base: 0.78, weight: 1, acc3: null, logLoss: null },
-      { name: 'streakAnti', fn: streakModel('anti'), base: 0.82, weight: 1, acc3: null, logLoss: null },
-      { name: 'alternation', fn: alternationModel(), base: 0.72, weight: 1, acc3: null, logLoss: null }
-    ];
-    this.trainingLog = [];
-    this.lastHash = null;
-    this.lastPred = null;
-    this.lastBacktest = null;
-    this.loadModel();
-  }
-
-  evaluateModel(model, h) {
-    const start = Math.max(CFG.TRAIN_START, h.length - CFG.TRAIN_WINDOW);
-    if (h.length - start < 16) return { weight: model.base, acc3: null, logLoss: null };
-    let hit3 = 0;
-    let loss = 0;
-    let total = 0;
-    for (let i = start; i < h.length; i += 1) {
-      const prefix = h.slice(0, i);
-      const actual = h[i];
-      let p;
-      try { p = U.normalize(model.fn(prefix)); } catch (_) { p = U.prob(); }
-      const coverage = U.setCoverage(p);
-      const best = U.rankSets(coverage)[0];
-      if (U.correct(best.key, actual)) hit3 += 1;
-      loss += -Math.log(U.clamp(p[actual], 0.0001, 0.9999));
-      total += 1;
+    constructor() {
+        this.models = [
+            { name: 'hBayes_a05', fn: h => hierarchicalBayesian(h, 0.5, 100).p, base: 1.3, w: 1, sharpe: 0, rec: 0 },
+            { name: 'hBayes_a1', fn: h => hierarchicalBayesian(h, 1, 80).p, base: 1.2, w: 1, sharpe: 0, rec: 0 },
+            { name: 'hBayes_a2', fn: h => hierarchicalBayesian(h, 2, 60).p, base: 1.1, w: 1, sharpe: 0, rec: 0 },
+            { name: 'freq20', fn: freqExp(20, .88), base: .9, w: 1, sharpe: 0, rec: 0 },
+            { name: 'freq50', fn: freqExp(50, .92), base: .85, w: 1, sharpe: 0, rec: 0 },
+            { name: 'freq120', fn: freqExp(120, .95), base: .8, w: 1, sharpe: 0, rec: 0 },
+            { name: 'freq300', fn: freqExp(300, .97), base: .7, w: 1, sharpe: 0, rec: 0 },
+            { name: 'markov1', fn: markovN(1, 200, .35), base: 1, w: 1, sharpe: 0, rec: 0 },
+            { name: 'markov2', fn: markovN(2, 250, .25), base: .85, w: 1, sharpe: 0, rec: 0 },
+            { name: 'markov3', fn: markovN(3, 300, .2), base: .65, w: 1, sharpe: 0, rec: 0 },
+            { name: 'pattern4f', fn: patternFuzzy(4, 0, .992), base: .75, w: 1, sharpe: 0, rec: 0 },
+            { name: 'pattern5f', fn: patternFuzzy(5, 1, .986), base: .65, w: 1, sharpe: 0, rec: 0 },
+            { name: 'gapHot', fn: gapPower(1.3), base: .6, w: 1, sharpe: 0, rec: 0 },
+            { name: 'gapCold', fn: antiGapPower(.65), base: .55, w: 1, sharpe: 0, rec: 0 },
+            { name: 'streakF', fn: streakFollow(), base: .7, w: 1, sharpe: 0, rec: 0 },
+            { name: 'streakB', fn: streakBreak(), base: .75, w: 1, sharpe: 0, rec: 0 },
+            { name: 'pairFreq', fn: pairFrequency(), base: .55, w: 1, sharpe: 0, rec: 0 },
+            { name: 'tripleP', fn: triplePattern(), base: .5, w: 1, sharpe: 0, rec: 0 },
+            { name: 'cycle4', fn: cycleModel(4), base: .45, w: 1, sharpe: 0, rec: 0 },
+            { name: 'cycle7', fn: cycleModel(7), base: .4, w: 1, sharpe: 0, rec: 0 },
+            { name: 'entMR', fn: entropyMR(), base: .65, w: 1, sharpe: 0, rec: 0 },
+            { name: 'runLen', fn: runLengthModel(), base: .45, w: 1, sharpe: 0, rec: 0 },
+            { name: 'recBias', fn: recentBias(40), base: .6, w: 1, sharpe: 0, rec: 0 },
+        ];
+        this.trainingLog = []; this.lastHash = null; this.lastPred = null;
+        this.regime = new RegimeDetector(); this.sprt = new SPRTMonitor(); this.calibration = new CalibrationTracker();
+        this.loadModel();
     }
-    const acc3 = hit3 / total;
-    const logLoss = loss / total;
-    const logGain = Math.log(4) - logLoss;
-    const edge3 = acc3 - CFG.BASELINE_SET3;
-    const raw = model.base * Math.exp(logGain * 1.1 + edge3 * 2.4);
-    return { weight: U.clamp(raw, 0.18, 3.2), acc3, logLoss };
-  }
-
-  train(h) {
-    if (h.length < CFG.MIN_HISTORY) return;
-    for (const model of this.models) {
-      const ev = this.evaluateModel(model, h);
-      model.weight = ev.weight;
-      model.acc3 = ev.acc3;
-      model.logLoss = ev.logLoss;
+    evaluateModel(model, h) {
+        const start = Math.max(CFG.MIN_HISTORY, h.length - CFG.TRAIN_WINDOW); if (h.length - start < 30) return { sharpe: 0, rec: 0, w: model.base };
+        const returns = []; for (let i = start; i < h.length; i++) { const prefix = h.slice(0, i), actual = h[i]; let p; try { p = model.fn(prefix); } catch (_) { p = U.prob(); } const ranked = U.rankDigits(p); const best = ranked[0].d; returns.push((U.correct(best, actual) ? 1 : 0) - CFG.BASELINE); }
+        const mean = U.mean(returns), std = U.std(returns); const sharpe = std > 0 ? mean / std : 0;
+        const rec = returns.slice(-50).reduce((a, b) => a + (b + CFG.BASELINE), 0) / Math.min(50, returns.slice(-50).length);
+        const w = U.clamp(model.base * Math.exp(sharpe * 2.0 + (rec - CFG.BASELINE) * 5.0), .03, 4.5);
+        return { sharpe, rec, w };
     }
-    this.saveModel();
-  }
-
-  predictOnly(h) {
-    if (h.length < CFG.MIN_HISTORY) return this.emptyPred();
-    const items = [];
-    for (const model of this.models) {
-      try { items.push({ p: model.fn(h), w: model.weight }); } catch (_) { items.push({ p: U.prob(), w: 0.05 }); }
+    train(h) { if (h.length < CFG.MIN_HISTORY) return; for (const m of this.models) { const ev = this.evaluateModel(m, h); m.w = m.w * (1 - CFG.LEARNING_RATE) + ev.w * CFG.LEARNING_RATE; m.sharpe = ev.sharpe; m.rec = ev.rec; } this.saveModel(); }
+    predictOnly(h) {
+        if (h.length < CFG.MIN_HISTORY) return this.emptyPred(); const rd = this.regime.detect(h); const items = [];
+        for (const m of this.models) { try { let p = m.fn(h); let w = m.w; if (rd.regime === 'random' && U.entropy(p) < 3.0) w *= .45; if (rd.regime === 'patterned' && m.sharpe > .3) w *= 1.35; if (m.sharpe < -.35) w *= .25; items.push({ p, w: Math.max(.02, w) }); } catch (_) { items.push({ p: U.prob(), w: .02 }); } }
+        const ensP = U.mix(items); const hBayes = hierarchicalBayesian(h, CFG.BAYES_PRIOR, 120); const bW = U.clamp(h.length / 350, .15, .45); const blended = {}; for (const d of U.digits) blended[d] = hBayes.p[d] * bW + ensP[d] * (1 - bW);
+        const p = U.normalize(blended); const ranked = U.rankDigits(p); const best = ranked[0], second = ranked[1];
+        const top7 = ranked.slice(0, CFG.TOP_N).map(r => r.d); const bottom3 = ranked.slice(-CFG.BOTTOM_N).map(r => r.d).reverse();
+        const bestCI = this.betaCI(hBayes.counts[best.d], hBayes.total - hBayes.counts[best.d]);
+        return { p, ranked, best, second, top7, bottom3, rd, hBayes, bestCI };
     }
-    const p = U.mix(items);
-    const coverage = U.setCoverage(p);
-    const ranked = U.rankSets(coverage);
-    const best = ranked[0];
-    const second = ranked[1] || best;
-    const numsRank = U.nums.map(n => ({ n, p: p[n] })).sort((a, b) => b.p - a.p || a.n - b.n);
-    return { p, coverage, ranked, best, second, numsRank };
-  }
-
-  predict(h) {
-    if (h.length < CFG.MIN_HISTORY) return this.emptyPred();
-    const hash = U.hash(h);
-    if (hash === this.lastHash && this.lastPred) return this.lastPred;
-    this.train(h);
-    const pred = this.predictOnly(h);
-    const backtest = this.backtest(h);
-    pred.backtest = backtest;
-    pred.signal = this.signalScore(h, pred, backtest);
-    this.lastHash = hash;
-    this.lastPred = pred;
-    this.lastBacktest = backtest;
-    return pred;
-  }
-
-  signalScore(h, pred, backtest) {
-    const margin = Math.max(0, pred.best.coverage - pred.second.coverage);
-    const setEdge = Math.max(0, pred.best.coverage - CFG.BASELINE_SET3);
-    const entropy = U.entropyFromProb(pred.p);
-    const marginScore = U.clamp(margin / 0.08, 0, 1);
-    const edgeScore = U.clamp(setEdge / 0.08, 0, 1);
-    const entropyScore = U.clamp((2 - entropy) / 0.38, 0, 1);
-    const sampleScore = U.clamp((h.length - CFG.MIN_HISTORY) / 90, 0, 1);
-    const btScore = backtest ? U.clamp((backtest.acc3 - CFG.BASELINE_SET3) / 0.09, 0, 1) : 0;
-    const score = U.clamp(0.28 * marginScore + 0.25 * edgeScore + 0.14 * entropyScore + 0.13 * sampleScore + 0.20 * btScore, 0, 1);
-    return {
-      score,
-      label: score >= 0.70 ? 'TÍN HIỆU MẠNH' : score >= 0.45 ? 'TÍN HIỆU VỪA' : 'RỦI RO CAO',
-      margin,
-      setEdge,
-      entropy
-    };
-  }
-
-  backtest(h) {
-    if (h.length < CFG.MIN_HISTORY + 25) return null;
-    const start = Math.max(CFG.TRAIN_START + 8, h.length - CFG.BACKTEST_WINDOW);
-    let hit3 = 0;
-    let hit1 = 0;
-    let total = 0;
-    let loss = 0;
-    const saved = this.models.map(m => m.weight);
-    try {
-      for (let i = start; i < h.length; i += 1) {
-        const prefix = h.slice(0, i);
-        for (const model of this.models) {
-          const ev = this.evaluateModel(model, prefix);
-          model.weight = ev.weight;
-        }
-        const pred = this.predictOnly(prefix);
-        const actual = h[i];
-        if (U.correct(pred.best.key, actual)) hit3 += 1;
-        if (pred.numsRank[0] && pred.numsRank[0].n === actual) hit1 += 1;
-        loss += -Math.log(U.clamp(pred.p[actual], 0.0001, 0.9999));
-        total += 1;
-      }
-    } finally {
-      this.models.forEach((m, i) => { m.weight = saved[i]; });
+    predict(h) {
+        if (h.length < CFG.MIN_HISTORY) return this.emptyPred(); const hash = U.hash(h); if (hash === this.lastHash && this.lastPred) return this.lastPred;
+        this.train(h); const pred = this.predictOnly(h); const bt = this.backtest(h); pred.backtest = bt; pred.signal = this.calcSignal(h, pred, bt);
+        this.lastHash = hash; this.lastPred = pred; return pred;
     }
-    if (!total) return null;
-    return { total, acc3: hit3 / total, acc1: hit1 / total, logLoss: loss / total, edge3: hit3 / total - CFG.BASELINE_SET3 };
-  }
-
-  emptyPred() {
-    const p = U.prob();
-    const coverage = U.setCoverage(p);
-    const ranked = U.rankSets(coverage);
-    const numsRank = U.nums.map(n => ({ n, p: p[n] }));
-    return {
-      p, coverage, ranked, best: ranked[0], second: ranked[1], numsRank,
-      backtest: null,
-      signal: { score: 0, label: 'CHƯA ĐỦ DỮ LIỆU', margin: 0, setEdge: 0, entropy: 2 }
-    };
-  }
-
-  learn(actual, pred) {
-    if (!pred || !pred.best) return;
-    const ok = U.correct(pred.best.key, actual) ? 1 : 0;
-    this.trainingLog.unshift({ actual, set: pred.best.key, ok, time: Date.now() });
-    if (this.trainingLog.length > 100) this.trainingLog.pop();
-    this.saveLog();
-  }
-
-  resetRuntime() {
-    this.trainingLog = [];
-    this.lastHash = null;
-    this.lastPred = null;
-    this.lastBacktest = null;
-    for (const model of this.models) {
-      model.weight = model.base;
-      model.acc3 = null;
-      model.logLoss = null;
+    calcSignal(h, pred, bt) {
+        const edge = pred.best.p - CFG.BASELINE; const n = Math.min(h.length, CFG.TRAIN_WINDOW); const z = U.zScore(pred.best.p, CFG.BASELINE, n);
+        const margin = pred.best.p - (pred.second ? pred.second.p : 0); const ms = U.clamp(margin / .04, 0, 1); const es = U.clamp(edge / .07, 0, 1);
+        const regS = pred.rd.regime === 'patterned' ? pred.rd.confidence : pred.rd.regime === 'random' ? -.3 * pred.rd.confidence : 0;
+        const btS = bt ? U.clamp((bt.acc - CFG.BASELINE) / .08, 0, 1) : 0; const zS = U.clamp(z / 2.5, 0, 1);
+        const calibErr = this.calibration.getCalibrationError(); const calS = calibErr < .1 ? U.clamp((.1 - calibErr) / .1, 0, .25) : 0;
+        const score = U.clamp(.18 * ms + .22 * es + .15 * regS + .2 * btS + .15 * zS + .1 * calS + .45, 0, 1);
+        return { score, label: score >= .68 ? 'MẠNH' : score >= .48 ? 'KHÁ' : score >= .32 ? 'YẾU' : 'RỦI RO CAO', edge, z };
     }
-    this.saveModel();
-    this.saveLog();
-  }
-
-  saveModel() {
-    try {
-      const data = { weights: {}, acc3: {}, logLoss: {} };
-      for (const model of this.models) {
-        data.weights[model.name] = model.weight;
-        data.acc3[model.name] = model.acc3;
-        data.logLoss[model.name] = model.logLoss;
-      }
-      localStorage.setItem(CFG.STORAGE_MODEL, JSON.stringify(data));
-    } catch (_) {}
-  }
-
-  saveLog() {
-    try { localStorage.setItem(CFG.STORAGE_LOG, JSON.stringify(this.trainingLog)); } catch (_) {}
-  }
-
-  loadModel() {
-    try {
-      const data = U.safeJsonParse(localStorage.getItem(CFG.STORAGE_MODEL), null);
-      if (data && data.weights) {
-        for (const model of this.models) {
-          if (typeof data.weights[model.name] === 'number') model.weight = data.weights[model.name];
-          if (typeof data.acc3?.[model.name] === 'number') model.acc3 = data.acc3[model.name];
-          if (typeof data.logLoss?.[model.name] === 'number') model.logLoss = data.logLoss[model.name];
-        }
-      }
-      const log = U.safeJsonParse(localStorage.getItem(CFG.STORAGE_LOG), []);
-      this.trainingLog = Array.isArray(log) ? log.filter(x => x && [1,2,3,4].includes(Number(x.actual))).slice(0, 100) : [];
-    } catch (_) {}
-  }
+    backtest(h) {
+        if (h.length < CFG.MIN_HISTORY + 40) return null; const start = Math.max(CFG.MIN_HISTORY + 15, h.length - CFG.BACKTEST_WINDOW); let hits = 0, total = 0;
+        const saved = this.models.map(m => m.w); const returns = [];
+        try { for (let i = start; i < h.length; i++) { const prefix = h.slice(0, i); for (const m of this.models) { const ev = this.evaluateModel(m, prefix); m.w = ev.w; } const pred = this.predictOnly(prefix); const actual = h[i]; if (pred.top7.includes(actual)) hits++; returns.push((U.correct(pred.best.d, actual) ? 1 : 0) - CFG.BASELINE); total++; } }
+        finally { this.models.forEach((m, i) => { m.w = saved[i]; }); }
+        if (!total) return null; const acc = hits / total; const mean = U.mean(returns), std = U.std(returns); const sharpe = std > 0 ? mean / std * Math.sqrt(total) : 0;
+        return { total, acc, edge: acc - CFG.BASELINE, sharpe };
+    }
+    betaCI(alpha, beta, level = .95) { const a = alpha + 1, b = beta + 1; const mean = a / (a + b); const sd = Math.sqrt(a * b / (Math.pow(a + b, 2) * (a + b + 1))); const z = level === .95 ? 1.96 : 1.645; return { low: U.clamp(mean - z * sd, 0, 1), high: U.clamp(mean + z * sd, 0, 1) }; }
+    emptyPred() {
+        const p = U.prob(); const ranked = U.rankDigits(p); const top7 = ranked.slice(0, CFG.TOP_N).map(r => r.d); const bottom3 = ranked.slice(-CFG.BOTTOM_N).map(r => r.d).reverse();
+        return { p, ranked, best: ranked[0], second: ranked[1], top7, bottom3, rd: { regime: 'insufficient', confidence: 0, hurst: .5, changeScore: 0, entropy: 3.32, maxP: .1 }, hBayes: { p: U.prob(), counts: Object.fromEntries(U.digits.map(d => [d, 0.5])), total: 5, vars: Object.fromEntries(U.digits.map(d => [d, 0])) }, bestCI: { low: 0, high: 1 }, backtest: null, signal: { score: 0, label: 'CHƯA ĐỦ', edge: 0, z: 0 } };
+    }
+    learn(actual, pred) { if (!pred || !pred.best) return; const ok = pred.top7.includes(actual) ? 1 : 0; this.trainingLog.unshift({ actual, best: pred.best.d, top7: pred.top7.join(','), ok, time: Date.now() }); if (this.trainingLog.length > 200) this.trainingLog.pop(); this.sprt.update(pred.top7.includes(actual)); this.calibration.update(pred.best.p, U.correct(pred.best.d, actual)); this.saveLog(); }
+    resetRuntime() { this.trainingLog = []; this.lastHash = null; this.lastPred = null; this.sprt.reset(); this.calibration.reset(); for (const m of this.models) { m.w = m.base; m.sharpe = 0; m.rec = 0; } this.saveModel(); this.saveLog(); }
+    saveModel() { try { const d = {}; for (const m of this.models) d[m.name] = { w: m.w, s: m.sharpe }; localStorage.setItem(CFG.STORAGE_MODEL, JSON.stringify(d)); } catch (_) {} }
+    saveLog() { try { localStorage.setItem(CFG.STORAGE_LOG, JSON.stringify(this.trainingLog)); } catch (_) {} }
+    loadModel() { try { const d = U.safeJsonParse(localStorage.getItem(CFG.STORAGE_MODEL), null); if (d) for (const m of this.models) { if (d[m.name]) { m.w = d[m.name].w || m.base; m.sharpe = d[m.name].s || 0; } } const log = U.safeJsonParse(localStorage.getItem(CFG.STORAGE_LOG), []); this.trainingLog = Array.isArray(log) ? log.filter(x => x && [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].includes(+x.actual)).slice(0, 200) : []; } catch (_) {} }
 }
+
+// ============ ═══════════════════════════════════════════ ============
+// ============ API MANAGER — PRODUCTION REFACTOR v2.1 ============
+// ============ ═══════════════════════════════════════════ ============
+
+class APIManager {
+    constructor(maxHistory) {
+        this.maxHistory = maxHistory;
+        this.cacheKey = CFG.STORAGE_API_CACHE;
+        this.cache = this.loadApiCache();
+    }
+
+    loadApiCache() {
+        try {
+            const raw = localStorage.getItem(this.cacheKey);
+            if (!raw) return this._emptyCache();
+            const parsed = JSON.parse(raw);
+            if (!parsed || typeof parsed !== 'object') return this._emptyCache();
+            return {
+                lastIssueNo: parsed.lastIssueNo ?? null,
+                lastHash: parsed.lastHash ?? null,
+                issueCount: parsed.issueCount ?? 0,
+            };
+        } catch (_) { return this._emptyCache(); }
+    }
+    _emptyCache() { return { lastIssueNo: null, lastHash: null, issueCount: 0 }; }
+    saveApiCache(data) {
+        try {
+            localStorage.setItem(this.cacheKey, JSON.stringify({
+                lastIssueNo: data.lastIssueNo ?? this.cache.lastIssueNo,
+                lastHash: data.lastHash ?? this.cache.lastHash,
+                issueCount: data.issueCount ?? this.cache.issueCount,
+            }));
+            this.cache = this.loadApiCache();
+        } catch (_) {}
+    }
+
+    resolveIssueId(issue) {
+        if (issue.issueNo != null) return `no:${issue.issueNo}`;
+        if (issue.issueId != null) return `id:${issue.issueId}`;
+        if (issue.openTime != null) return `time:${issue.openTime}`;
+        return `hash:${U.simpleHash(issue.openNum || '')}`;
+    }
+
+    resolveSortKey(issue) {
+        if (issue.issueNo != null && !isNaN(+issue.issueNo)) return +issue.issueNo;
+        if (issue.openTime != null) { const t = new Date(issue.openTime).getTime(); if (!isNaN(t)) return t; }
+        return 0;
+    }
+
+    extractDigits(issueList) {
+        const issues = [];
+        for (const issue of issueList) {
+            const openNum = issue.openNum || '';
+            const parts = openNum.split(',');
+            const lastPart = parts[parts.length - 1]?.trim();
+            if (!lastPart || !/^\d$/.test(lastPart)) continue;
+            const digit = parseInt(lastPart);
+            if (!U.digits.includes(digit)) continue;
+            issues.push({
+                id: this.resolveIssueId(issue),
+                sortKey: this.resolveSortKey(issue),
+                digit,
+                issueNo: issue.issueNo ?? null,
+                openTime: issue.openTime ?? null,
+            });
+        }
+        return issues;
+    }
+
+    sortHistory(items) {
+        return items.sort((a, b) => a.sortKey - b.sortKey || a.id.localeCompare(b.id));
+    }
+
+    removeDuplicate(items) {
+        const seen = new Map();
+        const deduped = [];
+        for (const item of items) {
+            if (seen.has(item.id)) continue;
+            seen.set(item.id, true);
+            deduped.push(item);
+        }
+        return deduped;
+    }
+
+    // ── FULL SYNC ──
+    fullSyncDigits(issueList) {
+        let issues = this.extractDigits(issueList);
+        if (!issues.length) return { success: false, digits: [], total: 0, log: '❌ Không trích xuất được đuôi từ API.', newCount: 0 };
+        issues = this.removeDuplicate(issues);
+        issues = this.sortHistory(issues);
+        const digits = issues.map(i => i.digit).slice(-this.maxHistory);
+        const last = issues[issues.length - 1];
+        this.saveApiCache({ lastIssueNo: last.issueNo, lastHash: last.id, issueCount: issues.length });
+        return { success: true, digits, total: digits.length, apiTotal: issues.length, newCount: digits.length, lastIssue: last };
+    }
+
+    // ── INCREMENTAL UPDATE — overlap-based, no cache-dependent novelty check ──
+    incrementalDigits(issueList, existingHistory) {
+        let issues = this.extractDigits(issueList);
+        if (!issues.length) return { success: false, digits: existingHistory, total: existingHistory.length, newCount: 0, log: '❌ Không trích xuất được đuôi từ API.', isUpToDate: false };
+
+        issues = this.removeDuplicate(issues);
+        issues = this.sortHistory(issues);
+        const apiDigits = issues.map(i => i.digit);
+
+        // Compare API digits against existing history to find what's actually new
+        const newCount = U.findOverlapIndex(apiDigits, existingHistory);
+
+        if (newCount === 0) {
+            return {
+                success: true, digits: existingHistory.slice(), total: existingHistory.length,
+                newCount: 0, log: '✅ Dữ liệu đã là mới nhất. Không có phiên mới.', isUpToDate: true,
+            };
+        }
+
+        // Take only the genuinely new digits from the tail of apiDigits
+        const novelDigits = apiDigits.slice(-newCount);
+        const merged = [...existingHistory, ...novelDigits].slice(-this.maxHistory);
+
+        const last = issues[issues.length - 1];
+        this.saveApiCache({ lastIssueNo: last.issueNo, lastHash: last.id, issueCount: this.cache.issueCount + newCount });
+
+        return { success: true, digits: merged, total: merged.length, newCount, isUpToDate: false, novelDigits };
+    }
+
+    compareCount(apiDigits, existingCount) {
+        if (apiDigits.length < existingCount) return { isLess: true, apiCount: apiDigits.length, localCount: existingCount };
+        return { isLess: false, apiCount: apiDigits.length, localCount: existingCount };
+    }
+
+    async fetchFromAPI(url, limit = 200) {
+        const finalUrl = url.includes('limitNum=')
+            ? url.replace(/limitNum=\d+/, `limitNum=${limit}`)
+            : `${url}?limitNum=${limit}&gameCode=st45g`;
+        const resp = await fetch(finalUrl, { method: 'GET', headers: { 'Accept': 'application/json' }, signal: AbortSignal.timeout(15000) });
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const json = await resp.json();
+        if (!json || !json.success) throw new Error('API response success=false');
+        const issueList = json.t?.issueList || json.issueList || [];
+        if (!issueList.length) throw new Error('issueList trống');
+        return { json, issueList };
+    }
+}
+
+// ============ ═══════════════════════════════════════════ ============
+// ============ APP — v2.1 FIXED INCREMENTAL ============
+// ============ ═══════════════════════════════════════════ ============
 
 class App {
-  constructor() {
-    this.engine = new PrecisionEngine();
-    this.history = [];
-    this.pred = this.engine.emptyPred();
-    this.autoTimer = null;
-    this.nodes = {
-      input: document.getElementById('historyInput'),
-      parseInfo: document.getElementById('parseInfo'),
-      errorBox: document.getElementById('errorBox'),
-      bestSet: document.getElementById('bestSetDisplay'),
-      confFill: document.getElementById('confFill'),
-      confText: document.getElementById('confText'),
-      edgeText: document.getElementById('edgeText'),
-      decision: document.getElementById('decisionBadge'),
-      sampleCount: document.getElementById('sampleCount'),
-      missingNum: document.getElementById('missingNum'),
-      topNums: document.getElementById('topNums'),
-      backtestText: document.getElementById('backtestText'),
-      numberTable: document.getElementById('numberTable'),
-      modelTable: document.getElementById('modelTable'),
-      logContent: document.getElementById('logContent')
-    };
-    this.loadSavedHistory();
-    this.nodes.input.addEventListener('input', () => {
-      clearTimeout(this.autoTimer);
-      this.autoTimer = setTimeout(() => this.autoAnalyze(), CFG.AUTO_DEBOUNCE);
-    });
-    this.analyzeCurrent(false);
-    this.render();
-  }
-
-  loadSavedHistory() {
-    try {
-      const saved = U.safeJsonParse(localStorage.getItem(CFG.STORAGE_HIST), []);
-      if (Array.isArray(saved)) this.history = saved.map(Number).filter(n => U.nums.includes(n)).slice(-CFG.MAX_HISTORY);
-      this.nodes.input.value = U.toText(this.history);
-    } catch (_) {
-      this.history = [];
-      this.nodes.input.value = '';
+    constructor() {
+        this.engine = new PrecisionEngine();
+        this.api = new APIManager(CFG.MAX_HISTORY);
+        this.history = [];
+        this.pred = this.engine.emptyPred();
+        this.autoTimer = null;
+        this.apiData = null;
+        this.countdownTimer = null;
+        this.pendingApiCountWarning = null;
+        this.nodes = {
+            input: g('historyInput'), parseInfo: g('parseInfo'), errorBox: g('errorBox'),
+            apiStatus: g('apiStatus'), apiUrl: g('apiUrl'), btnFetch: g('btnFetch'),
+            drawStrip: g('drawStrip'), digitGrid: g('digitGrid'), confFill: g('confFill'),
+            confText: g('confText'), regimeDisplay: g('regimeDisplay'), decisionBadge: g('decisionBadge'),
+            bestDigitDisplay: g('bestDigitDisplay'), eliminatedDisplay: g('eliminatedDisplay'),
+            edgeDisplay: g('edgeDisplay'), kellyDisplay: g('kellyDisplay'), sprtDisplay: g('sprtDisplay'),
+            sampleCount: g('sampleCount'), confidenceVal: g('confidenceVal'), regimeVal: g('regimeVal'),
+            hurstVal: g('hurstVal'), changeVal: g('changeVal'), sharpeVal: g('sharpeVal'),
+            calibVal: g('calibVal'), backtestText: g('backtestText'), entropyVal: g('entropyVal'),
+            zscoreVal: g('zscoreVal'), digitTableBody: g('digitTableBody'), modelTable: g('modelTable'),
+            logContent: g('logContent'), countdownDisplay: g('countdownDisplay'), syncLog: g('syncLog'),
+        };
+        this.loadHistory();
+        this.nodes.input.addEventListener('input', () => { clearTimeout(this.autoTimer); this.autoTimer = setTimeout(() => this.autoAnalyze(), CFG.AUTO_DEBOUNCE); });
+        this.analyzeCurrent(false);
+        this.render();
+        this.startCountdown();
     }
-  }
 
-  saveHistory() {
-    try { localStorage.setItem(CFG.STORAGE_HIST, JSON.stringify(this.history)); } catch (_) {}
-  }
-
-  showError(msg) {
-    this.nodes.errorBox.style.display = msg ? 'block' : 'none';
-    this.nodes.errorBox.textContent = msg || '';
-  }
-
-  autoAnalyze() { this.analyzeCurrent(false); this.render(); }
-
-  forceAnalyze() { this.engine.lastHash = null; this.analyzeCurrent(true); this.render(); }
-
-  analyzeCurrent(force) {
-    const parsed = U.parseManual(this.nodes.input.value);
-    this.history = parsed.history;
-    this.saveHistory();
-    const info = [`Đã đọc ${this.history.length} kết quả hợp lệ.`].concat(parsed.warnings);
-    this.nodes.parseInfo.textContent = info.join(' ');
-    if (this.history.length > 0 && this.history.length < CFG.MIN_HISTORY) {
-      this.pred = this.engine.emptyPred();
-      this.showError(`Cần tối thiểu ${CFG.MIN_HISTORY} kết quả để phân tích ổn định. Hiện có ${this.history.length}.`);
-      return;
+    loadHistory() {
+        try {
+            const s = U.safeJsonParse(localStorage.getItem(CFG.STORAGE_HIST), []);
+            if (Array.isArray(s)) this.history = s.map(Number).filter(n => U.digits.includes(n)).slice(-CFG.MAX_HISTORY);
+            this.nodes.input.value = U.toText(this.history);
+        } catch (_) { this.history = []; this.nodes.input.value = ''; }
     }
-    this.showError('');
-    if (this.history.length >= CFG.MIN_HISTORY) {
-      if (force) this.engine.lastHash = null;
-      this.pred = this.engine.predict(this.history);
-    } else {
-      this.pred = this.engine.emptyPred();
+    saveHistory() { try { localStorage.setItem(CFG.STORAGE_HIST, JSON.stringify(this.history)); } catch (_) {} }
+
+    showSyncLog(msg, type = '') {
+        const el = this.nodes.syncLog;
+        el.style.display = msg ? 'block' : 'none';
+        el.innerHTML = msg;
+        el.className = 'sync-log';
+        if (type === 'ok') el.classList.add('good');
+        if (type === 'warn') el.classList.add('warn-text');
     }
-  }
 
-  addNumber(n) {
-    if (!U.nums.includes(n)) return;
-    if (this.pred && this.history.length >= CFG.MIN_HISTORY) this.engine.learn(n, this.pred);
-    this.history.push(n);
-    if (this.history.length > CFG.MAX_HISTORY) this.history.shift();
-    this.nodes.input.value = U.toText(this.history);
-    this.saveHistory();
-    this.engine.lastHash = null;
-    this.pred = this.history.length >= CFG.MIN_HISTORY ? this.engine.predict(this.history) : this.engine.emptyPred();
-    this.showError('');
-    this.render();
-  }
-
-  undo() {
-    if (!this.history.length) return;
-    this.history.pop();
-    this.nodes.input.value = U.toText(this.history);
-    this.saveHistory();
-    this.engine.lastHash = null;
-    this.pred = this.history.length >= CFG.MIN_HISTORY ? this.engine.predict(this.history) : this.engine.emptyPred();
-    this.render();
-  }
-
-  reverseInput() {
-    const parsed = U.parseManual(this.nodes.input.value);
-    this.history = parsed.history.reverse();
-    this.nodes.input.value = U.toText(this.history);
-    this.saveHistory();
-    this.engine.lastHash = null;
-    this.pred = this.history.length >= CFG.MIN_HISTORY ? this.engine.predict(this.history) : this.engine.emptyPred();
-    this.nodes.parseInfo.textContent = `Đã đảo thứ tự. Hiện có ${this.history.length} kết quả hợp lệ, mới nhất nằm bên phải.`;
-    this.render();
-  }
-
-  reset() {
-    if (!confirm('Xoá hết lịch sử nhập tay?')) return;
-    this.history = [];
-    this.nodes.input.value = '';
-    this.saveHistory();
-    this.engine.resetRuntime();
-    this.pred = this.engine.emptyPred();
-    this.showError('');
-    this.nodes.parseInfo.textContent = 'Đã reset. Nhập lịch sử 1-2-3-4 để phân tích lại.';
-    this.render();
-  }
-
-  clearCache() {
-    if (!confirm('Xoá cache model và log, giữ nguyên lịch sử nhập tay?')) return;
-    try {
-      localStorage.removeItem(CFG.STORAGE_MODEL);
-      localStorage.removeItem(CFG.STORAGE_LOG);
-    } catch (_) {}
-    this.engine.resetRuntime();
-    this.engine.lastHash = null;
-    this.pred = this.history.length >= CFG.MIN_HISTORY ? this.engine.predict(this.history) : this.engine.emptyPred();
-    this.render();
-  }
-
-  loadSample() {
-    const sample = '3 2 3 4 3 4 4 3 1 4 1 3 1 3 3 4 3 2 1 3 2 1 3 1 2 4 3 3 1 2 1 2 4 1 1 2 4 2 1 4 1 1 3 3 2 4 2 1 1 1 2 2 2 3 3 4 4 1 3 2 4 1 2 2 3 4 1 4 3 2 2 1 3 4 4 2 1 3';
-    this.nodes.input.value = sample;
-    this.forceAnalyze();
-  }
-
-  setText(id, text) { const node = document.getElementById(id); if (node) node.textContent = text; }
-
-  renderSetTable(pred) {
-    const ranked = pred.ranked;
-    const ranks = {};
-    ranked.forEach((item, i) => { ranks[item.key] = i + 1; });
-    for (const set of U.sets) {
-      const cov = pred.coverage[set.key] || 0;
-      const edge = cov - CFG.BASELINE_SET3;
-      const suffix = set.key.replace(/-/g, '');
-      this.setText(`set${suffix}`, U.pct(cov, 1));
-      this.setText(`edge${suffix}`, `${edge >= 0 ? '+' : ''}${U.pct(edge, 1)}`);
-      this.setText(`rank${suffix}`, ranks[set.key] || '-');
+    setApiStatus(msg, cls = '') {
+        this.nodes.apiStatus.textContent = msg;
+        this.nodes.apiStatus.className = 'api-status ' + (cls || '');
     }
-    const rows = document.querySelectorAll('#setTable tbody tr');
-    rows.forEach(row => row.classList.remove('highlight'));
-    rows.forEach(row => { if (row.cells[0] && row.cells[0].textContent === pred.best.key) row.classList.add('highlight'); });
-  }
 
-  renderNumberTable(pred) {
-    const counts = U.counts(this.history);
-    const gaps = U.gaps(this.history);
-    const total = Math.max(1, this.history.length);
-    const rankedNums = pred.numsRank.map(x => x.n);
-    this.nodes.numberTable.innerHTML = U.nums.map(n => {
-      const rank = rankedNums.indexOf(n) + 1;
-      const cls = rank === 1 ? 'good' : rank === 4 ? 'bad' : '';
-      return `<tr><td><span class="pill">${n}</span></td><td class="${cls}">${U.pct(pred.p[n] || 0, 1)}</td><td>${U.pct(counts[n] / total, 1)}</td><td>${gaps[n]}</td></tr>`;
-    }).join('');
-  }
-
-  renderModelTable() {
-    const totalW = this.engine.models.reduce((a, m) => a + Math.max(0, m.weight), 0) || 1;
-    this.nodes.modelTable.innerHTML = this.engine.models
-      .slice()
-      .sort((a, b) => b.weight - a.weight)
-      .slice(0, 8)
-      .map(m => {
-        const acc = m.acc3 === null ? '-' : U.pct(m.acc3, 0);
-        return `<tr><td>${m.name}</td><td>${U.pct(m.weight / totalW, 0)}</td><td>${acc}</td></tr>`;
-      }).join('') || '<tr><td colspan="3">Chưa đủ mẫu</td></tr>';
-  }
-
-  renderLog() {
-    const rows = this.engine.trainingLog.slice(0, 28).map(x => {
-      const ok = x.ok ? 'WIN' : 'LOSS';
-      return `<div class="log-entry"><span>${x.actual}</span><span>→ ${x.set}</span><span class="${x.ok ? 'win' : 'loss'}">${ok}</span></div>`;
-    }).join('');
-    this.nodes.logContent.innerHTML = rows || 'Chưa có dữ liệu';
-  }
-
-  render() {
-    const pred = this.pred || this.engine.emptyPred();
-    const signal = pred.signal || { score: 0, label: 'CHƯA ĐỦ DỮ LIỆU', setEdge: 0 };
-    const scorePct = Math.round(signal.score * 100);
-    this.nodes.bestSet.textContent = pred.best ? pred.best.key : '-';
-    this.nodes.confFill.style.width = `${scorePct}%`;
-    this.nodes.confText.textContent = `Tín hiệu: ${signal.label} • ${scorePct}/100`;
-    this.nodes.edgeText.textContent = `Edge so với baseline 75%: ${signal.setEdge >= 0 ? '+' : ''}${U.pct(signal.setEdge || 0, 1)}`;
-    this.nodes.sampleCount.textContent = String(this.history.length);
-    this.nodes.missingNum.textContent = pred.best ? String(pred.best.missing) : '-';
-    this.nodes.topNums.textContent = pred.numsRank ? pred.numsRank.slice(0, 4).map(x => `${x.n}(${U.pct(x.p, 0)})`).join(' ') : '-';
-    if (pred.backtest) {
-      this.nodes.backtestText.textContent = `${U.pct(pred.backtest.acc3, 1)} (${pred.backtest.total} tay, edge ${pred.backtest.edge3 >= 0 ? '+' : ''}${U.pct(pred.backtest.edge3, 1)})`;
-    } else {
-      this.nodes.backtestText.textContent = 'Cần thêm dữ liệu';
+    // ── FULL SYNC ──
+    async fullSyncFromAPI() {
+        const btn = this.nodes.btnFetch;
+        btn.classList.add('fetching'); btn.textContent = '⏳ ĐANG ĐỒNG BỘ...';
+        this.setApiStatus('Đang kết nối API — Full Sync...'); this.showSyncLog('');
+        try {
+            const { issueList, json } = await this.api.fetchFromAPI(this.nodes.apiUrl.value.trim(), 500);
+            const result = this.api.fullSyncDigits(issueList);
+            if (!result.success) { this.setApiStatus(result.log, 'err'); this.showSyncLog(`<span class="warn-text">${result.log}</span>`, 'warn'); btn.textContent = '📡 NẠP DỮ LIỆU (FULL SYNC)'; btn.classList.remove('fetching'); return; }
+            const countCompare = this.api.compareCount(result.digits, this.history.length);
+            if (countCompare.isLess) {
+                this.pendingApiCountWarning = result;
+                this.setApiStatus(`⚠️ API trả ${countCompare.apiCount} phiên — ít hơn ${countCompare.localCount} phiên hiện có. Chọn hành động bên dưới.`, 'warn');
+                this.showSyncLog(`<span class="warn-text">⚠️ API trả về ${countCompare.apiCount} phiên, trong khi tool đang có ${countCompare.localCount} phiên.</span><br><button onclick="app.confirmReplaceHistory()" style="border-color:#ffaa00;color:#ffaa00;margin:4px">📡 Đồng bộ (ghi đè bằng ${countCompare.apiCount} phiên)</button><button onclick="app.cancelApiWarning()" style="border-color:#888;color:#aaa;margin:4px">↩ Giữ dữ liệu cũ</button>`, 'warn');
+                btn.textContent = '📡 NẠP DỮ LIỆU (FULL SYNC)'; btn.classList.remove('fetching'); return;
+            }
+            this._applyFullSyncResult(result, json);
+            btn.textContent = '📡 NẠP DỮ LIỆU (FULL SYNC)'; btn.classList.remove('fetching');
+        } catch (err) { this._handleApiError(err); btn.textContent = '📡 NẠP DỮ LIỆU (FULL SYNC)'; btn.classList.remove('fetching'); }
     }
-    if (signal.score >= 0.70) {
-      this.nodes.decision.textContent = 'TÍN HIỆU MẠNH';
-      this.nodes.decision.style.color = '#00e676';
-    } else if (signal.score >= 0.45) {
-      this.nodes.decision.textContent = 'TÍN HIỆU VỪA';
-      this.nodes.decision.style.color = '#ffd966';
-    } else {
-      this.nodes.decision.textContent = this.history.length >= CFG.MIN_HISTORY ? 'RỦI RO CAO' : 'CHƯA ĐỦ MẪU';
-      this.nodes.decision.style.color = '#ff5252';
+    confirmReplaceHistory() {
+        const result = this.pendingApiCountWarning; this.pendingApiCountWarning = null;
+        if (!result) return;
+        this._applyFullSyncResult(result, null);
     }
-    this.renderSetTable(pred);
-    this.renderNumberTable(pred);
-    this.renderModelTable();
-    this.renderLog();
-  }
+    cancelApiWarning() { this.pendingApiCountWarning = null; this.setApiStatus('Đã giữ dữ liệu cũ. API không được áp dụng.', ''); this.showSyncLog('↩ Đã giữ nguyên dữ liệu hiện tại.', ''); }
+    _applyFullSyncResult(result, json) {
+        this.history = result.digits; this.nodes.input.value = U.toText(this.history); this.saveHistory();
+        this.engine.lastHash = null; this.engine.lastPred = null; this.apiData = json; this.showError('');
+        this.showSyncLog(`✅ <span class="highlight">Đã đồng bộ ${result.total} phiên.</span> Dữ liệu được thay thế toàn bộ từ API.`, 'ok');
+        this.setApiStatus(`✅ Full Sync hoàn tất — ${result.total} phiên. Game: ${json?.t?.name || 'st45g'}`, 'ok');
+        this._autoAnalyzeAfterSync();
+    }
+
+    // ── INCREMENTAL UPDATE (FIXED) ──
+    async incrementalUpdate() {
+        const btn = document.getElementById('btnUpdate');
+        btn.classList.add('fetching'); btn.textContent = '⏳ ĐANG CẬP NHẬT...';
+        this.setApiStatus('Đang kiểm tra phiên mới từ API...'); this.showSyncLog('');
+        try {
+            const { issueList, json } = await this.api.fetchFromAPI(this.nodes.apiUrl.value.trim(), 200);
+            const result = this.api.incrementalDigits(issueList, this.history);
+
+            if (!result.success) {
+                this.setApiStatus(result.log, 'err');
+                this.showSyncLog(`<span class="warn-text">${result.log}</span>`, 'warn');
+                btn.textContent = '🔄 CẬP NHẬT PHIÊN MỚI'; btn.classList.remove('fetching'); return;
+            }
+            if (result.isUpToDate) {
+                this.setApiStatus('✅ Dữ liệu đã là mới nhất. Không có phiên mới.', 'ok');
+                this.showSyncLog('✅ Không có phiên mới. Dữ liệu đã là mới nhất.', 'ok');
+                btn.textContent = '🔄 CẬP NHẬT PHIÊN MỚI'; btn.classList.remove('fetching'); return;
+            }
+
+            this.history = result.digits; this.nodes.input.value = U.toText(this.history); this.saveHistory();
+            this.engine.lastHash = null; this.engine.lastPred = null; this.apiData = json; this.showError('');
+
+            this.showSyncLog(`✅ <span class="highlight">+${result.newCount} phiên mới.</span> Tổng: ${result.total} phiên.`, 'ok');
+            this.setApiStatus(`✅ Đã thêm ${result.newCount} phiên mới. Tổng: ${result.total}.`, 'ok');
+            this._autoAnalyzeAfterSync();
+            btn.textContent = '🔄 CẬP NHẬT PHIÊN MỚI'; btn.classList.remove('fetching');
+        } catch (err) { this._handleApiError(err); btn.textContent = '🔄 CẬP NHẬT PHIÊN MỚI'; btn.classList.remove('fetching'); }
+    }
+
+    _autoAnalyzeAfterSync() {
+        if (this.history.length >= CFG.MIN_HISTORY) { this.engine.lastHash = null; this.engine.lastPred = null; this.pred = this.engine.predict(this.history); }
+        else { this.pred = this.engine.emptyPred(); this.showError(`Cần ≥${CFG.MIN_HISTORY} mẫu. Hiện có ${this.history.length}.`); }
+        this.render();
+    }
+    _handleApiError(err) {
+        this.setApiStatus(`❌ Không thể kết nối API: ${err.message}. Đang sử dụng dữ liệu cache.`, 'err');
+        this.showSyncLog(`<span class="warn-text">❌ Lỗi API: ${err.message}</span><br>🛡 Dữ liệu hiện tại được giữ nguyên. Không có gì bị xóa.`, 'warn');
+    }
+
+    parsePastedJSON() {
+        const raw = document.getElementById('jsonPasteArea').value.trim();
+        if (!raw) { this.setApiStatus('❌ Vui lòng dán JSON vào ô bên dưới.', 'err'); return; }
+        try {
+            const json = JSON.parse(raw); const issueList = json.t?.issueList || json.issueList || [];
+            if (!issueList.length) { this.setApiStatus('❌ Không có issueList trong JSON.', 'err'); return; }
+            const result = this.api.fullSyncDigits(issueList);
+            if (!result.success) { this.setApiStatus(result.log, 'err'); return; }
+            this.history = result.digits; this.nodes.input.value = U.toText(this.history); this.saveHistory();
+            this.engine.lastHash = null; this.engine.lastPred = null; this.apiData = json; this.showError('');
+            this.setApiStatus(`✅ Đã nạp ${result.total} đuôi từ JSON dán.`, 'ok');
+            this.showSyncLog(`✅ Đã đồng bộ ${result.total} phiên từ JSON thủ công.`, 'ok');
+            this._autoAnalyzeAfterSync();
+        } catch (e) { this.setApiStatus(`❌ JSON không hợp lệ: ${e.message}`, 'err'); }
+    }
+
+    // ── STANDARD APP METHODS ──
+    showError(msg) { this.nodes.errorBox.style.display = msg ? 'block' : 'none'; this.nodes.errorBox.textContent = msg || ''; }
+    autoAnalyze() { this.analyzeCurrent(false); this.render(); }
+    forceAnalyze() { this.engine.lastHash = null; this.analyzeCurrent(true); this.render(); }
+    analyzeCurrent(force) {
+        const parsed = U.parseManual(this.nodes.input.value); this.history = parsed.history; this.saveHistory();
+        this.nodes.parseInfo.textContent = [`${this.history.length} kết quả.`].concat(parsed.warnings).join(' ');
+        if (this.history.length > 0 && this.history.length < CFG.MIN_HISTORY) { this.pred = this.engine.emptyPred(); this.showError(`Cần ≥${CFG.MIN_HISTORY} mẫu. Hiện có ${this.history.length}.`); return; }
+        this.showError('');
+        if (this.history.length >= CFG.MIN_HISTORY) { if (force) this.engine.lastHash = null; this.pred = this.engine.predict(this.history); }
+        else this.pred = this.engine.emptyPred();
+    }
+    startCountdown() {
+        const tick = () => { const now = new Date(); const sec = now.getSeconds(); const remaining = 45 - (sec % 45); const nextDraw = new Date(now); nextDraw.setSeconds(now.getSeconds() + remaining); nextDraw.setMilliseconds(0); this.nodes.countdownDisplay.textContent = `⏱ Phiên tiếp: ~${remaining}s (lúc ${nextDraw.toTimeString().slice(0,8)})`; };
+        tick(); this.countdownTimer = setInterval(tick, 5000);
+    }
+    addNumber(n) { if (!U.digits.includes(n)) return; if (this.pred && this.history.length >= CFG.MIN_HISTORY) this.engine.learn(n, this.pred); this.history.push(n); if (this.history.length > CFG.MAX_HISTORY) this.history.shift(); this.nodes.input.value = U.toText(this.history); this.saveHistory(); this.engine.lastHash = null; this.pred = this.history.length >= CFG.MIN_HISTORY ? this.engine.predict(this.history) : this.engine.emptyPred(); this.showError(''); this.render(); }
+    undo() { if (!this.history.length) return; this.history.pop(); this.nodes.input.value = U.toText(this.history); this.saveHistory(); this.engine.lastHash = null; this.pred = this.history.length >= CFG.MIN_HISTORY ? this.engine.predict(this.history) : this.engine.emptyPred(); this.render(); }
+    reverseInput() { const p = U.parseManual(this.nodes.input.value); this.history = p.history.reverse(); this.nodes.input.value = U.toText(this.history); this.saveHistory(); this.engine.lastHash = null; this.pred = this.history.length >= CFG.MIN_HISTORY ? this.engine.predict(this.history) : this.engine.emptyPred(); this.nodes.parseInfo.textContent = `Đã đảo. ${this.history.length} kết quả.`; this.render(); }
+    reset() { if (!confirm('Xoá tất cả dữ liệu?')) return; this.history = []; this.nodes.input.value = ''; this.saveHistory(); this.engine.resetRuntime(); this.pred = this.engine.emptyPred(); this.showError(''); this.nodes.parseInfo.textContent = 'Đã reset.'; this.api.cache = this.api._emptyCache(); this.api.saveApiCache(this.api.cache); this.showSyncLog(''); this.render(); }
+    clearCache() { if (!confirm('Xoá cache model weights + API cache + log?')) return; try { localStorage.removeItem(CFG.STORAGE_MODEL); localStorage.removeItem(CFG.STORAGE_LOG); localStorage.removeItem(CFG.STORAGE_API_CACHE); } catch (_) {} this.engine.resetRuntime(); this.api.cache = this.api._emptyCache(); this.engine.lastHash = null; this.pred = this.history.length >= CFG.MIN_HISTORY ? this.engine.predict(this.history) : this.engine.emptyPred(); this.showSyncLog('🧹 Đã xoá toàn bộ cache.', ''); this.render(); }
+    exportData() { const d = { history: this.history, weights: {}, log: this.engine.trainingLog, apiCache: this.api.cache, v: 'duoi_v2.1', ts: new Date().toISOString() }; for (const m of this.engine.models) d.weights[m.name] = { w: m.w, s: m.sharpe }; const b = new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `duoi_doc_duoi_${new Date().toISOString().slice(0,10)}.json`; a.click(); URL.revokeObjectURL(a.href); }
+    importData() { const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json'; inp.onchange = e => { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = ev => { try { const d = JSON.parse(ev.target.result); if (d.history && Array.isArray(d.history)) { this.history = d.history.map(Number).filter(n => U.digits.includes(n)).slice(-CFG.MAX_HISTORY); this.nodes.input.value = U.toText(this.history); this.saveHistory(); if (d.weights) for (const m of this.engine.models) { if (d.weights[m.name]) { m.w = d.weights[m.name].w || m.base; m.sharpe = d.weights[m.name].s || 0; } } if (d.apiCache) { this.api.saveApiCache(d.apiCache); } this.engine.lastHash = null; this.forceAnalyze(); this.nodes.parseInfo.textContent = `Đã nhập ${this.history.length} kết quả.`; } } catch (_) { this.showError('File lỗi.'); } }; r.readAsText(f); }; inp.click(); }
+    loadSample() { this.nodes.input.value = '4 0 3 1 7 2 5 8 9 3 1 6 0 4 2 7 5 9 8 3 1 6 0 4 2 7 5 9 8 3 1 6 0 4 2 7 5 9 8 3 1 6 0 4 2 7 5 9 8 3 1 6 0 4 2 7 5 9 8 3 1 6 0 4 2 7 5 9 8 3 1 6 0 4 2 7 5 9 8 3 1 6 0 4 2 7 5 9 8 3 1 6 0 4 2 7 5 9 8'; this.forceAnalyze(); }
+
+    render() {
+        const pred = this.pred || this.engine.emptyPred(); const sig = pred.signal || { score: 0, label: 'CHƯA ĐỦ', edge: 0, z: 0 }; const sp = Math.round(sig.score * 100);
+        const top7set = new Set(pred.top7 || []); const bottom3set = new Set(pred.bottom3 || []); const bestDigit = pred.best ? pred.best.d : null;
+        this.nodes.digitGrid.innerHTML = U.digits.map(d => { let cls = ''; if (d === bestDigit && top7set.has(d)) cls = 'top7 best'; else if (top7set.has(d)) cls = 'top7'; else if (bottom3set.has(d)) cls = 'bottom3'; return `<div class="digit-cell ${cls}"><span class="d-num">${d}</span><span class="d-prob">${U.pct(pred.p[d]||0,1)}</span></div>`; }).join('');
+        this.nodes.confFill.style.width = `${sp}%`; this.nodes.confText.textContent = `Tín hiệu: ${sig.label} • ${sp}/100`;
+        this.nodes.bestDigitDisplay.textContent = bestDigit !== null ? String(bestDigit) : '-'; this.nodes.bestDigitDisplay.style.color = '#ffd700';
+        this.nodes.eliminatedDisplay.textContent = (pred.bottom3 || []).join(' '); this.nodes.eliminatedDisplay.style.color = '#ff5252';
+        const edge = sig.edge; this.nodes.edgeDisplay.textContent = `${edge>=0?'+':''}${U.pct(edge,1)}`; this.nodes.edgeDisplay.style.color = edge > 0.03 ? '#00e676' : edge > 0 ? '#ffaa00' : '#ff5252';
+        const setEdge = Math.max(0, (pred.best ? pred.best.p : 0) - CFG.BASELINE); const kellyFrac = setEdge > 0 ? U.clamp(setEdge / 0.2, 0, .15) : 0; this.nodes.kellyDisplay.innerHTML = `${U.pct(kellyFrac,1)}`; this.nodes.kellyDisplay.style.color = kellyFrac >= .05 ? '#00e676' : kellyFrac >= .01 ? '#ffaa00' : '#ff5252';
+        const sprt = this.engine.sprt; this.nodes.sprtDisplay.textContent = sprt.status; this.nodes.sprtDisplay.style.color = sprt.status.includes('THẬT') ? '#00e676' : sprt.status.includes('NGẪU NHIÊN') ? '#ff5252' : '#ffaa00';
+        this.nodes.sampleCount.textContent = String(this.history.length); this.nodes.confidenceVal.textContent = `${sp}%`;
+        const rd = pred.rd || { regime: 'unknown', confidence: 0, hurst: .5, changeScore: 0, entropy: 3.32 };
+        this.nodes.regimeVal.textContent = rd.regime === 'random' ? 'Ngẫu nhiên' : rd.regime === 'patterned' ? 'Có pattern' : 'Hỗn hợp'; this.nodes.regimeVal.style.color = rd.regime === 'patterned' ? '#00e676' : rd.regime === 'random' ? '#ff9100' : '#aaa';
+        this.nodes.hurstVal.textContent = rd.hurst.toFixed(2); this.nodes.hurstVal.style.color = rd.hurst > .55 ? '#00e676' : rd.hurst < .45 ? '#ff5252' : '#ffaa00';
+        this.nodes.changeVal.textContent = `${U.pct(rd.changeScore||0,0)}`; this.nodes.changeVal.style.color = (rd.changeScore || 0) > .35 ? '#ffaa00' : '#888';
+        this.nodes.entropyVal.textContent = (rd.entropy || 3.32).toFixed(2); this.nodes.entropyVal.style.color = (rd.entropy || 3.32) < 2.9 ? '#00e676' : (rd.entropy || 3.32) > 3.2 ? '#ff5252' : '#ffaa00';
+        if (pred.backtest) { const bt = pred.backtest; this.nodes.backtestText.textContent = `${U.pct(bt.acc,1)} (${bt.total}t)`; this.nodes.sharpeVal.textContent = bt.sharpe.toFixed(2); } else { this.nodes.backtestText.textContent = '-'; this.nodes.sharpeVal.textContent = '-'; }
+        const calibErr = this.engine.calibration.getCalibrationError(); this.nodes.calibVal.textContent = `${U.pct(1-calibErr,0)}`; this.nodes.calibVal.style.color = calibErr < .06 ? '#00e676' : calibErr < .12 ? '#ffaa00' : '#ff5252';
+        this.nodes.zscoreVal.textContent = sig.z.toFixed(1); this.nodes.zscoreVal.style.color = Math.abs(sig.z) > 2 ? '#00e676' : Math.abs(sig.z) > 1 ? '#ffaa00' : '#888';
+        this.nodes.regimeDisplay.innerHTML = rd.regime === 'patterned' ? '<span class="regime-tag regime-pattern">🎯 CÓ PATTERN</span>' : rd.regime === 'random' ? '<span class="regime-tag regime-random">🎲 NGẪU NHIÊN</span>' : '';
+        if (sig.score >= .68) { this.nodes.decisionBadge.textContent = 'TÍN HIỆU MẠNH'; this.nodes.decisionBadge.style.color = '#00e676'; } else if (sig.score >= .48) { this.nodes.decisionBadge.textContent = 'TÍN HIỆU KHÁ'; this.nodes.decisionBadge.style.color = '#ffd740'; } else if (sig.score >= .32) { this.nodes.decisionBadge.textContent = 'TÍN HIỆU YẾU'; this.nodes.decisionBadge.style.color = '#ff9100'; } else { this.nodes.decisionBadge.textContent = this.history.length >= CFG.MIN_HISTORY ? 'RỦI RO CAO' : 'CHƯA ĐỦ MẪU'; this.nodes.decisionBadge.style.color = '#ff5252'; }
+        this.renderDigitTable(pred); this.renderDrawStrip(); this.renderModelTable(); this.renderLog();
+    }
+    renderDigitTable(pred) {
+        const ranked = pred.ranked; const bayes = pred.hBayes || { p: U.prob() }; const counts = U.counts(this.history); const gaps = U.gaps(this.history); const total = Math.max(1, this.history.length);
+        const top7set = new Set(pred.top7 || []); const bottom3set = new Set(pred.bottom3 || []);
+        this.nodes.digitTableBody.innerHTML = ranked.map((r, i) => { let cls = ''; if (top7set.has(r.d)) cls = 'top-row'; if (bottom3set.has(r.d)) cls = 'bot-row'; const freq = counts[r.d] / total; const z = U.zScore(freq, CFG.BASELINE, total); return `<tr class="${cls}"><td><span class="pill">${r.d}</span></td><td><b>${U.pct(r.p,2)}</b></td><td>${U.pct(bayes.p[r.d]||0,2)}</td><td style="color:${r.p>0.1?'#00e676':'#ff5252'}">${U.pct(r.p-0.1,1)}</td><td>${gaps[r.d]}</td><td>${U.pct(freq,1)}</td><td style="color:${Math.abs(z)>1.8?'#ffaa00':'#888'}">${z.toFixed(1)}</td><td>#${i+1}</td></tr>`; }).join('');
+    }
+    renderDrawStrip() {
+        const recent = this.history.slice(-40).reverse(); if (!recent.length) { this.nodes.drawStrip.innerHTML = '<span style="color:#666">Chưa có dữ liệu</span>'; return; }
+        const counts = U.counts(this.history); const total = Math.max(1, this.history.length);
+        this.nodes.drawStrip.innerHTML = recent.map((d, i) => { const freq = counts[d] / total; let cls = 'draw-dot'; if (freq > 0.13) cls += ' hot'; else if (freq > 0.09) cls += ' warm'; else cls += ' cold'; return `<span class="${cls}" title="Đuôi ${d} | Lần thứ ${this.history.length-i} | Tần suất ${U.pct(freq,0)}">${d}</span>`; }).join('');
+    }
+    renderModelTable() { const models = this.engine.models.slice().sort((a, b) => b.w - a.w).slice(0, 8); const tw = Math.max(.01, models.reduce((a, m) => a + Math.abs(m.w), 0)); this.nodes.modelTable.innerHTML = models.map(m => `<tr><td>${m.name}</td><td>${U.pct(Math.abs(m.w)/tw,0)}</td><td style="color:${m.sharpe>.25?'#00e676':m.sharpe>0?'#ffaa00':'#ff5252'}">${m.sharpe.toFixed(2)}</td><td>${m.rec!==undefined?U.pct(m.rec,0):'-'}</td></tr>`).join('') || '<tr><td colspan="4">-</td></tr>'; }
+    renderLog() { this.nodes.logContent.innerHTML = this.engine.trainingLog.slice(0, 25).map(x => `<div class="log-entry"><span>Đuôi: <b>${x.actual}</b></span><span>Dự đoán #1: ${x.best} | Top7: [${x.top7}]</span><span>${x.ok?'TOP7':'TRƯỢT'}</span><span class="${x.ok?'win':'loss'}">${x.ok?'✓':'✗'}</span></div>`).join('') || 'Chưa có dự đoán nào được kiểm chứng.'; }
 }
 
+function g(id) { return document.getElementById(id); }
 window.app = new App();
 </script>
 </body>
