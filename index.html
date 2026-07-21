@@ -4,1072 +4,693 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="dark">
-<title>Prediction Engine v3.0</title>
+<title>DỰ ĐOÁN — TOP7 PRO v2</title>
 <style>
 :root{
-  --bg:#060812;--panel:#0c1020;--panel-2:#11182a;--line:#26314b;--text:#eaf0ff;--muted:#8d9ab5;
+  --bg:#060812;--panel:#0c1020;--line:#26314b;--text:#eaf0ff;--muted:#8d9ab5;
   --gold:#f6c85f;--cyan:#56d6ff;--green:#49e39a;--orange:#ffad4d;--red:#ff647c;--violet:#af8cff;
-  --shadow:0 18px 45px #0008;--radius:14px;
 }
-*{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at 10% -10%,#1d1643 0,#090d1b 36%,#05060c 100%);color:var(--text);font:14px/1.45 Inter,Segoe UI,system-ui,sans-serif;min-height:100vh}
-button,input,textarea,select{font:inherit} button{cursor:pointer;color:var(--text);background:#151d31;border:1px solid #34415d;border-radius:9px;padding:8px 11px;font-weight:750;transition:.15s transform,.15s border-color,.15s background}button:hover{transform:translateY(-1px);border-color:var(--cyan);background:#19233c}button:active{transform:translateY(0)}button:disabled{cursor:not-allowed;opacity:.55;transform:none}
-.app{max-width:1500px;margin:auto;padding:18px}.hero{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin:2px 0 16px}.brand h1{margin:0;color:var(--gold);font-size:clamp(1.25rem,2.8vw,2rem);letter-spacing:.02em}.brand p{margin:3px 0 0;color:var(--muted);font-size:.83rem}.status-line{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.78rem}.live-dot{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 14px var(--green)}
-.grid{display:grid;gap:12px}.top-grid{grid-template-columns:minmax(0,1.35fr) minmax(300px,.65fr)}.dashboard-grid{grid-template-columns:repeat(12,minmax(0,1fr));margin-top:12px}.span-3{grid-column:span 3}.span-4{grid-column:span 4}.span-5{grid-column:span 5}.span-6{grid-column:span 6}.span-7{grid-column:span 7}.span-8{grid-column:span 8}.span-12{grid-column:span 12}
-.card{background:linear-gradient(155deg,#10172a 0,#0a0e1b 100%);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;min-width:0}.card h2,.card h3{margin:0;color:var(--gold);font-size:.82rem;letter-spacing:.06em}.card-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}.muted{color:var(--muted)}.tiny{font-size:.73rem}.caption{font-size:.73rem;color:var(--muted);margin:5px 0 0}
-.sync-row,.button-row,.form-row{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.sync-row input{flex:1;min-width:170px}.input,.textarea,select{border:1px solid #34415d;border-radius:9px;background:#080c17;color:var(--text);outline:none;padding:8px 10px}.input:focus,.textarea:focus,select:focus{border-color:var(--cyan);box-shadow:0 0 0 3px #56d6ff18}.textarea{width:100%;min-height:84px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Consolas,monospace}.primary{color:#1d1500;background:linear-gradient(135deg,#f6c85f,#e4a72f);border-color:#f9d77f}.primary:hover{background:linear-gradient(135deg,#ffdb75,#f0b942);border-color:#fff0b0}.success{border-color:#2fbf7f;color:var(--green)}.danger{border-color:#a74a5a;color:#ff9aaa}.outline-gold{border-color:#8e6c28;color:var(--gold)}
-.api-message{margin-top:8px;min-height:20px;color:var(--muted);font-size:.79rem}.api-message.ok{color:var(--green)}.api-message.error{color:var(--red)}.api-message.warn{color:var(--orange)}
-.history-strip{display:flex;gap:5px;overflow:auto;padding:1px 1px 7px;min-height:42px}.history-dot{flex:0 0 31px;width:31px;height:31px;display:grid;place-items:center;border-radius:8px;background:#111b31;border:1px solid #2c3a59;font-weight:800;color:#b6c4e2}.history-dot.latest{border-color:var(--cyan);color:var(--cyan);box-shadow:0 0 12px #56d6ff55}.history-dot.hot{border-color:#3b9f73;color:var(--green)}
-.result-entry{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.digit-btn{padding:5px 9px;min-width:34px;color:var(--cyan);border-color:#34536a}.digit-btn:hover{color:#06121a;background:var(--cyan)}
-.prediction{display:grid;grid-template-columns:minmax(230px,.9fr) minmax(310px,1.1fr);gap:12px;align-items:center}.gauge-wrap{display:grid;grid-template-columns:138px 1fr;gap:12px;align-items:center}.gauge{--value:0;position:relative;width:132px;height:132px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--cyan) calc(var(--value)*1%),#202a40 0);margin:auto}.gauge:before{content:"";position:absolute;inset:10px;border-radius:50%;background:#0b1020;border:1px solid #2c3854}.gauge-inner{z-index:1;text-align:center}.gauge-number{font-size:1.65rem;font-weight:900;color:var(--gold)}.gauge-label{font-size:.66rem;color:var(--muted);text-transform:uppercase}.risk-note{padding:8px 9px;border-radius:9px;background:#12182a;border-left:3px solid var(--orange);font-size:.78rem}
-.rank-grid{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:5px}.rank-cell{border:1px solid #26314b;border-radius:9px;background:#0a0f1d;text-align:center;padding:7px 2px}.rank-cell .n{display:block;font-size:1.25rem;font-weight:900}.rank-cell .p{font-size:.67rem;color:var(--muted)}.rank-cell.top{border-color:#328e69;background:#0b1b1a}.rank-cell.top .n{color:var(--green)}.rank-cell.best{border-color:var(--gold);box-shadow:0 0 14px #f6c85f4d}.rank-cell.best .n{color:var(--gold)}.rank-cell.bottom{opacity:.54;border-color:#5e3342}.rank-cell.bottom .n{color:#e77b8e}
-.stat-row{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;margin-top:11px}.stat{border:1px solid #24304a;border-radius:10px;padding:8px;background:#0a0f1d}.stat .k{font-size:.64rem;text-transform:uppercase;color:var(--muted);display:block}.stat .v{font-size:1rem;font-weight:850;color:var(--text);display:block;margin-top:2px}.green{color:var(--green)!important}.orange{color:var(--orange)!important}.red{color:var(--red)!important}.gold{color:var(--gold)!important}
-.metric-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.metric{border:1px solid #22304a;border-radius:9px;padding:8px;background:#090e1a}.metric .name{font-size:.66rem;color:var(--muted);text-transform:uppercase}.metric .value{font-weight:800;margin-top:2px}.pill{display:inline-flex;align-items:center;gap:4px;padding:3px 7px;border-radius:999px;background:#141c30;border:1px solid #30405f;font-size:.7rem;font-weight:800}.pill.good{color:var(--green);border-color:#287653}.pill.warn{color:var(--orange);border-color:#8d642c}.pill.bad{color:var(--red);border-color:#854354}
-canvas{display:block;width:100%;background:#080d18;border:1px solid #22304a;border-radius:10px}.chart{height:190px}.chart.small{height:160px}.heatmap{display:grid;grid-template-columns:25px repeat(10,1fr);gap:2px;max-width:390px;margin:auto}.hm-label,.hm-cell{display:grid;place-items:center;aspect-ratio:1;border-radius:3px;font-size:.67rem}.hm-label{color:var(--muted);font-weight:800}.hm-cell{font-weight:800;transition:transform .12s}.hm-cell:hover{transform:scale(1.35);z-index:1}
-.table-wrap{overflow:auto;max-height:390px;border:1px solid #22304a;border-radius:10px}table{width:100%;border-collapse:collapse;font-size:.76rem}th{position:sticky;top:0;background:#121a2d;color:var(--gold);font-size:.67rem;text-transform:uppercase;letter-spacing:.04em;z-index:1}th,td{padding:7px 8px;text-align:center;border-bottom:1px solid #1b2740}tr:last-child td{border:0}tbody tr:hover{background:#141c2e}.table-rank{font-weight:900;color:var(--gold)}
-.model-bar{height:7px;min-width:58px;border-radius:999px;background:#1b2740;overflow:hidden}.model-bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--violet),var(--cyan))}.disabled-row{opacity:.45}.log{max-height:280px;overflow:auto;font:12px/1.45 ui-monospace,SFMono-Regular,Consolas,monospace;background:#070b14;border:1px solid #22304a;border-radius:10px;padding:8px}.log-line{padding:3px 0;border-bottom:1px solid #182139}.log-line:last-child{border:0}.log-time{color:#657491;margin-right:7px}.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:.7rem;color:var(--muted)}.legend span:before{content:"";display:inline-block;width:8px;height:8px;margin-right:4px;border-radius:50%;background:var(--cyan)}
-details summary{cursor:pointer;color:var(--muted);font-size:.78rem}.hidden{display:none!important}.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(12px);opacity:0;pointer-events:none;background:#17233a;border:1px solid #3c5c7f;border-radius:9px;padding:9px 13px;box-shadow:var(--shadow);font-size:.8rem;transition:.2s opacity,.2s transform;z-index:9}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-@media(max-width:1050px){.top-grid{grid-template-columns:1fr}.span-3{grid-column:span 6}.span-4{grid-column:span 6}.span-5{grid-column:span 6}.span-7{grid-column:span 6}.span-8{grid-column:span 12}}@media(max-width:680px){.app{padding:10px}.hero{display:block}.status-line{margin-top:8px}.prediction{grid-template-columns:1fr}.gauge-wrap{grid-template-columns:120px 1fr}.gauge{width:112px;height:112px}.rank-grid{gap:3px}.rank-cell{padding:5px 1px}.rank-cell .n{font-size:1rem}.stat-row{grid-template-columns:repeat(3,1fr)}.span-3,.span-4,.span-5,.span-6,.span-7,.span-8{grid-column:span 12}.sync-row>*{width:100%}.sync-row input{min-width:0}.chart{height:170px}}
+*{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at 10% -10%,#1d1643 0,#090d1b 36%,#05060c 100%);color:var(--text);font:14px/1.45 system-ui,sans-serif;min-height:100vh;padding:12px}
+.app{max-width:780px;margin:auto}
+h1{color:var(--gold);font-size:1.4rem;margin:0 0 2px;letter-spacing:.02em}
+.sub{color:var(--muted);font-size:.7rem;margin-bottom:12px}
+
+.card{background:#0c1020;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
+.flex{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.flex-grow{flex:1;min-width:120px}
+.input,textarea,select{background:#080c17;border:1px solid #2a3650;border-radius:8px;color:var(--text);padding:6px 10px;outline:none;width:100%}
+.input:focus,textarea:focus{border-color:var(--cyan)}
+textarea{height:52px;resize:vertical;font-family:monospace;font-size:.78rem}
+button{background:#151d31;border:1px solid #34415d;border-radius:8px;color:var(--text);padding:6px 12px;font-weight:700;cursor:pointer;transition:.1s}
+button:hover{background:#1e2844;border-color:var(--cyan)}
+button.primary{background:linear-gradient(135deg,#f6c85f,#e4a72f);color:#1d1500;border-color:#f9d77f}
+button.primary:hover{background:linear-gradient(135deg,#ffdb75,#f0b942)}
+button.danger{border-color:#a74a5a;color:#ff9aaa}
+button.danger:hover{background:#2a0a0a;border-color:#ff647c}
+button.digit-btn{width:36px;height:36px;padding:0;font-size:1.1rem;font-weight:900;border-color:#34536a;color:var(--cyan);border-radius:8px}
+button.digit-btn:hover{background:var(--cyan);color:#06121a;border-color:var(--cyan)}
+button.api-btn{border-color:var(--gold);color:var(--gold);font-size:.7rem;padding:4px 10px}
+button.api-btn:hover{background:var(--gold);color:#1d1500;border-color:var(--gold)}
+
+.history-strip{display:flex;gap:4px;overflow:auto;padding:4px 0;min-height:36px;flex-wrap:nowrap}
+.history-dot{flex:0 0 30px;height:30px;display:grid;place-items:center;border-radius:6px;background:#111b31;border:1px solid #2c3a59;font-weight:800;font-size:.8rem;color:#b6c4e2}
+.history-dot.latest{border-color:var(--cyan);color:var(--cyan);box-shadow:0 0 10px #56d6ff55}
+.history-dot.hot{border-color:var(--green);color:var(--green)}
+.history-dot.cold{border-color:#3a3a5a;color:#6a6a8a}
+.history-dot.hit{background:#081a0e;border-color:var(--green);color:var(--green)}
+.history-dot.miss{background:#1a0808;border-color:#5a2a2a;color:#ff647c}
+
+.pred-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin:8px 0}
+.pred-cell{text-align:center;padding:6px 2px;border-radius:8px;background:#0a0f1d;border:2px solid #1a1a32;transition:all .2s}
+.pred-cell.top{border-color:var(--green);background:#081a0e}
+.pred-cell.best{border-color:var(--gold);background:#1a1808;box-shadow:0 0 14px #f6c85f44}
+.pred-cell.bot{border-color:#5e2a2a;background:#100808;opacity:.6}
+.pred-cell .num{font-size:1.5rem;font-weight:900;display:block;line-height:1.2}
+.pred-cell.top .num{color:var(--green)}
+.pred-cell.best .num{color:var(--gold)}
+.pred-cell .prob{font-size:.62rem;color:var(--muted)}
+.pred-cell.top .prob{color:#88cc88}
+
+.gauge-wrap{display:flex;gap:16px;align-items:center;margin:6px 0}
+.gauge{--v:0;width:80px;height:80px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--gold) calc(var(--v)*1%),#202a40 0);flex-shrink:0}
+.gauge-inner{text-align:center;background:#0b1020;border-radius:50%;width:64px;height:64px;display:grid;place-items:center;border:1px solid #2c3854}
+.gauge-num{font-size:1.3rem;font-weight:900;color:var(--gold)}
+.gauge-label{font-size:.55rem;color:var(--muted);text-transform:uppercase}
+.gauge-info{flex:1}
+.gauge-info .best{font-weight:800;color:var(--gold);font-size:1rem}
+.gauge-info .detail{font-size:.7rem;color:var(--muted)}
+
+/* rolling accuracy gauge */
+.rolling-gauge{--rv:0;width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--green) calc(var(--rv)*1%),#202a40 0);flex-shrink:0}
+.rolling-inner{text-align:center;background:#0b1020;border-radius:50%;width:50px;height:50px;display:grid;place-items:center;border:1px solid #2c3854}
+.rolling-num{font-size:1.1rem;font-weight:900;color:var(--green)}
+
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin:6px 0}
+.stat{background:#0a0f1d;border:1px solid #1a1a32;border-radius:8px;padding:5px 7px;text-align:center}
+.stat .lbl{font-size:.6rem;color:var(--muted);text-transform:uppercase;display:block}
+.stat .val{font-weight:800;font-size:.9rem}
+
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;background:#141c30;border:1px solid #30405f;font-size:.65rem;font-weight:800}
+.pill.good{color:var(--green);border-color:#287653}
+.pill.warn{color:var(--orange);border-color:#8d642c}
+.pill.bad{color:var(--red);border-color:#854354}
+.pill.hit-rate{color:var(--gold);border-color:#8d6c28}
+
+.table-wrap{overflow:auto;max-height:280px;border:1px solid #1a1a32;border-radius:8px;margin-top:6px}
+table{width:100%;border-collapse:collapse;font-size:.72rem}
+th{position:sticky;top:0;background:#121a2d;color:var(--gold);padding:5px 6px;text-align:center;border-bottom:1px solid #1b2740}
+td{padding:4px 6px;text-align:center;border-bottom:1px solid #182139}
+tr:last-child td{border:0}
+tr.top-row td{color:var(--green)}
+tr.top-row{background:#081a0e}
+tr.bot-row td{color:#662222}
+tr.bot-row{background:#100808}
+
+/* win/loss log */
+.wl-log{max-height:220px;overflow:auto;border:1px solid #1a1a32;border-radius:8px;margin-top:4px}
+.wl-entry{display:grid;grid-template-columns:36px 1fr 40px 60px;gap:4px;padding:3px 8px;border-bottom:1px solid #182139;align-items:center;font-size:.7rem}
+.wl-entry.hit-row{background:#081a0e}
+.wl-entry.miss-row{background:#1a0808}
+.wl-entry .wl-idx{color:var(--muted);font-weight:700}
+.wl-entry .wl-top7{color:var(--text);font-family:monospace;font-size:.68rem}
+.wl-entry .wl-actual{font-weight:900;font-size:.85rem}
+.wl-entry.hit-row .wl-actual{color:var(--green)}
+.wl-entry.miss-row .wl-actual{color:var(--red)}
+.wl-badge{font-size:.6rem;font-weight:800;padding:1px 6px;border-radius:999px;text-align:center}
+.wl-badge.hit{background:#0a2a15;color:var(--green);border:1px solid #287653}
+.wl-badge.miss{background:#2a0a0a;color:var(--red);border:1px solid #5a2a2a}
+
+.api-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:6px 0}
+.api-row input{flex:1;min-width:160px;font-size:.7rem;padding:4px 8px;background:#080c17;border:1px solid #2a3650;border-radius:6px;color:var(--text);outline:none}
+.api-row input:focus{border-color:var(--cyan)}
+.api-status{font-size:.65rem;color:var(--muted);margin:2px 0 0;min-height:18px}
+
+.json-collapse{background:#080c17;border:1px solid #1a1a32;border-radius:6px;padding:6px;margin-top:4px}
+.json-collapse summary{cursor:pointer;color:var(--muted);font-size:.65rem;font-weight:700}
+
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(12px);opacity:0;pointer-events:none;background:#17233a;border:1px solid #3c5c7f;border-radius:8px;padding:7px 14px;font-size:.75rem;transition:.2s;z-index:9}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media(max-width:540px){.stat-row{grid-template-columns:repeat(2,1fr)} .pred-grid{gap:2px} .pred-cell .num{font-size:1.1rem} .gauge{width:64px;height:64px} .gauge-inner{width:50px;height:50px} .gauge-num{font-size:1rem} .wl-entry{grid-template-columns:28px 1fr 32px 48px;font-size:.65rem}}
 </style>
 </head>
 <body>
-<main class="app">
-  <header class="hero">
-    <div class="brand"><h1>Prediction Engine <span>v3.0</span></h1><p>Bayesian stacking · online learning · regime &amp; drift aware · offline-first</p></div>
-    <div class="status-line"><i class="live-dot" id="liveDot"></i><span id="runStatus">Sẵn sàng — dữ liệu lưu cục bộ</span></div>
-  </header>
-  <section class="grid top-grid">
-    <article class="card">
-      <div class="card-head"><h2>DATA &amp; API SYNC</h2><span class="pill" id="syncState">OFFLINE READY</span></div>
-      <div class="sync-row"><input class="input" id="apiUrl" aria-label="API URL" value="https://k2d9u.k123b.club/api/front/open/lottery/history/list/game?limitNum=200&amp;gameCode=st45g"><button class="outline-gold" id="fullSyncButton">NẠP DỮ LIỆU</button><button class="success" id="incrementButton">CẬP NHẬT MỚI</button><label class="pill"><input type="checkbox" id="autoSync"> Tự đồng bộ 45s</label></div>
-      <div class="api-message" id="apiMessage">Có thể dùng thủ công hoàn toàn khi không có mạng hoặc API bị CORS chặn.</div>
-      <div class="card-head" style="margin-top:13px"><h2>LỊCH SỬ GẦN NHẤT</h2><span class="muted tiny" id="historyCount">0 kết quả</span></div>
-      <div id="historyStrip" class="history-strip"><span class="muted">Chưa có dữ liệu.</span></div>
-      <textarea class="textarea" id="historyInput" aria-label="Lịch sử đuôi" placeholder="Nhập dãy đuôi 0–9, ví dụ: 4 0 3 1 7 2 ..."></textarea>
-      <div class="form-row" style="margin-top:7px"><button class="primary" id="analyzeButton">PHÂN TÍCH</button><button id="undoButton">UNDO</button><button id="reverseButton">ĐẢO THỨ TỰ</button><button id="sampleButton">NẠP MẪU</button><span class="muted tiny" id="parseInfo">Nhập thủ công hoặc đồng bộ từ API. Giá trị mới nhất ở bên phải.</span></div>
-      <div class="result-entry" aria-label="Ghi nhận kết quả mới"><span class="muted tiny">Kết quả mới:</span><span id="digitButtons"></span></div>
-    </article>
-    <article class="card">
-      <div class="card-head"><h2>THAO TÁC &amp; LƯU TRỮ</h2><span class="muted tiny" id="updateMs">—</span></div>
-      <div class="button-row"><button id="exportButton">XUẤT JSON</button><button id="importButton">NHẬP JSON</button><button id="copyButton">COPY TG</button><button class="danger" id="clearButton">XOÁ DỮ LIỆU</button><button id="clearCacheButton">XOÁ CACHE</button></div>
-      <input type="file" id="importFile" class="hidden" accept=".json,application/json">
-      <details style="margin-top:12px"><summary>Dán JSON API thủ công (khi CORS chặn)</summary><textarea class="textarea" id="jsonInput" style="margin-top:7px;min-height:92px" placeholder='Dán response JSON có issueList ở đây'></textarea><button id="parseJsonButton" class="outline-gold" style="margin-top:7px">NẠP JSON ĐÃ DÁN</button></details>
-      <details style="margin-top:12px"><summary>Giới hạn &amp; diễn giải</summary><p class="caption">Kết quả xổ số về nguyên tắc là ngẫu nhiên. Công cụ chỉ đo mức độ phù hợp lịch sử, không tạo ra sự chắc chắn hay cam kết lợi nhuận. Khi dữ liệu có entropy cao, drift, hoặc calibration xấu, confidence sẽ bị giảm rõ rệt.</p></details>
-    </article>
-  </section>
-  <section class="card" style="margin-top:12px">
-    <div class="card-head"><h2>DỰ ĐOÁN KẾ TIẾP</h2><span id="decisionPill" class="pill warn">ĐANG CHỜ DỮ LIỆU</span></div>
-    <div class="prediction"><div class="gauge-wrap"><div class="gauge" id="confidenceGauge"><div class="gauge-inner"><div class="gauge-number" id="confidenceNumber">—</div><div class="gauge-label">confidence</div></div></div><div><div style="font-weight:850;color:var(--gold);font-size:1.15rem" id="bestSummary">—</div><div class="caption" id="confidenceText">Cần ít nhất 30 quan sát để phân tích.</div><div class="risk-note" id="riskNote" style="margin-top:8px">Chưa đủ dữ liệu để đánh giá rủi ro.</div></div></div><div><div class="rank-grid" id="rankGrid"></div><div class="stat-row"><div class="stat"><span class="k">Top 7</span><span class="v" id="top7Value">—</span></div><div class="stat"><span class="k">Loại 3</span><span class="v red" id="bottom3Value">—</span></div><div class="stat"><span class="k">Edge #1</span><span class="v" id="edgeValue">—</span></div><div class="stat"><span class="k">Uncertainty</span><span class="v" id="uncertaintyValue">—</span></div><div class="stat"><span class="k">Agreement</span><span class="v" id="agreementValue">—</span></div></div></div></div>
-  </section>
-  <section class="dashboard-grid">
-    <article class="card span-3"><div class="card-head"><h3>RISK ASSESSMENT</h3><span id="riskRegime" class="pill">—</span></div><div class="metric-grid" id="riskMetrics"></div></article>
-    <article class="card span-3"><div class="card-head"><h3>REGIME &amp; DRIFT</h3><span id="driftPill" class="pill">—</span></div><div class="metric-grid" id="regimeMetrics"></div></article>
-    <article class="card span-3"><div class="card-head"><h3>FEATURE SIGNALS</h3><span class="muted tiny">incremental</span></div><div class="metric-grid" id="featureMetrics"></div></article>
-    <article class="card span-3"><div class="card-head"><h3>MONTE CARLO</h3><select id="simulationCount" aria-label="Số mô phỏng"><option value="10000">10k</option><option value="50000">50k</option><option value="100000">100k</option></select></div><div class="metric-grid" id="monteMetrics"></div><button id="simulateButton" style="margin-top:8px;width:100%">CHẠY MÔ PHỎNG</button></article>
-    <article class="card span-5"><div class="card-head"><h3>TRANSITION HEATMAP</h3><span class="muted tiny">Adaptive Markov P(next | current)</span></div><div class="heatmap" id="heatmap"></div><p class="caption">Hàng = đuôi hiện tại, cột = đuôi kế tiếp. Màu sáng hơn biểu thị xác suất chuyển tiếp cao hơn.</p></article>
-    <article class="card span-7"><div class="card-head"><h3>CALIBRATION &amp; RELIABILITY</h3><span class="pill" id="ecePill">ECE —</span></div><canvas class="chart" id="calibrationChart" width="700" height="190"></canvas><div class="legend"><span>Predicted vs actual</span><span style="color:var(--gold)">Ideal diagonal</span></div></article>
-    <article class="card span-6"><div class="card-head"><h3>WALK-FORWARD BACKTEST</h3><span class="muted tiny" id="backtestState">lazy / no look-ahead</span></div><div class="metric-grid" id="backtestMetrics"></div><canvas class="chart small" id="rocChart" width="650" height="160" style="margin-top:10px"></canvas></article>
-    <article class="card span-6"><div class="card-head"><h3>WEIGHT EVOLUTION</h3><span class="muted tiny">Hedge + EXP4 + Thompson blend</span></div><canvas class="chart small" id="weightChart" width="650" height="160"></canvas></article>
-    <article class="card span-7"><div class="card-head"><h3>MODEL MANAGEMENT</h3><span class="muted tiny">models automatically deactivate after persistent instability</span></div><div class="table-wrap"><table><thead><tr><th>Model</th><th>Contribution</th><th>Weight</th><th>Hit</th><th>Log loss</th><th>Brier</th><th>Sharpe</th><th>Calib.</th><th>Status</th></tr></thead><tbody id="modelTable"></tbody></table></div></article>
-    <article class="card span-5"><div class="card-head"><h3>DIGIT ANALYTICS</h3><span class="muted tiny">calibrated stacking output</span></div><div class="table-wrap"><table><thead><tr><th>#</th><th>Đuôi</th><th>P final</th><th>Bayes CI</th><th>Freq.</th><th>Gap</th><th>Edge</th></tr></thead><tbody id="digitTable"></tbody></table></div></article>
-    <article class="card span-6"><div class="card-head"><h3>PREDICTION TIMELINE</h3><span class="muted tiny">validated #1 forecasts</span></div><canvas class="chart small" id="timelineChart" width="650" height="160"></canvas></article>
-    <article class="card span-6"><div class="card-head"><h3>EVENT LOG</h3><span class="muted tiny">persistent, bounded to 200 events</span></div><div class="log" id="eventLog">No events yet.</div></article>
-  </section>
-</main>
-<div id="toast" class="toast" role="status"></div>
+<div class="app">
+  <h1>🎯 DỰ ĐOÁN — TOP7 PRO v2</h1>
+  <div class="sub">26-model ensemble · adaptive weighting · streak shield · win/loss chronicle</div>
+
+  <!-- HISTORY INPUT + DIGIT BUTTONS -->
+  <div class="card">
+    <div class="flex">
+      <textarea id="historyInput" placeholder="Nhập dãy đuôi: 4 0 3 1 7 2 ..."></textarea>
+      <button class="primary" id="analyzeBtn">PHÂN TÍCH</button>
+    </div>
+
+    <div class="flex" style="margin:6px 0;justify-content:center;gap:4px">
+      <button class="digit-btn" data-digit="0">0</button>
+      <button class="digit-btn" data-digit="1">1</button>
+      <button class="digit-btn" data-digit="2">2</button>
+      <button class="digit-btn" data-digit="3">3</button>
+      <button class="digit-btn" data-digit="4">4</button>
+      <button class="digit-btn" data-digit="5">5</button>
+      <button class="digit-btn" data-digit="6">6</button>
+      <button class="digit-btn" data-digit="7">7</button>
+      <button class="digit-btn" data-digit="8">8</button>
+      <button class="digit-btn" data-digit="9">9</button>
+    </div>
+
+    <div class="api-row">
+      <input id="apiUrl" value="https://k2d9u.k123b.club/api/front/open/lottery/history/list/game?limitNum=200&gameCode=st45g">
+      <button class="api-btn" id="syncFullBtn">📡 NẠP FULL</button>
+      <button class="api-btn" id="syncIncBtn">🔄 CẬP NHẬT</button>
+    </div>
+    <div class="api-status" id="apiStatus">Sẵn sàng — bấm NẠP FULL để lấy lịch sử từ API</div>
+
+    <details class="json-collapse"><summary>📋 Dán JSON thủ công (nếu CORS chặn)</summary>
+      <div class="flex" style="margin-top:4px">
+        <textarea id="jsonPaste" placeholder="Dán toàn bộ JSON response ở đây..." style="height:44px;font-size:.65rem;flex:1"></textarea>
+        <button id="jsonParseBtn" style="font-size:.65rem;padding:4px 8px;border-color:var(--orange);color:var(--orange)">NẠP JSON</button>
+      </div>
+    </details>
+
+    <div class="history-strip" id="historyStrip"><span class="muted">Chưa có dữ liệu</span></div>
+    <div class="flex" style="margin-top:4px">
+      <button id="undoBtn">↩ UNDO</button>
+      <button id="reverseBtn">⇄ ĐẢO</button>
+      <button id="sampleBtn">📋 MẪU</button>
+      <button id="telegramBtn">📋 COPY</button>
+      <button class="danger" id="clearBtn">✖ XOÁ</button>
+    </div>
+    <div class="flex" style="margin-top:4px">
+      <span class="muted tiny" id="parseInfo">0 kết quả</span>
+      <span class="pill" id="statusPill">SẴN SÀNG</span>
+      <span class="pill hit-rate" id="top7HitPill">🎯 TOP7 HIT: —</span>
+      <span class="pill" id="lossStreakPill" style="display:none">📉 MISS STREAK: 0</span>
+      <span class="pill good" id="winStreakPill" style="display:none">🔥 WIN STREAK: 0</span>
+    </div>
+  </div>
+
+  <!-- PREDICTION -->
+  <div class="card">
+    <div class="pred-grid" id="predGrid"></div>
+    <div class="gauge-wrap">
+      <div class="gauge" id="gauge"><div class="gauge-inner"><span class="gauge-num" id="gaugeNum">—</span><span class="gauge-label">TOP7 conf</span></div></div>
+      <div class="rolling-gauge" id="rollingGauge"><div class="rolling-inner"><span class="rolling-num" id="rollingNum">—</span></div></div>
+      <div class="gauge-info">
+        <div class="best" id="bestLabel">—</div>
+        <div class="detail" id="detailLabel">Chờ dữ liệu</div>
+      </div>
+    </div>
+    <div class="stat-row">
+      <div class="stat"><span class="lbl">TOP 7</span><span class="val gold" id="top7Val">—</span></div>
+      <div class="stat"><span class="lbl">Loại</span><span class="val red" id="botVal">—</span></div>
+      <div class="stat"><span class="lbl">TOP7 Hit Rate</span><span class="val" id="top7HitVal" style="color:var(--gold)">—</span></div>
+      <div class="stat"><span class="lbl">Rolling 50</span><span class="val" id="rolling50Val" style="color:var(--green)">—</span></div>
+    </div>
+  </div>
+
+  <!-- WIN/LOSS CHRONICLE -->
+  <div class="card">
+    <div class="flex"><span style="color:var(--gold);font-weight:800;font-size:.8rem">📋 LỊCH SỬ THẮNG/THUA</span><span class="muted tiny" id="wlSummary">0 thắng / 0 thua</span></div>
+    <div class="wl-log" id="wlLog"><div class="wl-entry" style="color:var(--muted);justify-content:center;display:flex">Chưa có lịch sử — bấm số để ghi nhận</div></div>
+  </div>
+
+  <!-- DIGIT TABLE -->
+  <div class="card">
+    <div class="flex"><span style="color:var(--gold);font-weight:800;font-size:.8rem">📊 PHÂN TÍCH CHI TIẾT</span><span class="muted tiny" id="sampleCount">0 mẫu</span></div>
+    <div class="table-wrap"><table><thead><tr><th>#</th><th>Đuôi</th><th>P</th><th>Edge</th><th>Freq</th><th>Gap</th><th>TOP7</th></tr></thead><tbody id="digitTable"></tbody></table></div>
+  </div>
+
+  <!-- MODEL WEIGHTS -->
+  <div class="card">
+    <div style="color:var(--gold);font-weight:800;font-size:.8rem;margin-bottom:4px">⚙️ TOP MODELS (adaptive, TOP7-optimized)</div>
+    <div class="table-wrap"><table><thead><tr><th>Model</th><th>W</th><th>TOP7 Hit</th><th>Sharpe</th></tr></thead><tbody id="modelTable"></tbody></table></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
 <script>
 'use strict';
 
-const CONFIG = Object.freeze({
-  DIGITS: Object.freeze([0,1,2,3,4,5,6,7,8,9]),
-  BASELINE: 0.1, MIN_HISTORY: 30, MAX_HISTORY: 5000, DISPLAY_HISTORY: 60,
-  ANALYSIS_WINDOW: 420, BACKTEST_WINDOW: 180, CALIBRATION_BINS: 10,
-  DECAY_HALF_LIFE: 100, MAX_MODEL_WEIGHT: 0.42, MIN_MODEL_WEIGHT: 0.01,
-  STORAGE_KEY: 'prediction-engine-v3-state', API_TIMEOUT_MS: 15000,
-  AUTO_SYNC_MS: 45000, CACHE_LIMIT: 300, TOP_N: 7, BOTTOM_N: 3,
-  UPDATE_BUDGET_MS: 20, MODEL_DISABLE_LOSS: 2.8, MODEL_RECOVERY_LOSS: 2.35
-});
+const D=Object.freeze([0,1,2,3,4,5,6,7,8,9]);
+const BASELINE=0.1, MIN_HIST=30, MAX_HIST=5000, DECAY_HL=100, TOP_N=7, BOT_N=3;
 
-/**
- * Shared numerical utilities. All distributions are Float64Array instances to
- * keep allocation pressure low during incremental forecasts.
- */
-const Num = {
-  clamp(value, low, high) { return Number.isFinite(value) ? Math.min(high, Math.max(low, value)) : low; },
-  sum(values) { let total = 0; for (let i = 0; i < values.length; i += 1) total += values[i]; return total; },
-  mean(values) { return values.length ? Num.sum(values) / values.length : 0; },
-  std(values) { if (values.length < 2) return 0; const avg = Num.mean(values); let acc = 0; for (let i = 0; i < values.length; i += 1) { const delta = values[i] - avg; acc += delta * delta; } return Math.sqrt(acc / values.length); },
-  uniform() { const p = new Float64Array(10); p.fill(0.1); return p; },
-  normalize(values) { const out = new Float64Array(10); let total = 0; for (let i = 0; i < 10; i += 1) { const v = Math.max(0, Number(values[i]) || 0); out[i] = v; total += v; } if (total <= 0 || !Number.isFinite(total)) return Num.uniform(); for (let i = 0; i < 10; i += 1) out[i] /= total; return out; },
-  mix(items) { const out = new Float64Array(10); let totalWeight = 0; for (const item of items) { if (!item || !item.p) continue; const weight = Math.max(0, Number(item.weight) || 0); if (!weight) continue; totalWeight += weight; for (let d = 0; d < 10; d += 1) out[d] += item.p[d] * weight; } if (!totalWeight) return Num.uniform(); for (let d = 0; d < 10; d += 1) out[d] /= totalWeight; return Num.normalize(out); },
-  ranks(p) { return CONFIG.DIGITS.map(function(d) { return { digit: d, p: p[d] }; }).sort(function(a, b) { return b.p - a.p || a.digit - b.digit; }); },
-  entropy(p) { let result = 0; for (let d = 0; d < 10; d += 1) { const value = Math.max(1e-12, p[d]); result -= value * Math.log2(value); } return result; },
-  kl(p, q) { let result = 0; for (let d = 0; d < 10; d += 1) { const a = Math.max(1e-12, p[d]); const b = Math.max(1e-12, q[d]); result += a * Math.log(a / b); } return result; },
-  js(p, q) { const mid = new Float64Array(10); for (let d = 0; d < 10; d += 1) mid[d] = 0.5 * (p[d] + q[d]); return 0.5 * Num.kl(p, mid) + 0.5 * Num.kl(q, mid); },
-  correlation(a, b) { const n = Math.min(a.length, b.length); if (n < 3) return 0; let sa = 0; let sb = 0; for (let i = 0; i < n; i += 1) { sa += a[i]; sb += b[i]; } const ma = sa / n; const mb = sb / n; let cov = 0; let va = 0; let vb = 0; for (let i = 0; i < n; i += 1) { const da = a[i] - ma; const db = b[i] - mb; cov += da * db; va += da * da; vb += db * db; } return va && vb ? cov / Math.sqrt(va * vb) : 0; },
-  percentile(sorted, fraction) { if (!sorted.length) return 0; const index = (sorted.length - 1) * Num.clamp(fraction, 0, 1); const low = Math.floor(index); const high = Math.ceil(index); return sorted[low] + (sorted[high] - sorted[low]) * (index - low); },
-  pct(value, digits) { return (100 * (Number(value) || 0)).toFixed(digits == null ? 1 : digits) + '%'; },
-  hash(history) { let h = 2166136261; const start = Math.max(0, history.length - 800); for (let i = start; i < history.length; i += 1) { h ^= history[i] + i; h = Math.imul(h, 16777619); } return String(history.length) + ':' + String(h >>> 0); },
-  randomNormal() { let u = 0; let v = 0; while (u === 0) u = Math.random(); while (v === 0) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+const U={
+  clamp:(v,l,h)=>Number.isFinite(v)?Math.min(h,Math.max(l,v)):l,
+  sum:a=>{let s=0;for(let i=0;i<a.length;i++)s+=a[i];return s},
+  mean:a=>a.length?U.sum(a)/a.length:0,
+  std:a=>{if(a.length<2)return 0;const m=U.mean(a);let s=0;for(let i=0;i<a.length;i++)s+=(a[i]-m)*(a[i]-m);return Math.sqrt(s/a.length)},
+  normalize:p=>{const o=new Float64Array(10);let t=0;for(let i=0;i<10;i++){const v=Math.max(0,p[i]||0);o[i]=v;t+=v}if(t<=0||!Number.isFinite(t)){o.fill(0.1);return o}for(let i=0;i<10;i++)o[i]/=t;return o},
+  uniform:()=>{const o=new Float64Array(10);o.fill(0.1);return o},
+  ranks:p=>D.map(d=>({digit:d,p:p[d]||0})).sort((a,b)=>b.p-a.p||a.digit-b.digit),
+  entropy:p=>{let e=0;for(let d=0;d<10;d++){const x=Math.max(1e-12,p[d]);e-=x*Math.log2(x)}return e},
+  pct:(v,d=1)=>((100*U.clamp(v,-99,99)).toFixed(d))+'%',
+  gaps:h=>{const g=new Int32Array(10);g.fill(h.length);for(let i=h.length-1;i>=0;i--){const d=h[i];if(g[d]===h.length)g[d]=h.length-1-i}return g},
+  counts:h=>{const c=new Float64Array(10);for(let i=0;i<h.length;i++)c[h[i]]++;return c},
+  zScore:(obs,p0,n)=>{const se=Math.sqrt(p0*(1-p0)/n);return se>0?(obs-p0)/se:0},
+  parse:raw=>{const text=String(raw||'').trim();const tokens=text.split(/[\s,;|\/.-]+/).filter(Boolean);const h=[];for(const t of tokens){if(/^[0-9]$/.test(t))h.push(+t);else if(/^[0-9]{2,}$/.test(t)){for(const ch of t){const n=+ch;if(n>=0&&n<=9)h.push(n)}}}return h.slice(-MAX_HIST)},
+  hash:h=>{let hh=2166136261;for(let i=0;i<h.length;i++){hh^=h[i]+i;hh=Math.imul(hh,16777619)}return h.length+':'+(hh>>>0).toString(16)},
+  findOverlap:(api,existing)=>{if(!existing.length)return api.length;if(!api.length)return 0;const sw=Math.min(50,api.length,existing.length);for(let len=sw;len>=5;len--){let ok=true;for(let i=0;i<len;i++){if(api[api.length-len+i]!==existing[existing.length-len+i]){ok=false;break}}if(ok)return api.length-len}const ctx=Math.min(5,existing.length,api.length-1);if(ctx>=3){const hc=existing.slice(-ctx);for(let i=api.length-ctx;i>=0;i--){let same=0;for(let j=0;j<ctx;j++)if(api[i+j]===hc[j])same++;if(same>=Math.ceil(ctx*0.6))return api.length-(i+ctx)}}return api.length}
 };
 
-/** Safely persists only serializable application state. */
-class Storage {
-  constructor(key) { this.key = key; }
-  load(fallback) { try { const parsed = JSON.parse(localStorage.getItem(this.key) || ''); return parsed && typeof parsed === 'object' ? parsed : fallback; } catch (_) { return fallback; } }
-  save(value) { try { localStorage.setItem(this.key, JSON.stringify(value)); return true; } catch (_) { return false; } }
-  clear() { try { localStorage.removeItem(this.key); } catch (_) { /* Storage can be unavailable in private contexts. */ } }
-}
+// ===== MODELS =====
+function markovN(order,w,sm){return h=>{if(h.length<=order)return U.uniform();const key=h.slice(-order).join(',');const cnt=new Float64Array(10);cnt.fill(sm);const st=Math.max(0,h.length-w);for(let i=st;i<=h.length-order-1;i++){if(h.slice(i,i+order).join(',')===key)cnt[h[i+order]]++}return U.normalize(cnt)}}
+function freqExp(w,decay){return h=>{const p=new Float64Array(10);const st=Math.max(0,h.length-w);for(let i=st;i<h.length;i++)p[h[i]]+=Math.pow(decay,h.length-1-i);return U.normalize(p)}}
+function recency(hl){return h=>{const p=new Float64Array(10);let t=0;const lam=Math.log(2)/hl;const st=Math.max(0,h.length-300);for(let i=st;i<h.length;i++){const w=Math.exp(-lam*(h.length-1-i));p[h[i]]+=w;t+=w}for(let d=0;d<10;d++)p[d]=(p[d]+0.2)/(t+2);return U.normalize(p)}}
+function patternFuzzy(len,tol,decay){return h=>{if(h.length<=len)return U.uniform();const tail=h.slice(-len);const cnt=new Float64Array(10);cnt.fill(0.02);const st=Math.max(0,h.length-600);for(let i=st;i<=h.length-len-1;i++){let same=0;for(let j=0;j<len;j++)if(h[i+j]===tail[j])same++;if(same>=len-tol){cnt[h[i+len]]+=(same/len)*Math.pow(decay,h.length-len-i)}}return U.normalize(cnt)}}
+function gapModel(pow){return h=>{const g=U.gaps(h);const p=new Float64Array(10);for(let d=0;d<10;d++)p[d]=Math.pow(g[d]+1,pow);return U.normalize(p)}}
+function streakBreak(){return h=>{if(!h.length)return U.uniform();const last=h[h.length-1];let len=1;for(let i=h.length-2;i>=0&&h[i]===last;i--)len++;const p=new Float64Array(10);p.fill(1);if(len>=3){p[last]*=0.3;for(let d=0;d<10;d++)if(d!==last)p[d]+=0.8}else p[last]*=0.65;return U.normalize(p)}}
+function pairFreq(){return h=>{if(h.length<25)return U.uniform();const last=h[h.length-1];const cnt=new Float64Array(10);cnt.fill(0.05);for(let i=0;i<h.length-1;i++){if(h[i]===last)cnt[h[i+1]]+=Math.exp(-(h.length-1-i)/70)}return U.normalize(cnt)}}
+function cycleModel(cycle){return h=>{if(h.length<cycle*2)return U.uniform();const cnt=new Float64Array(10);cnt.fill(0.04);const st=Math.max(0,h.length-cycle*10);for(let i=st;i<h.length-cycle;i++){if(h[i]===h[h.length-cycle])cnt[h[i+cycle]]++}return U.normalize(cnt)}}
+function entropyMR(){return h=>{if(h.length<50)return U.uniform();const p=new Float64Array(10);for(const w of [20,40,80]){const sub=h.slice(-w);const c=U.counts(sub);const ent=U.entropy(U.normalize(c));const wt=ent<2.8?1.5:ent>3.1?0.4:1;for(let d=0;d<10;d++)p[d]+=(c[d]/w)*wt}return U.normalize(p)}}
+function runLength(){return h=>{if(h.length<10)return U.uniform();const last=h[h.length-1];let len=1;for(let i=h.length-2;i>=0&&h[i]===last;i--)len++;if(len<2)return U.uniform();const runs=[];let rl=1;for(let i=1;i<h.length;i++){if(h[i]===h[i-1])rl++;else{runs.push(rl);rl=1}}runs.push(rl);const avg=U.mean(runs)||1;const p=new Float64Array(10);p.fill(0.15);if(len>avg*1.5){for(let d=0;d<10;d++)if(d!==last)p[d]+=1}else if(len<avg*0.5){p[last]+=0.6}return U.normalize(p)}}
+function posBayes(cycle){return h=>{if(h.length<cycle*1.5)return U.uniform();const pos=h.length%cycle;const cnt=new Float64Array(10);cnt.fill(0.05);let t=0.5;const lam=Math.log(2)/(cycle*1.5);for(let i=0;i<h.length-1;i++){if(i%cycle===pos){const w=Math.exp(-lam*(h.length-1-i));cnt[h[i+1]]+=w;t+=w}}for(let d=0;d<10;d++)cnt[d]/=t;return U.normalize(cnt)}}
+function posMarkov(order,cycle){return h=>{if(h.length<order+cycle)return U.uniform();const pos=h.length%cycle;const key=order===1?String(h[h.length-1]):h.slice(-order).join(',');const cnt=new Float64Array(10);cnt.fill(0.03);let t=0.3;const st=Math.max(0,h.length-200);for(let i=st;i<=h.length-order-1;i++){if(i%cycle!==pos)continue;const ikey=order===1?String(h[i]):h.slice(i,i+order).join(',');if(ikey===key){const w=Math.exp(-(h.length-order-i)/(cycle*2));cnt[h[i+order]]+=w;t+=w}}for(let d=0;d<10;d++)cnt[d]/=t;return U.normalize(cnt)}}
 
-/** Bounded event log; it never stores more than its configured capacity. */
-class Logger {
-  constructor(entries) { this.entries = Array.isArray(entries) ? entries.slice(0, 200) : []; }
-  add(level, message) {
-    this.entries.unshift({ level: level || 'info', message: String(message), time: Date.now() });
-    if (this.entries.length > 200) this.entries.length = 200;
-  }
-  serialise() { return this.entries.slice(0, 200); }
-}
-
-/** Small LRU cache for expensive read-only calculations. */
-class CacheManager {
-  constructor(limit) { this.limit = limit || CONFIG.CACHE_LIMIT; this.items = new Map(); }
-  get(key) { const value = this.items.get(key); if (value !== undefined) { this.items.delete(key); this.items.set(key, value); } return value; }
-  set(key, value) { if (this.items.has(key)) this.items.delete(key); this.items.set(key, value); while (this.items.size > this.limit) this.items.delete(this.items.keys().next().value); return value; }
-  clear(prefix) { if (!prefix) { this.items.clear(); return; } for (const key of this.items.keys()) if (String(key).indexOf(prefix) === 0) this.items.delete(key); }
-}
-
-/**
- * Owns source observations and cheap incremental counters. The canonical
- * history remains a compact plain array for persistence and user editing.
- */
-class DataManager {
-  constructor(cache) {
-    this.cache = cache;
-    this.history = [];
-    this.counts = new Uint32Array(10);
-    this.transitions = new Uint32Array(100);
-  }
-  static parse(text) {
-    const values = [];
-    const ignored = [];
-    const tokens = String(text || '').trim().split(/[\s,;|/.-]+/).filter(Boolean);
-    for (const token of tokens) {
-      if (/^[0-9]$/.test(token)) values.push(Number(token));
-      else if (/^[0-9]{2,}$/.test(token)) for (const char of token) values.push(Number(char));
-      else ignored.push(token);
-    }
-    return { values: values.slice(-CONFIG.MAX_HISTORY), ignored: ignored.length };
-  }
-  setHistory(values) {
-    this.history = Array.from(values || [], Number).filter(function(value) { return Number.isInteger(value) && value >= 0 && value <= 9; }).slice(-CONFIG.MAX_HISTORY);
-    this.rebuild();
-    return this.history;
-  }
-  rebuild() {
-    this.counts.fill(0); this.transitions.fill(0);
-    for (let i = 0; i < this.history.length; i += 1) {
-      this.counts[this.history[i]] += 1;
-      if (i) this.transitions[this.history[i - 1] * 10 + this.history[i]] += 1;
-    }
-    this.cache.clear();
-  }
-  append(digit) {
-    if (!Number.isInteger(digit) || digit < 0 || digit > 9) return false;
-    const previous = this.history[this.history.length - 1];
-    this.history.push(digit); this.counts[digit] += 1;
-    if (previous !== undefined) this.transitions[previous * 10 + digit] += 1;
-    if (this.history.length > CONFIG.MAX_HISTORY) this.setHistory(this.history.slice(-CONFIG.MAX_HISTORY));
-    else this.cache.clear();
-    return true;
-  }
-  pop() { if (!this.history.length) return null; const removed = this.history.pop(); this.rebuild(); return removed; }
-  distribution(window) {
-    const key = 'frequency:' + Num.hash(this.history) + ':' + String(window || 0);
-    const cached = this.cache.get(key); if (cached) return cached;
-    const counts = new Float64Array(10); const start = Math.max(0, this.history.length - (window || this.history.length));
-    for (let i = start; i < this.history.length; i += 1) counts[this.history[i]] += 1;
-    return this.cache.set(key, Num.normalize(counts));
-  }
-  gaps() {
-    const gaps = new Int32Array(10); gaps.fill(this.history.length);
-    for (let i = this.history.length - 1; i >= 0; i -= 1) { const digit = this.history[i]; if (gaps[digit] === this.history.length) gaps[digit] = this.history.length - 1 - i; }
-    return gaps;
-  }
-  transitionMatrix(window) {
-    const key = 'transition:' + Num.hash(this.history) + ':' + String(window || 0);
-    const cached = this.cache.get(key); if (cached) return cached;
-    const matrix = new Float64Array(100); matrix.fill(0.25);
-    const start = Math.max(1, this.history.length - (window || this.history.length));
-    for (let i = start; i < this.history.length; i += 1) matrix[this.history[i - 1] * 10 + this.history[i]] += 1;
-    for (let row = 0; row < 10; row += 1) {
-      let total = 0; for (let col = 0; col < 10; col += 1) total += matrix[row * 10 + col];
-      for (let col = 0; col < 10; col += 1) matrix[row * 10 + col] /= total;
-    }
-    return this.cache.set(key, matrix);
-  }
-}
-
-/** Statistical primitives used by the engine, calibration and backtest. */
-class StatisticsEngine {
-  betaInterval(success, total, level) {
-    const alpha = Math.max(0.1, success + 0.5); const beta = Math.max(0.1, total - success + 0.5);
-    const mean = alpha / (alpha + beta); const variance = alpha * beta / ((alpha + beta) * (alpha + beta) * (alpha + beta + 1));
-    const z = level === 0.9 ? 1.645 : 1.96; const radius = z * Math.sqrt(variance);
-    return { low: Num.clamp(mean - radius, 0, 1), high: Num.clamp(mean + radius, 0, 1), mean: mean };
-  }
-  autocorrelation(history, lag) {
-    if (history.length <= lag + 2) return 0; const start = Math.max(0, history.length - CONFIG.ANALYSIS_WINDOW); const segment = history.slice(start);
-    const avg = Num.mean(segment); let numerator = 0; let denominator = 0;
-    for (let i = lag; i < segment.length; i += 1) numerator += (segment[i] - avg) * (segment[i - lag] - avg);
-    for (let i = 0; i < segment.length; i += 1) denominator += (segment[i] - avg) * (segment[i] - avg);
-    return denominator ? numerator / denominator : 0;
-  }
-  transitionEntropy(matrix) {
-    let total = 0; for (let row = 0; row < 10; row += 1) total += Num.entropy(matrix.slice(row * 10, row * 10 + 10));
-    return total / 10;
-  }
-  mutualInformation(history) {
-    if (history.length < 3) return 0; const joint = new Float64Array(100); const first = new Float64Array(10); const second = new Float64Array(10);
-    const start = Math.max(1, history.length - CONFIG.ANALYSIS_WINDOW);
-    for (let i = start; i < history.length; i += 1) { joint[history[i - 1] * 10 + history[i]] += 1; first[history[i - 1]] += 1; second[history[i]] += 1; }
-    const n = Num.sum(joint); if (!n) return 0; let mi = 0;
-    for (let a = 0; a < 10; a += 1) for (let b = 0; b < 10; b += 1) { const p = joint[a * 10 + b] / n; if (p) mi += p * Math.log2(p / ((first[a] / n) * (second[b] / n))); }
-    return Math.max(0, mi);
-  }
-  permutationEntropy(history, order) {
-    const size = order || 3; if (history.length < size + 3) return 1; const patterns = new Map(); let total = 0;
-    const start = Math.max(0, history.length - CONFIG.ANALYSIS_WINDOW);
-    for (let i = start; i <= history.length - size; i += 1) {
-      const rank = history.slice(i, i + size).map(function(value, index) { return { value: value, index: index }; }).sort(function(a, b) { return a.value - b.value || a.index - b.index; }).map(function(item) { return item.index; }).join('');
-      patterns.set(rank, (patterns.get(rank) || 0) + 1); total += 1;
-    }
-    let h = 0; patterns.forEach(function(count) { const p = count / total; h -= p * Math.log2(p); });
-    return h / Math.log2(Math.max(2, patterns.size));
-  }
-  hurst(history) {
-    if (history.length < 40) return 0.5; const lags = [8, 16, 32, 48].filter(function(lag) { return lag <= history.length / 2; }); const xs = []; const ys = [];
-    for (const lag of lags) {
-      const values = []; for (let start = 0; start + lag <= history.length; start += lag) {
-        const segment = history.slice(start, start + lag); const avg = Num.mean(segment); let cumulative = 0; let max = -Infinity; let min = Infinity; let variance = 0;
-        for (const value of segment) { cumulative += value - avg; max = Math.max(max, cumulative); min = Math.min(min, cumulative); variance += (value - avg) * (value - avg); }
-        const sd = Math.sqrt(variance / lag); if (sd > 0) values.push((max - min) / sd);
-      }
-      if (values.length) { xs.push(Math.log(lag)); ys.push(Math.log(Num.mean(values))); }
-    }
-    const mx = Num.mean(xs); const my = Num.mean(ys); let cov = 0; let variance = 0;
-    for (let i = 0; i < xs.length; i += 1) { cov += (xs[i] - mx) * (ys[i] - my); variance += (xs[i] - mx) * (xs[i] - mx); }
-    return Num.clamp(variance ? cov / variance : 0.5, 0.2, 0.8);
-  }
-  rocAuc(scores, labels) {
-    if (scores.length < 3) return { auc: 0.5, points: [[0, 0], [1, 1]] };
-    const rows = scores.map(function(score, index) { return { score: score, label: labels[index] ? 1 : 0 }; }).sort(function(a, b) { return b.score - a.score; });
-    const positives = labels.reduce(function(total, value) { return total + (value ? 1 : 0); }, 0); const negatives = labels.length - positives;
-    if (!positives || !negatives) return { auc: 0.5, points: [[0, 0], [1, 1]] };
-    let tp = 0; let fp = 0; let previous = Infinity; let area = 0; let oldFpr = 0; let oldTpr = 0; const points = [[0, 0]];
-    for (const row of rows) { if (row.score !== previous) { const fpr = fp / negatives; const tpr = tp / positives; area += (fpr - oldFpr) * (tpr + oldTpr) / 2; points.push([fpr, tpr]); oldFpr = fpr; oldTpr = tpr; previous = row.score; } if (row.label) tp += 1; else fp += 1; }
-    const fpr = fp / negatives; const tpr = tp / positives; area += (fpr - oldFpr) * (tpr + oldTpr) / 2; points.push([fpr, tpr]);
-    return { auc: area, points: points };
-  }
-}
-
-/**
- * Caches rich time-series features by history hash. FFT and Haar coefficients
- * use a bounded tail to make the analysis deterministic and inexpensive.
- */
-class FeatureExtractor {
-  constructor(cache, stats) { this.cache = cache; this.stats = stats; }
-  extract(history, data) {
-    const key = 'features:' + Num.hash(history); const cached = this.cache.get(key); if (cached) return cached;
-    const tail = history.slice(-128); const frequency = data.distribution(100); const matrix = data.transitionMatrix(160);
-    const fft = this.fftMagnitudes(tail); const wavelet = this.waveletEnergy(tail); const gaps = data.gaps();
-    let variance = 0; const avg = Num.mean(tail); for (const value of tail) variance += (value - avg) * (value - avg); variance /= Math.max(1, tail.length);
-    let cyclic = 0; for (let lag = 3; lag <= 12; lag += 1) cyclic = Math.max(cyclic, Math.abs(this.stats.autocorrelation(tail, lag)));
-    const streak = this.streak(history);
-    return this.cache.set(key, {
-      frequency: frequency, gaps: gaps, entropy: Num.entropy(frequency), transitionEntropy: this.stats.transitionEntropy(matrix),
-      mutualInformation: this.stats.mutualInformation(tail), autocorrelation: this.stats.autocorrelation(tail, 1),
-      permutationEntropy: this.stats.permutationEntropy(tail, 3), volatility: Math.sqrt(variance) / 4.5,
-      trendStrength: Math.abs(this.stats.autocorrelation(tail, 2)), cyclicStrength: cyclic, fft: fft, wavelet: wavelet,
-      streak: streak, matrix: matrix, hurst: this.stats.hurst(tail)
-    });
-  }
-  streak(history) { if (!history.length) return { digit: null, length: 0 }; let length = 1; const digit = history[history.length - 1]; for (let i = history.length - 2; i >= 0 && history[i] === digit; i -= 1) length += 1; return { digit: digit, length: length }; }
-  fftMagnitudes(values) {
-    const n = Math.min(64, values.length); if (n < 8) return [0, 0, 0]; const magnitudes = [];
-    for (let k = 1; k <= Math.min(8, Math.floor(n / 2)); k += 1) { let re = 0; let im = 0; for (let t = 0; t < n; t += 1) { const angle = 2 * Math.PI * k * t / n; re += values[values.length - n + t] * Math.cos(angle); im -= values[values.length - n + t] * Math.sin(angle); } magnitudes.push(Math.sqrt(re * re + im * im) / n); }
-    return magnitudes.sort(function(a, b) { return b - a; }).slice(0, 3);
-  }
-  waveletEnergy(values) {
-    let vector = Float64Array.from(values.slice(-64)); const energy = [];
-    while (vector.length >= 4) { const next = new Float64Array(Math.floor(vector.length / 2)); let detailEnergy = 0; for (let i = 0; i < next.length; i += 1) { const a = vector[2 * i]; const b = vector[2 * i + 1]; next[i] = (a + b) / Math.sqrt(2); const detail = (a - b) / Math.sqrt(2); detailEnergy += detail * detail; } energy.push(detailEnergy / Math.max(1, next.length)); vector = next; }
-    return energy.length ? energy : [0];
-  }
-}
-
-/** Bayesian posterior with dynamic, decayed priors and credible intervals. */
-class BayesianEngine {
-  constructor(stats) { this.stats = stats; }
-  posterior(history, features, halfLife) {
-    const dynamic = features ? features.frequency : Num.uniform(); const alpha = new Float64Array(10); const counts = new Float64Array(10);
-    const strength = Math.min(4, 0.8 + history.length / 260); let total = 0;
-    for (let d = 0; d < 10; d += 1) { alpha[d] = 0.35 + dynamic[d] * strength; counts[d] = alpha[d]; total += alpha[d]; }
-    const lambda = Math.log(2) / (halfLife || CONFIG.DECAY_HALF_LIFE); const start = Math.max(0, history.length - 700);
-    for (let i = start; i < history.length; i += 1) { const weight = Math.exp(-lambda * (history.length - 1 - i)); counts[history[i]] += weight; total += weight; }
-    const p = new Float64Array(10); const ci = [];
-    for (let d = 0; d < 10; d += 1) { p[d] = counts[d] / total; ci[d] = this.stats.betaInterval(counts[d], total, 0.95); }
-    return { p: Num.normalize(p), counts: counts, total: total, ci: ci };
-  }
-  positionAware(history, cycleLength) {
-    if (history.length < cycleLength + 6) return Num.uniform();
-    const p = new Float64Array(10); p.fill(0.25); const target = history.length % cycleLength; let total = 2.5; const lambda = Math.log(2) / (cycleLength * 1.7);
-    for (let i = 0; i < history.length - 1; i += 1) if (i % cycleLength === target) { const w = Math.exp(-lambda * (history.length - i)); p[history[i + 1]] += w; total += w; }
-    for (let d = 0; d < 10; d += 1) p[d] /= total;
-    return Num.normalize(p);
-  }
-  modelAverage(items, priors) {
-    const weights = new Float64Array(items.length); let total = 0;
-    for (let i = 0; i < items.length; i += 1) { const evidence = Math.exp(-Num.kl(items[i].p, priors)); weights[i] = Math.max(1e-4, items[i].weight || 0.01) * evidence; total += weights[i]; }
-    const weighted = items.map(function(item, index) { return { p: item.p, weight: weights[index] / total }; });
-    return Num.mix(weighted);
-  }
-}
-
-/** Adaptive, higher-order and variable-order Markov probability models. */
-class MarkovEngine {
-  distribution(history, order, window, decay) {
-    if (history.length <= order) return Num.uniform();
-    const out = new Float64Array(10); out.fill(0.28); let total = 2.8;
-    const start = Math.max(order, history.length - (window || CONFIG.ANALYSIS_WINDOW)); const key = this.key(history, history.length - order, order);
-    for (let i = start; i < history.length; i += 1) {
-      if (this.key(history, i - order, order) !== key) continue;
-      const weight = Math.pow(decay || 0.992, history.length - i); out[history[i]] += weight; total += weight;
-    }
-    for (let d = 0; d < 10; d += 1) out[d] /= total;
-    return Num.normalize(out);
-  }
-  key(history, index, order) { let value = 0; for (let i = 0; i < order; i += 1) value = value * 10 + history[index + i]; return value; }
-  adaptive(history, features) {
-    if (history.length < 2) return Num.uniform();
-    const first = this.distribution(history, 1, 260, 0.992);
-    const second = this.distribution(history, 2, 360, 0.994);
-    const third = this.distribution(history, 3, 420, 0.996);
-    const effective = Math.max(0, (features ? features.mutualInformation : 0) * 2.3 + (features ? 3.32 - features.transitionEntropy : 0) * 0.35);
-    const weights = [{ p: first, weight: 0.55 }, { p: second, weight: 0.3 + effective * 0.22 }, { p: third, weight: 0.12 + effective * 0.18 }];
-    return Num.mix(weights);
-  }
-}
-
-/**
- * A compact three-state HMM filter. State emissions use repeat pressure and
- * distance from the preceding digit, which keeps it meaningful for a digit
- * series without claiming a structural causal process.
- */
-class HiddenMarkov {
-  constructor() {
-    this.transition = [
-      [0.84, 0.10, 0.06],
-      [0.10, 0.80, 0.10],
-      [0.08, 0.13, 0.79]
+// ===== ENGINE v2 — TIGHTER TOP7, WIN/LOSS LOG, ADAPTIVE WEIGHTS =====
+class Engine{
+  constructor(){
+    this.models=[
+      ['Bayes dyn',1.12,this._bayesDynamic],
+      ['Bayes pos30',0.70,posBayes(30)],
+      ['Bayes pos15',0.56,posBayes(15)],
+      ['Adaptive Markov',1.05,this._adaptiveMarkov],
+      ['Markov2',0.78,markovN(2,330,0.25)],
+      ['Markov3',0.56,markovN(3,420,0.2)],
+      ['Recency45',0.72,recency(45)],
+      ['Recency140',0.68,recency(140)],
+      ['Gap',0.48,gapModel(1.3)],
+      ['Streak',0.42,streakBreak()],
+      ['Cycle7',0.46,cycleModel(7)],
+      ['Wavelet',0.44,recency(36)],
+      ['PosMarkov30',0.45,posMarkov(1,30)],
+      ['PosMarkov15',0.40,posMarkov(1,15)],
+      ['freq20',0.70,freqExp(20,0.88)],
+      ['freq50',0.65,freqExp(50,0.92)],
+      ['freq120',0.60,freqExp(120,0.95)],
+      ['pattern4',0.60,patternFuzzy(4,1,0.992)],
+      ['pairFreq',0.50,pairFreq()],
+      ['entropyMR',0.50,entropyMR()],
+      ['runLen',0.40,runLength()],
+      ['cycle4',0.45,cycleModel(4)],
+      ['freq300',0.55,freqExp(300,0.97)],
+      ['pattern5',0.50,patternFuzzy(5,1,0.986)],
+      ['gapCold',0.45,h=>{const g=U.gaps(h);const p=new Float64Array(10);for(let d=0;d<10;d++)p[d]=1/Math.pow(g[d]+1,0.65);return U.normalize(p)}],
+      ['streakFollow',0.55,h=>{if(!h.length)return U.uniform();const last=h[h.length-1];let len=1;for(let i=h.length-2;i>=0&&h[i]===last;i--)len++;const p=new Float64Array(10);p.fill(1);if(len>=2)p[last]+=1.8+len*0.6;else p[last]+=0.15;return U.normalize(p)}]
     ];
+    this.weights=this.models.map(m=>m[1]);
+    this.history=[];
+    this._cache={};
+    this.missStreak=0;
+    this.winStreak=0;
+    this.top7HitRate=0.7;
+    this.top7Hits=0;
+    this.top7Total=0;
+    this.lastActual=null;
+    this.lastTop7=null;
+    // win/loss log: array of {sessionIdx, top7, actual, hit}
+    this.winLossLog=[];
+    this.sessionCounter=0;
+    // per-model recent TOP7 hit tracking for adaptive weighting
+    this.modelRecentHits=this.models.map(()=>[]);
   }
-  infer(history, features) {
-    const alpha = new Float64Array([1 / 3, 1 / 3, 1 / 3]); const start = Math.max(1, history.length - 120);
-    for (let i = start; i < history.length; i += 1) {
-      const repeat = history[i] === history[i - 1] ? 1 : 0; const distance = Math.abs(history[i] - history[i - 1]) / 9;
-      const emission = [0.23 + 0.62 * repeat + 0.18 * (1 - distance), 0.55, 0.22 + 0.62 * (1 - repeat) * (1 - distance)];
-      const next = new Float64Array(3);
-      for (let state = 0; state < 3; state += 1) for (let from = 0; from < 3; from += 1) next[state] += alpha[from] * this.transition[from][state];
-      let sum = 0; for (let state = 0; state < 3; state += 1) { next[state] *= emission[state]; sum += next[state]; }
-      for (let state = 0; state < 3; state += 1) alpha[state] = sum ? next[state] / sum : 1 / 3;
-    }
-    const names = ['trending', 'random', 'mean-reverting']; let state = 0; for (let i = 1; i < 3; i += 1) if (alpha[i] > alpha[state]) state = i;
-    let regime = names[state];
-    if (features && features.cyclicStrength > 0.2 && alpha[1] < 0.5) regime = 'cycle';
-    else if (features && features.volatility > 0.62) regime = 'high volatility';
-    else if (features && features.volatility < 0.42) regime = 'low volatility';
-    return { state: regime, probabilities: alpha, confidence: alpha[state] || Math.max.apply(null, alpha) };
-  }
-}
-
-/**
- * Bayesian categorical change-point score plus ADWIN, Page-Hinkley and CUSUM
- * monitors. Drift is confirmed only when multiple indicators agree.
- */
-class ChangePointDetector {
-  constructor() { this.losses = []; this.pageMean = 0; this.pageMin = 0; this.pageSum = 0; this.cusum = 0; this.events = []; }
-  categoricalChange(history) {
-    if (history.length < 50) return { probability: 0, kl: 0, runLength: history.length };
-    const width = Math.min(50, Math.floor(history.length / 2)); const prior = new Float64Array(10); const recent = new Float64Array(10); prior.fill(0.5); recent.fill(0.5);
-    for (let i = history.length - 2 * width; i < history.length - width; i += 1) prior[history[i]] += 1;
-    for (let i = history.length - width; i < history.length; i += 1) recent[history[i]] += 1;
-    const p = Num.normalize(prior); const q = Num.normalize(recent); const kl = Num.kl(q, p); const probability = Num.clamp(1 - Math.exp(-kl * width * 0.55), 0, 1);
-    return { probability: probability, kl: kl, runLength: Math.round(width * (1 - probability)) };
-  }
-  update(logLoss) {
-    const value = Num.clamp(logLoss, 0, 8); this.losses.push(value); if (this.losses.length > 240) this.losses.shift();
-    const n = this.losses.length; this.pageMean += (value - this.pageMean) / n; this.pageSum += value - this.pageMean - 0.005; this.pageMin = Math.min(this.pageMin, this.pageSum);
-    this.cusum = Math.max(0, this.cusum + value - 2.32 - 0.03);
-    const adwin = this.adwin(); const pageHinkley = this.pageSum - this.pageMin > 1.35; const cusum = this.cusum > 2.4;
-    const active = [adwin, pageHinkley, cusum].filter(Boolean).length >= 2;
-    if (active) this.events.push({ time: Date.now(), adwin: adwin, pageHinkley: pageHinkley, cusum: cusum });
-    if (this.events.length > 30) this.events.shift();
-    return { adwin: adwin, pageHinkley: pageHinkley, cusum: cusum, active: active, score: (Number(adwin) + Number(pageHinkley) + Number(cusum)) / 3 };
-  }
-  adwin() {
-    const n = this.losses.length; if (n < 30) return false; const split = Math.floor(n / 2); const a = this.losses.slice(0, split); const b = this.losses.slice(split);
-    const delta = Math.abs(Num.mean(b) - Num.mean(a)); const epsilon = Math.sqrt(2 * Math.log(2 / 0.05) * (1 / a.length + 1 / b.length));
-    return delta > epsilon;
-  }
-}
-
-/**
- * Pure-JS logistic stacking. Each model contributes its log probability for
- * every digit; a multiclass softmax turns those expert outputs into one final
- * probability vector. Coefficients learn online from the next observation.
- */
-class LogisticStacker {
-  constructor(modelCount, state) {
-    this.coefficients = new Float64Array(modelCount); this.coefficients.fill(1 / Math.max(1, modelCount));
-    this.bias = new Float64Array(10); this.learningRate = 0.022;
-    if (state && Array.isArray(state.coefficients) && state.coefficients.length === modelCount) this.coefficients.set(state.coefficients);
-    if (state && Array.isArray(state.bias) && state.bias.length === 10) this.bias.set(state.bias);
-  }
-  predict(outputs) {
-    const scores = new Float64Array(10); let max = -Infinity;
-    for (let d = 0; d < 10; d += 1) {
-      let score = this.bias[d];
-      for (let m = 0; m < outputs.length; m += 1) score += this.coefficients[m] * Math.log(Math.max(0.002, outputs[m].p[d]));
-      scores[d] = Num.clamp(score, -30, 10); max = Math.max(max, scores[d]);
-    }
-    let total = 0; for (let d = 0; d < 10; d += 1) { scores[d] = Math.exp(scores[d] - max); total += scores[d]; }
-    for (let d = 0; d < 10; d += 1) scores[d] /= total;
-    return scores;
-  }
-  update(outputs, actual, finalP) {
-    if (!outputs.length) return;
-    for (let m = 0; m < outputs.length; m += 1) {
-      let gradient = 0;
-      for (let d = 0; d < 10; d += 1) gradient += ((d === actual ? 1 : 0) - finalP[d]) * Math.log(Math.max(0.002, outputs[m].p[d]));
-      this.coefficients[m] = Num.clamp(this.coefficients[m] + this.learningRate * Num.clamp(gradient, -3, 3), -1.4, 2.4);
-    }
-    for (let d = 0; d < 10; d += 1) this.bias[d] = Num.clamp(this.bias[d] + this.learningRate * 0.25 * ((d === actual ? 1 : 0) - finalP[d]), -0.5, 0.5);
-  }
-  serialise() { return { coefficients: Array.from(this.coefficients), bias: Array.from(this.bias) }; }
-}
-
-/**
- * Isotonic regression (pool-adjacent-violators) and an online Platt scaler.
- * The calibration record treats each digit occurrence as a separate event.
- */
-class Calibration {
-  constructor(state) {
-    this.records = state && Array.isArray(state.records) ? state.records.slice(-900) : [];
-    this.plattA = state && Number.isFinite(state.plattA) ? state.plattA : 1;
-    this.plattB = state && Number.isFinite(state.plattB) ? state.plattB : 0;
-    this.bins = CONFIG.CALIBRATION_BINS; this.fit = null; this.dirty = true;
-  }
-  record(p, actual) {
-    for (let d = 0; d < 10; d += 1) {
-      const x = Num.clamp(p[d], 0.001, 0.999); const y = d === actual ? 1 : 0; const z = this.sigmoid(this.plattA * this.logit(x) + this.plattB); const error = y - z;
-      this.plattA = Num.clamp(this.plattA + 0.006 * error * this.logit(x), 0.25, 3.5);
-      this.plattB = Num.clamp(this.plattB + 0.006 * error, -2.5, 2.5);
-      this.records.push({ x: x, y: y });
-    }
-    if (this.records.length > 900) this.records.splice(0, this.records.length - 900);
-    this.dirty = true;
-  }
-  sigmoid(value) { return value >= 0 ? 1 / (1 + Math.exp(-value)) : Math.exp(value) / (1 + Math.exp(value)); }
-  logit(p) { const x = Num.clamp(p, 0.001, 0.999); return Math.log(x / (1 - x)); }
-  ensureFit() {
-    if (!this.dirty) return; this.dirty = false;
-    const rows = this.records.slice(-600).sort(function(a, b) { return a.x - b.x; }); const blocks = [];
-    for (const row of rows) {
-      blocks.push({ min: row.x, max: row.x, sum: row.y, count: 1, value: row.y });
-      while (blocks.length > 1 && blocks[blocks.length - 2].value > blocks[blocks.length - 1].value) {
-        const right = blocks.pop(); const left = blocks.pop(); const count = left.count + right.count;
-        blocks.push({ min: left.min, max: right.max, sum: left.sum + right.sum, count: count, value: (left.sum + right.sum) / count });
+  _bayesDynamic(h){const cnt=new Float64Array(10);cnt.fill(0.5);let t=5;const lam=Math.log(2)/DECAY_HL;const st=Math.max(0,h.length-700);for(let i=st;i<h.length;i++){const w=Math.exp(-lam*(h.length-1-i));cnt[h[i]]+=w;t+=w}for(let d=0;d<10;d++)cnt[d]/=t;return U.normalize(cnt)}
+  _adaptiveMarkov(h){if(h.length<2)return U.uniform();const p1=markovN(1,260,0.35)(h),p2=markovN(2,360,0.25)(h),p3=markovN(3,420,0.2)(h);const ent=U.entropy(U.normalize(U.counts(h.slice(-100))));const mi=Math.max(0,Math.log2(10)-ent)*0.7;const eff=Math.max(0,mi*2.3+(3.32-ent)*0.35);const w1=0.55,w2=0.3+eff*0.22,w3=0.12+eff*0.18;const p=new Float64Array(10);for(let d=0;d<10;d++)p[d]=p1[d]*w1+p2[d]*w2+p3[d]*w3;return U.normalize(p)}
+  _hurst(h){if(h.length<50)return 0.5;const lags=[4,8,16,32,64];const rs=[];for(const lag of lags){if(lag>h.length/4)continue;const segs=Math.floor(h.length/lag);let rsSum=0;for(let s=0;s<segs;s++){const slice=h.slice(s*lag,(s+1)*lag);const m=U.mean(slice);let cum=0,maxv=-1e9,minv=1e9,ss=0;for(const v of slice){cum+=v-m;if(cum>maxv)maxv=cum;if(cum<minv)minv=cum;ss+=(v-m)*(v-m)}const r=maxv-minv;const sd=Math.sqrt(ss/lag);if(sd>0)rsSum+=r/sd}rs.push(Math.log(rsSum/segs))}if(rs.length<2)return 0.5;const loglags=lags.slice(0,rs.length).map(Math.log);const mx=U.mean(loglags),my=U.mean(rs);let cov=0,varx=0;for(let i=0;i<rs.length;i++){cov+=(loglags[i]-mx)*(rs[i]-my);varx+=(loglags[i]-mx)*(loglags[i]-mx)}return U.clamp(varx>0?cov/varx:0.5,0.2,0.9)}
+  _regime(h){const hurst=this._hurst(h);const ent=U.entropy(U.normalize(U.counts(h.slice(-80))));let change=0;if(h.length>=80){const rec=U.counts(h.slice(-40)),old=U.counts(h.slice(-80,-40));let chi=0;for(let d=0;d<10;d++){const e1=old[d]/40,e2=rec[d]/40;chi+=Math.pow(e1-e2,2)/((e1+e2)/2+0.001)}change=U.clamp(chi/10,0,1)}if(hurst>0.55||(Math.max(...U.counts(h.slice(-40)))/40>0.2&&change>0.2))return ['patterned',U.clamp((hurst-0.5)*3.5+change,0.25,1)];if(hurst<0.45&&ent>3.2&&change<0.2)return ['random',U.clamp((0.5-hurst)*3.5+(Math.log2(10)-ent),0.25,1)];return ['mixed',0.5]}
+  _corrPenalty(items){if(items.length<3)return items;const adj=items.map(it=>({p:it.p,w:it.w,_aw:it.w}));for(let i=0;i<adj.length;i++){let pen=0;for(let j=0;j<adj.length;j++){if(i===j)continue;const jsd=this._js(adj[i].p,adj[j].p);const sim=1-Math.min(1,jsd/Math.log(2));const tw=adj.reduce((s,x)=>s+Math.abs(x.w),0.01);pen+=sim*0.35*(adj[j].w/tw)}adj[i]._aw=Math.max(0.03,adj[i].w*(1-pen))}return adj.map(it=>({p:it.p,w:it._aw}))}
+  _js(p,q){let k=0;for(let d=0;d<10;d++){const m=((p[d]||0.001)+(q[d]||0.001))/2;const a=p[d]||0.001,b=q[d]||0.001;k+=a*Math.log(a/m)+b*Math.log(b/m)}return Math.sqrt(Math.max(0,k/2))}
+  _backtest(h){if(h.length<MIN_HIST+20)return {top7Hit:BASELINE,total:0};const start=Math.max(MIN_HIST+10,h.length-180);let hits=0,total=0;const saved=this.weights.slice();try{for(let i=start;i<h.length;i++){const prefix=h.slice(0,i);const outs=[];for(let mi=0;mi<this.models.length;mi++){try{outs.push({p:this.models[mi][2](prefix),w:saved[mi]})}catch{outs.push({p:U.uniform(),w:saved[mi]})}}const items=outs.map(o=>({p:o.p,w:o.w}));const tw=items.reduce((s,x)=>s+x.w,0.01);const mix=new Float64Array(10);for(const it of items)for(let d=0;d<10;d++)mix[d]+=it.p[d]*(it.w/tw);const p=U.normalize(mix);const top7=U.ranks(p).slice(0,7).map(r=>r.digit);if(top7.includes(h[i]))hits++;total++}}catch{}return {top7Hit:hits/total||BASELINE,total}}
+  predict(h){
+    if(h.length<MIN_HIST)return {ready:false,p:U.uniform(),ranked:U.ranks(U.uniform()),top7:[],bottom3:[],best:{digit:0,p:0.1},regime:'insufficient',regimeConf:0,hurst:0.5,entropy:Math.log2(10),edge:0,z:0,signal:{score:0,label:'CHỜ'},backtest:{top7Hit:BASELINE,total:0},modelWeights:{},missStreak:this.missStreak,winStreak:this.winStreak,top7HitRate:this.top7HitRate,winLossLog:this.winLossLog,rolling50:this._rolling50()};
+    this.history=h;
+    const outputs=[];for(let i=0;i<this.models.length;i++){const m=this.models[i];try{outputs.push({name:m[0],p:m[2](h),weight:m[1],base:m[1],idx:i})}catch{outputs.push({name:m[0],p:U.uniform(),weight:m[1],base:m[1],idx:i})}}
+    // adaptive weighting: recent TOP7 hit rate per model + boost/malus from last outcome
+    for(const out of outputs){
+      const recent=h.slice(-40);
+      let hits=0;
+      for(let i=1;i<recent.length;i++){
+        const top7=U.ranks(out.p).slice(0,7).map(r=>r.digit);
+        if(top7.includes(recent[i]))hits++;
       }
-    }
-    this.fit = blocks;
-  }
-  isotonic(value) {
-    this.ensureFit(); if (!this.fit || !this.fit.length) return value;
-    for (const block of this.fit) if (value <= block.max) return Num.clamp(block.value, 0.001, 0.999);
-    return Num.clamp(this.fit[this.fit.length - 1].value, 0.001, 0.999);
-  }
-  calibrateDistribution(p) {
-    const raw = new Float64Array(10); const trust = Num.clamp(this.records.length / 500, 0, 0.7);
-    for (let d = 0; d < 10; d += 1) {
-      const platt = this.sigmoid(this.plattA * this.logit(p[d]) + this.plattB); const iso = this.isotonic(p[d]);
-      raw[d] = (1 - trust) * p[d] + trust * (0.55 * iso + 0.45 * platt);
-    }
-    return Num.normalize(raw);
-  }
-  reliability() {
-    const totals = new Uint32Array(this.bins); const hits = new Uint32Array(this.bins); const prediction = new Float64Array(this.bins);
-    for (const row of this.records) { const index = Math.min(this.bins - 1, Math.floor(row.x * this.bins)); totals[index] += 1; hits[index] += row.y; prediction[index] += row.x; }
-    const points = []; let ece = 0; const total = this.records.length || 1;
-    for (let i = 0; i < this.bins; i += 1) if (totals[i]) { const predicted = prediction[i] / totals[i]; const actual = hits[i] / totals[i]; points.push({ predicted: predicted, actual: actual, n: totals[i] }); ece += Math.abs(predicted - actual) * totals[i] / total; }
-    return { ece: ece, points: points, n: this.records.length };
-  }
-  serialise() { return { records: this.records.slice(-900), plattA: this.plattA, plattB: this.plattB }; }
-}
-
-/**
- * Coordinates model scoring, Hedge/EXP4/Thompson weight adaptation, logistic
- * stacking and calibration after every observed result.
- */
-class OnlineLearning {
-  constructor(models, optimizer, stacker, calibration, detector, logger) {
-    this.models = models; this.optimizer = optimizer; this.stacker = stacker; this.calibration = calibration; this.detector = detector; this.logger = logger;
-  }
-  observe(actual, forecast) {
-    this.models.update(forecast.outputs, actual);
-    this.stacker.update(forecast.outputs, actual, forecast.rawP);
-    this.calibration.record(forecast.p, actual);
-    const loss = -Math.log(Math.max(1e-8, forecast.p[actual]));
-    const drift = this.detector.update(loss);
-    this.optimizer.update(forecast.weighted, actual, forecast.p);
-    this.optimizer.snapshot(this.models.models);
-    return { loss: loss, drift: drift };
-  }
-}
-
-/** Model registry, performance accounting and stability state machine. */
-class ModelManager {
-  constructor(bayes, markov, state) {
-    this.bayes = bayes; this.markov = markov;
-    this.models = this.createModels();
-    if (state && Array.isArray(state.models)) this.restore(state.models);
-  }
-  createModels() {
-    const self = this;
-    const recency = function(history, halfLife) {
-      const p = new Float64Array(10); let total = 0; const lambda = Math.log(2) / halfLife; const start = Math.max(0, history.length - 400);
-      for (let i = start; i < history.length; i += 1) { const w = Math.exp(-lambda * (history.length - 1 - i)); p[history[i]] += w; total += w; }
-      for (let d = 0; d < 10; d += 1) p[d] = (p[d] + 0.2) / (total + 2); return Num.normalize(p);
-    };
-    const gap = function(history, features) { const p = new Float64Array(10); for (let d = 0; d < 10; d += 1) p[d] = Math.pow(features.gaps[d] + 1, 0.72); return Num.normalize(p); };
-    const streak = function(history, features) { const p = Num.uniform(); const s = features.streak; if (s.digit === null) return p; if (s.length >= 3) { p[s.digit] *= 0.35; for (let d = 0; d < 10; d += 1) if (d !== s.digit) p[d] *= 1.08; } else p[s.digit] *= 1.22; return Num.normalize(p); };
-    const cycle = function(history, features) { const p = new Float64Array(10); p.fill(0.25); const cycleLength = features.cyclicStrength > 0.2 ? 7 : 5; const target = history.length % cycleLength; let total = 2.5; for (let i = 0; i < history.length - 1; i += 1) if (i % cycleLength === target) { p[history[i + 1]] += 1; total += 1; } for (let d = 0; d < 10; d += 1) p[d] /= total; return Num.normalize(p); };
-    const wavelet = function(history, features) { const p = recency(history, features.volatility > 0.55 ? 36 : 105); const last = history[history.length - 1]; if (last !== undefined && features.wavelet[0] > 4) p[last] *= 0.72; return Num.normalize(p); };
-    return [
-      this.make('Bayes dynamic', 1.12, function(ctx) { return ctx.bayesPosterior.p; }),
-      this.make('Bayes position 30', 0.70, function(ctx) { return self.bayes.positionAware(ctx.history, 30); }),
-      this.make('Bayes position 15', 0.56, function(ctx) { return self.bayes.positionAware(ctx.history, 15); }),
-      this.make('Adaptive Markov', 1.05, function(ctx) { return self.markov.adaptive(ctx.history, ctx.features); }),
-      this.make('Markov order 2', 0.78, function(ctx) { return self.markov.distribution(ctx.history, 2, 330, 0.994); }),
-      this.make('Markov order 3', 0.56, function(ctx) { return self.markov.distribution(ctx.history, 3, 420, 0.996); }),
-      this.make('Recency decay 45', 0.72, function(ctx) { return recency(ctx.history, 45); }),
-      this.make('Recency decay 140', 0.68, function(ctx) { return recency(ctx.history, 140); }),
-      this.make('Gap reversion', 0.48, function(ctx) { return gap(ctx.history, ctx.features); }),
-      this.make('Streak balance', 0.42, function(ctx) { return streak(ctx.history, ctx.features); }),
-      this.make('Cycle / FFT', 0.46, function(ctx) { return cycle(ctx.history, ctx.features); }),
-      this.make('Wavelet volatility', 0.44, function(ctx) { return wavelet(ctx.history, ctx.features); })
-    ];
-  }
-  make(name, base, fn) { return { name: name, base: base, fn: fn, weight: base, active: true, badStreak: 0, goodStreak: 0, metrics: { hitRate: 0.1, logLoss: 2.303, brier: 0.9, sharpe: 0, calibration: 0, recent: [], hits: 0, n: 0 }, contribution: 0 }; }
-  restore(saved) {
-    for (const model of this.models) {
-      const source = saved.find(function(item) { return item && item.name === model.name; });
-      if (!source) continue; model.weight = Num.clamp(Number(source.weight) || model.base, CONFIG.MIN_MODEL_WEIGHT, CONFIG.MAX_MODEL_WEIGHT); model.active = source.active !== false;
-      if (source.metrics) Object.assign(model.metrics, source.metrics); model.metrics.recent = Array.isArray(model.metrics.recent) ? model.metrics.recent.slice(-60) : [];
-    }
-  }
-  outputs(context) {
-    return this.models.map(function(model) { let p; try { p = Num.normalize(model.fn(context)); } catch (_) { p = Num.uniform(); } return { model: model, p: p }; });
-  }
-  update(outputs, actual) {
-    for (const output of outputs) {
-      const model = output.model; const p = Num.clamp(output.p[actual], 1e-6, 1); const hit = Num.ranks(output.p)[0].digit === actual ? 1 : 0; let brier = 0;
-      for (let d = 0; d < 10; d += 1) { const error = output.p[d] - (d === actual ? 1 : 0); brier += error * error; }
-      const m = model.metrics; const rate = Math.min(0.08, 1 / Math.max(12, m.n + 1));
-      m.hitRate += rate * (hit - m.hitRate); m.logLoss += rate * (-Math.log(p) - m.logLoss); m.brier += rate * (brier - m.brier); m.calibration += rate * (Math.abs(p - hit) - m.calibration); m.hits += hit; m.n += 1;
-      m.recent.push(hit - CONFIG.BASELINE); if (m.recent.length > 60) m.recent.shift(); const sd = Num.std(m.recent); m.sharpe = sd ? Num.mean(m.recent) / sd * Math.sqrt(m.recent.length) : 0;
-      if (m.logLoss > CONFIG.MODEL_DISABLE_LOSS && m.n > 28) { model.badStreak += 1; model.goodStreak = 0; } else if (m.logLoss < CONFIG.MODEL_RECOVERY_LOSS) { model.goodStreak += 1; model.badStreak = Math.max(0, model.badStreak - 1); }
-      if (model.badStreak >= 6) model.active = false; if (!model.active && model.goodStreak >= 15) { model.active = true; model.weight = Math.max(model.weight, 0.04); }
-    }
-  }
-  serialise() { return this.models.map(function(model) { return { name: model.name, weight: model.weight, active: model.active, metrics: model.metrics }; }); }
-}
-
-/** Bounded ensemble weights using Hedge, contextual EXP4 and Thompson means. */
-class WeightOptimizer {
-  constructor(state) { this.weightHistory = state && Array.isArray(state.weightHistory) ? state.weightHistory.slice(-80) : []; }
-  weights(outputs, regime, drift) {
-    const active = outputs.filter(function(output) { return output.model.active; }); const total = active.reduce(function(sum, output) { return sum + output.model.weight; }, 0) || 1;
-    const items = [];
-    for (const output of active) {
-      const model = output.model; let weight = model.weight / total; const lossFactor = Math.exp(-0.24 * Math.max(0, model.metrics.logLoss - 2.1));
-      if (regime.state === 'random' && /Markov|Cycle/.test(model.name)) weight *= 0.72;
-      if ((regime.state === 'trending' || regime.state === 'cycle') && /Markov|Cycle|position/.test(model.name)) weight *= 1.18;
-      if (drift.active && /Recency|Bayes dynamic|Wavelet/.test(model.name)) weight *= 1.14;
-      items.push({ model: model, p: output.p, weight: Math.max(0.001, weight * lossFactor) });
-    }
-    this.applyCorrelationPenalty(items);
-    const adjustedTotal = items.reduce(function(sum, item) { return sum + item.weight; }, 0) || 1;
-    for (const item of items) item.weight /= adjustedTotal;
-    return items;
-  }
-  applyCorrelationPenalty(items) {
-    for (let i = 0; i < items.length; i += 1) {
-      let similarity = 0; let n = 0;
-      for (let j = 0; j < items.length; j += 1) if (i !== j) { similarity += Math.max(0, 1 - Math.sqrt(Num.js(items[i].p, items[j].p) / Math.log(2))); n += 1; }
-      const penalty = n ? similarity / n : 0; items[i].weight *= 1 - 0.28 * penalty; items[i].model.correlation = penalty;
-    }
-  }
-  update(items, actual, ensembleP) {
-    const eta = 0.16; const propensity = Math.max(0.04, ensembleP[actual]);
-    for (const item of items) {
-      const model = item.model; const p = Num.clamp(item.p[actual], 1e-6, 1); const hedge = Math.exp(-eta * -Math.log(p));
-      const exp4 = Math.exp(0.025 * Num.clamp((p / propensity) - 1, -2, 2));
-      const hit = Num.ranks(item.p)[0].digit === actual ? 1 : 0; const alpha = 1 + model.metrics.hits; const beta = 1 + Math.max(0, model.metrics.n - model.metrics.hits); const thompsonMean = alpha / (alpha + beta);
-      const target = model.base * hedge * exp4 * (0.55 + 0.9 * thompsonMean); model.weight = Num.clamp(model.weight * 0.84 + target * 0.16, CONFIG.MIN_MODEL_WEIGHT, CONFIG.MAX_MODEL_WEIGHT);
-    }
-  }
-  snapshot(models) {
-    this.weightHistory.push({ time: Date.now(), values: models.map(function(model) { return { name: model.name, weight: model.weight }; }) });
-    if (this.weightHistory.length > 80) this.weightHistory.shift();
-  }
-  serialise() { return this.weightHistory.slice(-80); }
-}
-
-/** Monte-Carlo multinomial simulation with empirical confidence intervals. */
-class MonteCarlo {
-  simulate(p, simulations) {
-    const n = Math.max(1000, Math.min(100000, Number(simulations) || 10000)); const cumulative = new Float64Array(10); const counts = new Uint32Array(10); let running = 0;
-    for (let d = 0; d < 10; d += 1) { running += p[d]; cumulative[d] = running; }
-    for (let i = 0; i < n; i += 1) { const sample = Math.random(); let d = 0; while (d < 9 && sample > cumulative[d]) d += 1; counts[d] += 1; }
-    const result = []; for (let d = 0; d < 10; d += 1) { const mean = counts[d] / n; const se = Math.sqrt(mean * (1 - mean) / n); result.push({ digit: d, p: mean, low: Math.max(0, mean - 1.96 * se), high: Math.min(1, mean + 1.96 * se) }); }
-    return { simulations: n, results: result.sort(function(a, b) { return b.p - a.p; }) };
-  }
-}
-
-/** Converts probabilistic diagnostics into a deliberately conservative risk score. */
-class RiskAnalyzer {
-  assess(forecast, historyLength, calibration) {
-    const reliability = calibration.reliability(); const weighted = forecast.weighted || []; let agreement = 0;
-    if (weighted.length > 1) {
-      let distance = 0; let comparisons = 0;
-      for (let i = 0; i < weighted.length; i += 1) for (let j = i + 1; j < weighted.length; j += 1) { distance += Math.sqrt(Num.js(weighted[i].p, weighted[j].p) / Math.log(2)); comparisons += 1; }
-      agreement = 1 - distance / Math.max(1, comparisons);
-    }
-    const best = forecast.ranked[0]; const ci = forecast.bayes.ci[best.digit]; const intervalWidth = ci.high - ci.low;
-    const dataQuality = Num.clamp(historyLength / 280, 0, 1); const calibrationQuality = Num.clamp(1 - reliability.ece / 0.12, 0, 1);
-    const uncertainty = Num.clamp(0.5 * (forecast.features.entropy / Math.log2(10)) + 0.5 * intervalWidth / 0.2, 0, 1);
-    const driftPenalty = Num.clamp((forecast.drift.score || 0) * 0.45 + (forecast.change.probability || 0) * 0.25, 0, 0.7);
-    const confidence = Num.clamp(100 * (0.18 + 0.30 * agreement + 0.22 * calibrationQuality + 0.19 * dataQuality - 0.28 * uncertainty - driftPenalty), 0, 100);
-    let message = 'Dữ liệu có tín hiệu hạn chế; xác suất gần mức ngẫu nhiên.';
-    if (confidence >= 66) message = 'Tín hiệu lịch sử tương đối nhất quán, nhưng không đảm bảo kết quả.';
-    else if (confidence >= 42) message = 'Có một số mô hình đồng thuận; cần thận trọng vì bất định còn lớn.';
-    if (forecast.drift.active) message = 'Phát hiện drift: confidence đã bị giảm và trọng số được tái cân bằng.';
-    return { confidence: confidence, agreement: agreement, uncertainty: uncertainty, dataQuality: dataQuality, calibrationQuality: calibrationQuality, ece: reliability.ece, intervalWidth: intervalWidth, message: message };
-  }
-}
-
-/**
- * Walk-forward evaluator. Forecasts only use observations strictly before the
- * held-out actual. It runs in asynchronous batches to keep the UI responsive.
- */
-class BacktestEngine {
-  constructor(stats) { this.stats = stats; this.version = 0; this.result = null; }
-  schedule(history, callback) {
-    const token = ++this.version; const source = history.slice(); const self = this;
-    if (source.length < CONFIG.MIN_HISTORY + 12) { this.result = null; callback(null); return; }
-    const start = Math.max(CONFIG.MIN_HISTORY, source.length - CONFIG.BACKTEST_WINDOW); const cache = new CacheManager(40); const data = new DataManager(cache); const features = new FeatureExtractor(cache, this.stats);
-    const bayes = new BayesianEngine(this.stats); const markov = new MarkovEngine(); const hmm = new HiddenMarkov(); const manager = new ModelManager(bayes, markov);
-    let index = start; const forecasts = []; const labels = []; const scores = []; const top7Hits = []; const returns = [];
-    const work = function() {
-      if (token !== self.version) return;
-      const deadline = performance.now() + 12;
-      while (index < source.length && performance.now() < deadline) {
-        const prefix = source.slice(0, index); data.setHistory(prefix); const f = features.extract(prefix, data); const posterior = bayes.posterior(prefix, f, CONFIG.DECAY_HALF_LIFE);
-        const ctx = { history: prefix, data: data, features: f, bayesPosterior: posterior, stats: self.stats };
-        const outputs = manager.outputs(ctx); const mix = Num.mix(outputs.map(function(output) { return { p: output.p, weight: output.model.base }; }));
-        const prior = bayes.modelAverage(outputs.map(function(output) { return { p: output.p, weight: output.model.base }; }), posterior.p);
-        const p = Num.mix([{ p: mix, weight: 0.68 }, { p: prior, weight: 0.32 }]); const ranked = Num.ranks(p); const actual = source[index]; const best = ranked[0];
-        let brier = 0; for (let d = 0; d < 10; d += 1) { const delta = p[d] - (d === actual ? 1 : 0); brier += delta * delta; }
-        forecasts.push({ p: p, ranked: ranked, actual: actual, brier: brier }); labels.push(best.digit === actual ? 1 : 0); scores.push(best.p); top7Hits.push(ranked.slice(0, 7).some(function(row) { return row.digit === actual; }) ? 1 : 0); returns.push((best.digit === actual ? 1 : 0) - CONFIG.BASELINE);
-        index += 1;
-      }
-      if (index < source.length) { setTimeout(work, 0); return; }
-      if (token !== self.version) return;
-      self.result = self.summarise(forecasts, labels, scores, top7Hits, returns); callback(self.result);
-    };
-    setTimeout(work, 0);
-  }
-  summarise(forecasts, labels, scores, top7Hits, returns) {
-    const total = forecasts.length || 1; const hits = labels.reduce(function(sum, value) { return sum + value; }, 0); const accuracy = hits / total;
-    const logLoss = Num.mean(forecasts.map(function(row) { return -Math.log(Math.max(1e-8, row.p[row.actual])); })); const brier = Num.mean(forecasts.map(function(row) { return row.brier; }));
-    const reliability = new Calibration(); for (const row of forecasts) reliability.record(row.p, row.actual); const ece = reliability.reliability().ece; const roc = this.stats.rocAuc(scores, labels);
-    let equity = 0; let high = 0; let drawdown = 0; for (const value of returns) { equity += value; high = Math.max(high, equity); drawdown = Math.max(drawdown, high - equity); }
-    const sd = Num.std(returns); const stability = Num.std(scores); const top7 = Num.mean(top7Hits);
-    return { total: forecasts.length, accuracy: accuracy, precision: accuracy, recall: accuracy, f1: accuracy, top7: top7, auc: roc.auc, roc: roc.points, logLoss: logLoss, brier: brier, ece: ece, sharpe: sd ? Num.mean(returns) / sd * Math.sqrt(returns.length) : 0, maxDrawdown: drawdown, stability: stability };
-  }
-}
-
-/**
- * Coordinates all statistical modules into a forecast and incorporates one
- * observed next digit through true online learning.
- */
-class PredictionEngine {
-  constructor(data, cache, stats, logger, state) {
-    this.data = data; this.cache = cache; this.stats = stats; this.logger = logger;
-    this.features = new FeatureExtractor(cache, stats); this.bayes = new BayesianEngine(stats); this.markov = new MarkovEngine(); this.hmm = new HiddenMarkov();
-    this.changePoint = new ChangePointDetector(); this.calibration = new Calibration(state && state.calibration); this.models = new ModelManager(this.bayes, this.markov, state && state.models);
-    this.optimizer = new WeightOptimizer(state && state.optimizer); this.stacker = new LogisticStacker(this.models.models.length, state && state.stacker);
-    this.online = new OnlineLearning(this.models, this.optimizer, this.stacker, this.calibration, this.changePoint, this.logger); this.risk = new RiskAnalyzer(); this.monteCarlo = new MonteCarlo();
-    this.lastForecast = null; this.lastKey = ''; this.lastDrift = { adwin: false, pageHinkley: false, cusum: false, active: false, score: 0 };
-  }
-  empty() {
-    const p = Num.uniform(); const ranked = Num.ranks(p); const bayes = { p: p, ci: CONFIG.DIGITS.map(function() { return { low: 0, high: 1, mean: 0.1 }; }) };
-    return { ready: false, p: p, rawP: p, ranked: ranked, top7: ranked.slice(0, 7), bottom3: ranked.slice(-3), bayes: bayes, features: { entropy: Math.log2(10), volatility: 0, mutualInformation: 0, autocorrelation: 0, permutationEntropy: 1, fft: [0], wavelet: [0], matrix: new Float64Array(100) }, regime: { state: 'insufficient', confidence: 0 }, change: { probability: 0, kl: 0, runLength: 0 }, drift: this.lastDrift, weighted: [], outputs: [], risk: { confidence: 0, agreement: 0, uncertainty: 1, dataQuality: 0, calibrationQuality: 0, ece: 0, message: 'Cần ít nhất 30 quan sát.' } };
-  }
-  forecast(history) {
-    const series = history || this.data.history; if (series.length < CONFIG.MIN_HISTORY) return this.empty();
-    const key = 'forecast:' + Num.hash(series) + ':' + this.models.models.map(function(model) { return model.weight.toFixed(3); }).join(',');
-    const cached = this.cache.get(key); if (cached) return cached;
-    const feature = this.features.extract(series, this.data); const posterior = this.bayes.posterior(series, feature, CONFIG.DECAY_HALF_LIFE);
-    const regime = this.hmm.infer(series, feature); const change = this.changePoint.categoricalChange(series); const drift = Object.assign({}, this.lastDrift); drift.score = Math.max(drift.score || 0, change.probability * 0.7);
-    const context = { history: series, data: this.data, features: feature, bayesPosterior: posterior, stats: this.stats };
-    const outputs = this.models.outputs(context); const weighted = this.optimizer.weights(outputs, regime, drift);
-    const bma = this.bayes.modelAverage(weighted, posterior.p); const stackInputs = outputs.map(function(output) { return { model: output.model, p: output.model.active ? output.p : Num.uniform() }; });
-    const stacked = this.stacker.predict(stackInputs); const rawP = Num.mix([{ p: stacked, weight: 0.64 }, { p: bma, weight: 0.36 }]); const p = this.calibration.calibrateDistribution(rawP); const ranked = Num.ranks(p);
-    for (const model of this.models.models) { const source = weighted.find(function(item) { return item.model === model; }); model.contribution = source ? source.weight : 0; }
-    const result = { ready: true, p: p, rawP: rawP, ranked: ranked, top7: ranked.slice(0, CONFIG.TOP_N), bottom3: ranked.slice(-CONFIG.BOTTOM_N).reverse(), bayes: posterior, features: feature, regime: regime, change: change, drift: drift, weighted: weighted, outputs: outputs, bma: bma, stacked: stacked };
-    result.risk = this.risk.assess(result, series.length, this.calibration); this.lastForecast = result; this.lastKey = key; return this.cache.set(key, result);
-  }
-  learn(actual, forecast) {
-    if (!forecast || !forecast.ready || !Number.isInteger(actual)) return;
-    const learned = this.online.observe(actual, forecast); const loss = learned.loss; this.lastDrift = learned.drift;
-    const best = forecast.ranked[0]; this.logger.add(best.digit === actual ? 'success' : 'warn', 'Actual ' + actual + ' | #1 ' + best.digit + ' (' + Num.pct(best.p, 1) + ') | log loss ' + loss.toFixed(2));
-    if (this.lastDrift.active) this.logger.add('warn', 'Drift confirmed by ' + [this.lastDrift.adwin && 'ADWIN', this.lastDrift.pageHinkley && 'Page-Hinkley', this.lastDrift.cusum && 'CUSUM'].filter(Boolean).join(', ') + '.');
-    this.cache.clear('forecast:'); this.lastForecast = null;
-  }
-  resetLearning() {
-    this.calibration = new Calibration(); this.models = new ModelManager(this.bayes, this.markov); this.optimizer = new WeightOptimizer(); this.stacker = new LogisticStacker(this.models.models.length); this.changePoint = new ChangePointDetector(); this.online = new OnlineLearning(this.models, this.optimizer, this.stacker, this.calibration, this.changePoint, this.logger); this.lastDrift = { adwin: false, pageHinkley: false, cusum: false, active: false, score: 0 }; this.cache.clear();
-  }
-  serialise() { return { calibration: this.calibration.serialise(), models: this.models.serialise(), optimizer: this.optimizer.serialise(), stacker: this.stacker.serialise() }; }
-}
-
-/** API transport and result extraction, with overlap-safe incremental sync. */
-class ApiSync {
-  constructor(state) {
-    this.lastIssueId = state && state.lastIssueId ? String(state.lastIssueId) : '';
-    this.auto = Boolean(state && state.auto); this.timer = null; this.onNew = null; this.onStatus = null;
-  }
-  serialise() { return { lastIssueId: this.lastIssueId, auto: this.auto }; }
-  async fetch(url, limit) {
-    const rawUrl = String(url || '').trim(); if (!rawUrl) throw new Error('API URL trống.');
-    const finalUrl = rawUrl.indexOf('limitNum=') >= 0 ? rawUrl.replace(/limitNum=\d+/, 'limitNum=' + (limit || 200)) : rawUrl + (rawUrl.indexOf('?') >= 0 ? '&' : '?') + 'limitNum=' + (limit || 200);
-    const controller = new AbortController(); const timer = setTimeout(function() { controller.abort(); }, CONFIG.API_TIMEOUT_MS);
-    try {
-      const response = await fetch(finalUrl, { method: 'GET', headers: { Accept: 'application/json' }, signal: controller.signal });
-      if (!response.ok) throw new Error('HTTP ' + response.status);
-      return await response.json();
-    } finally { clearTimeout(timer); }
-  }
-  issues(json) {
-    const list = json && (json.t && json.t.issueList || json.issueList || json.data && json.data.issueList);
-    if (!Array.isArray(list)) throw new Error('Không tìm thấy issueList trong phản hồi API.');
-    const seen = new Set(); const items = [];
-    for (const issue of list) {
-      const open = String(issue.openNum == null ? '' : issue.openNum); const parts = open.split(','); const tail = String(parts[parts.length - 1] || '').trim();
-      if (!/^[0-9]$/.test(tail)) continue;
-      const id = issue.issueNo != null ? 'no:' + issue.issueNo : issue.issueId != null ? 'id:' + issue.issueId : issue.openTime != null ? 'time:' + issue.openTime : 'draw:' + open;
-      if (seen.has(id)) continue; seen.add(id);
-      const numeric = Number(issue.issueNo); const time = Date.parse(issue.openTime || '');
-      items.push({ id: id, digit: Number(tail), sort: Number.isFinite(numeric) ? numeric : Number.isFinite(time) ? time : items.length, issue: issue });
-    }
-    items.sort(function(a, b) { return a.sort - b.sort || a.id.localeCompare(b.id); }); if (!items.length) throw new Error('Không trích xuất được đuôi hợp lệ từ API.');
-    return items;
-  }
-  full(json) { const items = this.issues(json); this.lastIssueId = items[items.length - 1].id; return { items: items, digits: items.map(function(item) { return item.digit; }).slice(-CONFIG.MAX_HISTORY) }; }
-  incremental(json, existing) {
-    const items = this.issues(json); let start = -1;
-    if (this.lastIssueId) start = items.findIndex(function(item) { return item.id === this.lastIssueId; }, this);
-    let additions = start >= 0 ? items.slice(start + 1) : [];
-    if (start < 0) {
-      const max = Math.min(12, existing.length, items.length); let newStart = -1;
-      for (let length = max; length >= 4 && newStart < 0; length -= 1) {
-        const suffix = existing.slice(existing.length - length);
-        for (let i = items.length - length; i >= 0; i -= 1) {
-          let same = true; for (let j = 0; j < length; j += 1) if (suffix[j] !== items[i + j].digit) { same = false; break; }
-          if (same) { newStart = i + length; break; }
+      const hr=hits/Math.max(1,recent.length-1);
+      // blend base weight with recent performance
+      out.weight=U.clamp(out.base*(0.55+hr*4.2),0.02,5.0);
+      // if we have last actual, apply sharper boost/malus
+      if(this.lastActual!==null && this.lastTop7!==null){
+        const modelTop7=U.ranks(out.p).slice(0,7).map(r=>r.digit);
+        if(modelTop7.includes(this.lastActual)){
+          out.weight*=1.45; // strong boost for correct models
+        } else {
+          out.weight*=0.55; // strong penalty for wrong models
         }
       }
-      additions = newStart >= 0 ? items.slice(newStart) : items;
     }
-    this.lastIssueId = items[items.length - 1].id; return { items: additions, digits: additions.map(function(item) { return item.digit; }), total: items.length };
-  }
-  setAuto(enabled, url) {
-    this.auto = Boolean(enabled); if (this.timer) { clearInterval(this.timer); this.timer = null; }
-    if (this.auto) {
-      const self = this; this.timer = setInterval(function() { self.poll(url); }, CONFIG.AUTO_SYNC_MS); this.poll(url);
+    const [regime,regConf]=this._regime(h);
+    for(const out of outputs){
+      if(regime==='random'&&U.entropy(out.p)<3.0)out.weight*=0.40;
+      if(regime==='patterned'&&out.weight>0.3)out.weight*=1.45;
     }
-  }
-  async poll(url) {
-    if (!this.auto) return;
-    try { const json = await this.fetch(url, 200); const update = this.incremental(json, []); if (update.digits.length && this.onNew) this.onNew(update); else if (this.onStatus) this.onStatus('Đã kiểm tra tự động — chưa có phiên mới.', 'ok'); }
-    catch (error) { if (this.onStatus) this.onStatus('Tự đồng bộ không thành công: ' + error.message, 'warn'); }
-  }
-  destroy() { if (this.timer) clearInterval(this.timer); this.timer = null; }
-}
+    const items=outputs.map(o=>({p:o.p,w:o.weight}));const penalized=this._corrPenalty(items);const tw=penalized.reduce((s,x)=>s+x.w,0.01);const ens=new Float64Array(10);for(const it of penalized)for(let d=0;d<10;d++)ens[d]+=it.p[d]*(it.w/tw);const ensP=U.normalize(ens);const bayes=this._bayesDynamic(h);const bw=U.clamp(h.length/350,0.15,0.45);let p=new Float64Array(10);for(let d=0;d<10;d++)p[d]=ensP[d]*(1-bw)+bayes[d]*bw;let finalP=U.normalize(p);
 
-/** Canvas chart renderer kept separate from the data-to-DOM renderer. */
-class Dashboard {
-  setup(canvas) {
-    const rect = canvas.getBoundingClientRect(); const ratio = Math.max(1, Math.min(2, window.devicePixelRatio || 1)); const width = Math.max(10, Math.floor(rect.width)); const height = Math.max(10, Math.floor(rect.height));
-    if (canvas.width !== width * ratio || canvas.height !== height * ratio) { canvas.width = width * ratio; canvas.height = height * ratio; }
-    const ctx = canvas.getContext('2d'); ctx.setTransform(ratio, 0, 0, ratio, 0, 0); ctx.clearRect(0, 0, width, height); return { ctx: ctx, width: width, height: height };
+    // streak protection
+    if(this.missStreak>=2){
+      const ranked=U.ranks(finalP);
+      const top3=ranked.slice(0,3);
+      const boost=new Float64Array(10);
+      const boostFactor=1+this.missStreak*0.35;
+      for(const r of top3)boost[r.digit]=r.p*boostFactor;
+      for(let d=0;d<10;d++)boost[d]=Math.max(boost[d],0.01);
+      finalP=U.normalize(boost);
+    }
+    if(this.missStreak>=3){
+      const ranked=U.ranks(finalP);
+      const best=ranked[0];
+      const safe=new Float64Array(10);
+      safe.fill(0.01);
+      safe[best.digit]=0.85+this.missStreak*0.02;
+      finalP=U.normalize(safe);
+    }
+    // win streak: ride the momentum but stay diversified
+    if(this.winStreak>=3){
+      const ranked=U.ranks(finalP);
+      const top5=ranked.slice(0,5);
+      const boost=new Float64Array(10);
+      for(const r of top5)boost[r.digit]=r.p*(1+this.winStreak*0.12);
+      for(let d=0;d<10;d++)boost[d]=Math.max(boost[d],0.015);
+      finalP=U.normalize(boost);
+    }
+
+    const ranked=U.ranks(finalP);
+    const best=ranked[0];
+    const top7=ranked.slice(0,TOP_N).map(r=>r.digit);
+    const bottom3=ranked.slice(-BOT_N).map(r=>r.digit).reverse();
+    const edge=best.p-BASELINE;
+    const z=U.zScore(best.p,BASELINE,h.length);
+    const bt=this._backtest(h);
+    const top7Score=bt.top7Hit||BASELINE;
+    const score=U.clamp(0.35*U.clamp((top7Score-BASELINE)/0.08,0,1)+0.25*regConf+0.2*U.clamp(edge/0.07,0,1)+0.45,0,1);
+    const label=score>=0.68?'MẠNH':score>=0.48?'KHÁ':score>=0.32?'YẾU':'RỦI RO';
+    const mw={};for(const o of outputs)mw[o.name]=o.weight;
+    return {ready:true,p:finalP,ranked,top7,bottom3,best,regime,regimeConf:regConf,hurst:this._hurst(h),entropy:U.entropy(finalP),edge,z,signal:{score,label},backtest:bt,modelWeights:mw,missStreak:this.missStreak,winStreak:this.winStreak,top7HitRate:this.top7HitRate,winLossLog:this.winLossLog,rolling50:this._rolling50()};
   }
-  frame(ctx, width, height) {
-    ctx.strokeStyle = '#263550'; ctx.lineWidth = 1; for (let i = 1; i < 4; i += 1) { const y = 12 + (height - 24) * i / 4; ctx.beginPath(); ctx.moveTo(30, y); ctx.lineTo(width - 10, y); ctx.stroke(); }
+  _rolling50(){
+    const recent=this.winLossLog.slice(-50);
+    if(!recent.length)return 0;
+    const hits=recent.filter(e=>e.hit).length;
+    return hits/recent.length;
   }
-  line(canvas, series, colors, range) {
-    const chart = this.setup(canvas); const ctx = chart.ctx; const width = chart.width; const height = chart.height; this.frame(ctx, width, height);
-    const min = range ? range[0] : 0; const max = range ? range[1] : 1; const plotW = Math.max(1, width - 40); const plotH = Math.max(1, height - 25);
-    series.forEach(function(values, index) {
-      if (!values || values.length < 1) return; ctx.beginPath(); ctx.strokeStyle = colors[index % colors.length]; ctx.lineWidth = 2;
-      values.forEach(function(value, point) { const x = 30 + plotW * (values.length === 1 ? 0 : point / (values.length - 1)); const y = 10 + plotH * (1 - Num.clamp((value - min) / (max - min || 1), 0, 1)); if (point) ctx.lineTo(x, y); else ctx.moveTo(x, y); }); ctx.stroke();
+  recordResult(actual, top7){
+    const hit=top7.includes(actual);
+    this.sessionCounter++;
+    this.winLossLog.push({
+      sessionIdx:this.sessionCounter,
+      top7:[...top7],
+      actual,
+      hit
     });
-  }
-  calibration(canvas, calibration) {
-    const chart = this.setup(canvas); const ctx = chart.ctx; const width = chart.width; const height = chart.height; const left = 34; const bottom = height - 22; const w = width - 48; const h = height - 34; this.frame(ctx, width, height);
-    ctx.strokeStyle = '#f6c85f'; ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.moveTo(left, bottom); ctx.lineTo(left + w, bottom - h); ctx.stroke(); ctx.setLineDash([]);
-    const points = calibration.points || []; if (!points.length) return;
-    ctx.strokeStyle = '#56d6ff'; ctx.lineWidth = 2; ctx.beginPath(); points.forEach(function(point, index) { const x = left + w * point.predicted; const y = bottom - h * point.actual; if (index) ctx.lineTo(x, y); else ctx.moveTo(x, y); }); ctx.stroke();
-    ctx.fillStyle = '#56d6ff'; for (const point of points) { ctx.beginPath(); ctx.arc(left + w * point.predicted, bottom - h * point.actual, Math.min(6, 2 + Math.sqrt(point.n) / 5), 0, Math.PI * 2); ctx.fill(); }
-  }
-  roc(canvas, points) {
-    const chart = this.setup(canvas); const ctx = chart.ctx; const width = chart.width; const height = chart.height; const left = 34; const bottom = height - 22; const w = width - 48; const h = height - 34; this.frame(ctx, width, height);
-    ctx.strokeStyle = '#f6c85f'; ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.moveTo(left, bottom); ctx.lineTo(left + w, bottom - h); ctx.stroke(); ctx.setLineDash([]);
-    ctx.strokeStyle = '#56d6ff'; ctx.lineWidth = 2; ctx.beginPath(); (points || [[0, 0], [1, 1]]).forEach(function(point, index) { const x = left + w * point[0]; const y = bottom - h * point[1]; if (index) ctx.lineTo(x, y); else ctx.moveTo(x, y); }); ctx.stroke();
-  }
-  timeline(canvas, trace) {
-    const values = trace.slice(-60); const chart = this.setup(canvas); const ctx = chart.ctx; const width = chart.width; const height = chart.height; const plotW = width - 40; const plotH = height - 25; this.frame(ctx, width, height);
-    if (!values.length) return;
-    ctx.strokeStyle = '#56d6ff'; ctx.lineWidth = 2; ctx.beginPath();
-    values.forEach(function(row, index) { const x = 30 + plotW * (values.length === 1 ? 0 : index / (values.length - 1)); const y = 10 + plotH * (1 - Num.clamp(row.p / 0.45, 0, 1)); if (index) ctx.lineTo(x, y); else ctx.moveTo(x, y); }); ctx.stroke();
-    values.forEach(function(row, index) { const x = 30 + plotW * (values.length === 1 ? 0 : index / (values.length - 1)); const y = 10 + plotH * (1 - Num.clamp(row.p / 0.45, 0, 1)); ctx.fillStyle = row.hit ? '#49e39a' : '#ff647c'; ctx.beginPath(); ctx.arc(x, y, 2.7, 0, Math.PI * 2); ctx.fill(); });
-  }
-  weights(canvas, history, models) {
-    const selected = models.slice().sort(function(a, b) { return b.contribution - a.contribution; }).slice(0, 4); const series = selected.map(function(model) { return history.slice(-50).map(function(snapshot) { const found = snapshot.values.find(function(value) { return value.name === model.name; }); return found ? found.weight : 0; }); });
-    this.line(canvas, series, ['#56d6ff', '#af8cff', '#49e39a', '#f6c85f'], [0, CONFIG.MAX_MODEL_WEIGHT]);
+    // keep last 200 entries
+    if(this.winLossLog.length>200)this.winLossLog.shift();
+    if(hit){
+      this.missStreak=0;
+      this.winStreak++;
+      this.top7Hits++;
+    } else {
+      this.winStreak=0;
+      this.missStreak++;
+      if(this.missStreak>10)this.missStreak=10;
+    }
+    this.top7Total++;
+    if(this.top7Total>0)this.top7HitRate=this.top7Hits/this.top7Total;
+    this.lastActual=actual;
+    this.lastTop7=top7;
   }
 }
 
-/** Updates the modern dashboard from an immutable forecast snapshot. */
-class UIRenderer {
-  constructor(dashboard) { this.dashboard = dashboard; }
-  byId(id) { return document.getElementById(id); }
-  escape(value) { return String(value).replace(/[&<>"]/g, function(char) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[char]; }); }
-  metric(name, value, color) { return '<div class="metric"><div class="name">' + this.escape(name) + '</div><div class="value ' + (color || '') + '">' + this.escape(value) + '</div></div>'; }
-  pill(node, text, kind) { node.textContent = text; node.className = 'pill' + (kind ? ' ' + kind : ''); }
-  render(state) {
-    const forecast = state.forecast; const data = state.data; const engine = state.engine; const risk = forecast.risk; const ranked = forecast.ranked;
-    this.byId('historyCount').textContent = data.history.length + ' kết quả'; this.byId('historyInput').value = data.history.join(' '); this.byId('parseInfo').textContent = data.history.length + ' kết quả. Giá trị mới nhất ở bên phải.';
-    this.renderHistory(data); this.renderPrediction(forecast); this.renderMetrics(forecast, engine); this.renderHeatmap(forecast.features.matrix); this.renderTables(forecast, data, engine); this.renderLog(state.logger); this.renderCharts(state);
-    const update = state.updateMs == null ? '—' : state.updateMs.toFixed(1) + 'ms incremental';
-    this.byId('updateMs').textContent = update; this.byId('backtestState').textContent = state.backtest ? state.backtest.total + ' walk-forward forecasts' : 'lazy / no look-ahead';
-    this.byId('ecePill').textContent = 'ECE ' + Num.pct(risk.ece, 1); this.byId('ecePill').className = 'pill ' + (risk.ece < 0.04 ? 'good' : risk.ece < 0.09 ? 'warn' : 'bad');
+// ===== APP =====
+class App{
+  constructor(){
+    this.engine=new Engine();
+    this.history=[];
+    this.pred=null;
+    this._load();
+    this._bind();
+    this._analyze();
+    this._render();
   }
-  renderHistory(data) {
-    const node = this.byId('historyStrip'); const counts = data.counts; const n = Math.max(1, data.history.length); const tail = data.history.slice(-CONFIG.DISPLAY_HISTORY);
-    node.innerHTML = tail.length ? tail.map(function(digit, index) { const hot = counts[digit] / n > 0.13 ? ' hot' : ''; const latest = index === tail.length - 1 ? ' latest' : ''; return '<span class="history-dot' + hot + latest + '" title="Tần suất ' + Num.pct(counts[digit] / n, 1) + '">' + digit + '</span>'; }).join('') : '<span class="muted">Chưa có dữ liệu.</span>';
-  }
-  renderPrediction(forecast) {
-    const risk = forecast.risk; const top = new Set(forecast.top7.map(function(row) { return row.digit; })); const bottom = new Set(forecast.bottom3.map(function(row) { return row.digit; })); const best = forecast.ranked[0];
-    this.byId('confidenceGauge').style.setProperty('--value', String(risk.confidence)); this.byId('confidenceNumber').textContent = Math.round(risk.confidence) + '%';
-    this.byId('bestSummary').textContent = forecast.ready ? 'Đuôi #1: ' + best.digit + ' · P ' + Num.pct(best.p, 2) : 'Chưa đủ dữ liệu';
-    this.byId('confidenceText').textContent = forecast.ready ? 'Bayesian CI: ' + Num.pct(forecast.bayes.ci[best.digit].low, 1) + '–' + Num.pct(forecast.bayes.ci[best.digit].high, 1) + ' · Regime ' + forecast.regime.state : 'Cần ít nhất 30 quan sát để phân tích.';
-    this.byId('riskNote').textContent = risk.message; this.byId('rankGrid').innerHTML = CONFIG.DIGITS.map(function(digit) { const row = forecast.ranked.find(function(item) { return item.digit === digit; }); let cls = ''; if (top.has(digit)) cls += ' top'; if (bottom.has(digit)) cls += ' bottom'; if (best.digit === digit) cls += ' best'; return '<div class="rank-cell' + cls + '"><span class="n">' + digit + '</span><span class="p">' + Num.pct(row.p, 1) + '</span></div>'; }).join('');
-    this.byId('top7Value').textContent = forecast.top7.map(function(row) { return row.digit; }).join(' '); this.byId('bottom3Value').textContent = forecast.bottom3.map(function(row) { return row.digit; }).join(' ');
-    this.byId('edgeValue').textContent = (best.p - CONFIG.BASELINE >= 0 ? '+' : '') + Num.pct(best.p - CONFIG.BASELINE, 1); this.byId('uncertaintyValue').textContent = Num.pct(risk.uncertainty, 0); this.byId('agreementValue').textContent = Num.pct(risk.agreement, 0);
-    const decision = risk.confidence >= 66 ? ['THẬN TRỌNG TÍN HIỆU TỐT', 'good'] : risk.confidence >= 42 ? ['TÍN HIỆU GIỚI HẠN', 'warn'] : ['RỦI RO CAO / GẦN NGẪU NHIÊN', 'bad']; this.pill(this.byId('decisionPill'), decision[0], decision[1]);
-  }
-  renderMetrics(forecast, engine) {
-    const risk = forecast.risk; const feature = forecast.features; const drift = forecast.drift; const change = forecast.change;
-    this.byId('riskMetrics').innerHTML = this.metric('Overall confidence', Math.round(risk.confidence) + '%', risk.confidence > 65 ? 'green' : risk.confidence > 40 ? 'orange' : 'red') + this.metric('Model agreement', Num.pct(risk.agreement, 1)) + this.metric('Calibration quality', Num.pct(risk.calibrationQuality, 1)) + this.metric('Data quality', Num.pct(risk.dataQuality, 1));
-    this.byId('riskRegime').textContent = forecast.regime.state; this.byId('riskRegime').className = 'pill ' + (forecast.regime.state === 'random' ? 'warn' : 'good');
-    this.byId('regimeMetrics').innerHTML = this.metric('HMM confidence', Num.pct(forecast.regime.confidence, 1)) + this.metric('Bayes change point', Num.pct(change.probability, 1), change.probability > 0.35 ? 'orange' : '') + this.metric('ADWIN / PH / CUSUM', [drift.adwin, drift.pageHinkley, drift.cusum].filter(Boolean).length + '/3', drift.active ? 'red' : 'green') + this.metric('Run length estimate', String(change.runLength));
-    this.pill(this.byId('driftPill'), drift.active ? 'DRIFT DETECTED' : 'STABLE', drift.active ? 'bad' : 'good');
-    this.byId('featureMetrics').innerHTML = this.metric('Entropy', feature.entropy.toFixed(3) + ' / 3.322') + this.metric('Mutual information', feature.mutualInformation.toFixed(3)) + this.metric('Autocorrelation', feature.autocorrelation.toFixed(3)) + this.metric('Permutation entropy', feature.permutationEntropy.toFixed(3)) + this.metric('FFT dominant', (feature.fft[0] || 0).toFixed(2)) + this.metric('Wavelet energy', (feature.wavelet[0] || 0).toFixed(2));
-    const monte = engine.lastMonte; this.byId('monteMetrics').innerHTML = monte ? this.metric('Simulations', String(monte.simulations)) + this.metric('Most frequent', monte.results[0].digit + ' · ' + Num.pct(monte.results[0].p, 1)) + this.metric('95% CI', Num.pct(monte.results[0].low, 1) + '–' + Num.pct(monte.results[0].high, 1)) + this.metric('Expected baseline', '10.0%') : this.metric('Status', 'Chưa chạy', 'orange') + this.metric('Mode', 'Multinomial') + this.metric('Confidence', '95% CI') + this.metric('Samples', '10k–100k');
-  }
-  renderHeatmap(matrix) {
-    const node = this.byId('heatmap'); let min = Infinity; let max = -Infinity; for (const value of matrix) { min = Math.min(min, value); max = Math.max(max, value); }
-    let html = '<div class="hm-label"></div>'; for (let d = 0; d < 10; d += 1) html += '<div class="hm-label">' + d + '</div>';
-    for (let row = 0; row < 10; row += 1) { html += '<div class="hm-label">' + row + '</div>'; for (let col = 0; col < 10; col += 1) { const p = matrix[row * 10 + col]; const level = Num.clamp((p - min) / (max - min || 1), 0, 1); const color = 'hsl(' + Math.round(225 - 150 * level) + ',72%,' + Math.round(16 + 32 * level) + '%)'; html += '<div class="hm-cell" title="' + row + ' → ' + col + ': ' + Num.pct(p, 2) + '" style="background:' + color + ';color:' + (level > 0.5 ? '#061017' : '#d9e9ff') + '">' + col + '</div>'; } }
-    node.innerHTML = html;
-  }
-  renderTables(forecast, data, engine) {
-    const total = Math.max(1, data.history.length); const gaps = data.gaps(); this.byId('digitTable').innerHTML = forecast.ranked.map(function(row, index) { const ci = forecast.bayes.ci[row.digit]; return '<tr><td class="table-rank">#' + (index + 1) + '</td><td><b>' + row.digit + '</b></td><td>' + Num.pct(row.p, 2) + '</td><td>' + Num.pct(ci.low, 1) + '–' + Num.pct(ci.high, 1) + '</td><td>' + Num.pct(data.counts[row.digit] / total, 1) + '</td><td>' + gaps[row.digit] + '</td><td class="' + (row.p > CONFIG.BASELINE ? 'green' : 'red') + '">' + (row.p >= CONFIG.BASELINE ? '+' : '') + Num.pct(row.p - CONFIG.BASELINE, 1) + '</td></tr>'; }).join('');
-    const models = engine.models.models.slice().sort(function(a, b) { return b.contribution - a.contribution; }); const totalWeight = models.reduce(function(sum, model) { return sum + model.contribution; }, 0) || 1;
-    this.byId('modelTable').innerHTML = models.map(function(model) { const m = model.metrics; const contribution = model.contribution / totalWeight; return '<tr class="' + (model.active ? '' : 'disabled-row') + '"><td>' + model.name + '</td><td><div class="model-bar"><i style="width:' + Num.clamp(contribution * 100, 0, 100) + '%"></i></div></td><td>' + Num.pct(model.weight, 1) + '</td><td>' + Num.pct(m.hitRate, 1) + '</td><td>' + m.logLoss.toFixed(2) + '</td><td>' + m.brier.toFixed(2) + '</td><td class="' + (m.sharpe >= 0 ? 'green' : 'red') + '">' + m.sharpe.toFixed(2) + '</td><td>' + Num.pct(m.calibration, 1) + '</td><td><span class="pill ' + (model.active ? 'good' : 'bad') + '">' + (model.active ? 'ACTIVE' : 'PAUSED') + '</span></td></tr>'; }).join('');
-  }
-  renderLog(logger) { this.byId('eventLog').innerHTML = logger.entries.length ? logger.entries.slice(0, 80).map(this.logLine.bind(this)).join('') : 'No events yet.'; }
-  logLine(entry) { const time = new Date(entry.time).toLocaleTimeString('vi-VN'); return '<div class="log-line"><span class="log-time">' + time + '</span><span class="' + (entry.level === 'success' ? 'green' : entry.level === 'warn' ? 'orange' : '') + '">' + this.escape(entry.message) + '</span></div>'; }
-  renderCharts(state) {
-    const reliability = state.engine.calibration.reliability(); this.dashboard.calibration(this.byId('calibrationChart'), reliability);
-    this.dashboard.roc(this.byId('rocChart'), state.backtest ? state.backtest.roc : null); this.dashboard.weights(this.byId('weightChart'), state.engine.optimizer.weightHistory, state.engine.models.models); this.dashboard.timeline(this.byId('timelineChart'), state.trace || []);
-    const bt = state.backtest; this.byId('backtestMetrics').innerHTML = bt ? this.metric('Accuracy', Num.pct(bt.accuracy, 1)) + this.metric('Top 7 hit', Num.pct(bt.top7, 1)) + this.metric('AUC', bt.auc.toFixed(3)) + this.metric('Log loss', bt.logLoss.toFixed(3)) + this.metric('Brier', bt.brier.toFixed(3)) + this.metric('ECE', Num.pct(bt.ece, 1)) + this.metric('Sharpe', bt.sharpe.toFixed(2), bt.sharpe >= 0 ? 'green' : 'red') + this.metric('Max drawdown', bt.maxDrawdown.toFixed(2)) + this.metric('Stability σ', bt.stability.toFixed(3)) + this.metric('F1', Num.pct(bt.f1, 1)) : this.metric('Status', 'Đang chờ / chưa đủ dữ liệu', 'orange');
-  }
-}
-
-/**
- * Application controller. It owns event listeners, persistence and lifecycle;
- * calculation modules never reach into the DOM directly.
- */
-class App {
-  constructor() {
-    this.storage = new Storage(CONFIG.STORAGE_KEY); this.saved = this.storage.load({}); this.cache = new CacheManager(CONFIG.CACHE_LIMIT);
-    this.logger = new Logger(this.saved.logs); this.data = new DataManager(this.cache); this.data.setHistory(this.saved.history || []);
-    this.stats = new StatisticsEngine(); this.engine = new PredictionEngine(this.data, this.cache, this.stats, this.logger, this.saved.engine || {});
-    this.backtester = new BacktestEngine(this.stats); this.dashboard = new Dashboard(); this.ui = new UIRenderer(this.dashboard); this.trace = Array.isArray(this.saved.trace) ? this.saved.trace.slice(-100) : [];
-    this.api = new ApiSync(this.saved.api || {}); this.backtest = null; this.updateMs = null; this.debounce = null; this.toastTimer = null;
-    this.nodes = this.collectNodes(); this.bind(); this.drawDigitButtons();
-    this.nodes.apiUrl.value = this.saved.apiUrl || this.nodes.apiUrl.value; this.nodes.autoSync.checked = this.api.auto; this.setStatus('Sẵn sàng — dữ liệu lưu cục bộ', 'ok');
-    this.api.onNew = this.receiveAutoUpdate.bind(this); this.api.onStatus = this.setApiMessage.bind(this);
-    this.render(); this.scheduleBacktest();
-    if (this.api.auto && this.api.lastIssueId) this.api.setAuto(true, this.nodes.apiUrl.value);
-    window.addEventListener('pagehide', this.destroy.bind(this), { once: true });
-  }
-  collectNodes() {
-    const ids = ['apiUrl', 'fullSyncButton', 'incrementButton', 'autoSync', 'apiMessage', 'historyInput', 'analyzeButton', 'undoButton', 'reverseButton', 'sampleButton', 'exportButton', 'importButton', 'importFile', 'copyButton', 'clearButton', 'clearCacheButton', 'jsonInput', 'parseJsonButton', 'simulationCount', 'simulateButton', 'syncState', 'runStatus'];
-    const nodes = {}; for (const id of ids) nodes[id] = document.getElementById(id); return nodes;
-  }
-  bind() {
-    const self = this;
-    this.nodes.analyzeButton.addEventListener('click', function() { self.applyManual(true); });
-    this.nodes.historyInput.addEventListener('input', function() { clearTimeout(self.debounce); self.debounce = setTimeout(function() { self.applyManual(false); }, 500); });
-    this.nodes.undoButton.addEventListener('click', function() { if (self.data.pop() !== null) { self.engine.resetLearning(); self.trace = []; self.logger.add('info', 'Removed last observation; online state reset to avoid look-behind bias.'); self.afterHistoryChange(); } });
-    this.nodes.reverseButton.addEventListener('click', function() { self.data.setHistory(self.data.history.slice().reverse()); self.engine.resetLearning(); self.trace = []; self.logger.add('info', 'Reversed chronology; online state reset.'); self.afterHistoryChange(); });
-    this.nodes.sampleButton.addEventListener('click', function() { self.loadSample(); });
-    this.nodes.fullSyncButton.addEventListener('click', function() { self.fullSync(); });
-    this.nodes.incrementButton.addEventListener('click', function() { self.incrementSync(); });
-    this.nodes.autoSync.addEventListener('change', function() { self.toggleAuto(); });
-    this.nodes.parseJsonButton.addEventListener('click', function() { self.parseJson(); });
-    this.nodes.exportButton.addEventListener('click', function() { self.exportData(); });
-    this.nodes.importButton.addEventListener('click', function() { self.nodes.importFile.click(); });
-    this.nodes.importFile.addEventListener('change', function(event) { self.importData(event); });
-    this.nodes.copyButton.addEventListener('click', function() { self.copyTelegram(); });
-    this.nodes.clearButton.addEventListener('click', function() { self.clearAll(); });
-    this.nodes.clearCacheButton.addEventListener('click', function() { self.clearCache(); });
-    this.nodes.simulateButton.addEventListener('click', function() { self.runSimulation(); });
-    window.addEventListener('resize', function() { self.render(); }, { passive: true });
-  }
-  drawDigitButtons() {
-    const self = this; document.getElementById('digitButtons').innerHTML = CONFIG.DIGITS.map(function(digit) { return '<button class="digit-btn" data-digit="' + digit + '">' + digit + '</button>'; }).join('');
-    document.getElementById('digitButtons').addEventListener('click', function(event) { const target = event.target.closest('[data-digit]'); if (target) self.appendObserved(Number(target.dataset.digit), 'manual'); });
-  }
-  setStatus(message, kind) {
-    this.nodes.runStatus.textContent = message; document.getElementById('liveDot').style.background = kind === 'error' ? 'var(--red)' : kind === 'warn' ? 'var(--orange)' : 'var(--green)';
-  }
-  setApiMessage(message, kind) {
-    const node = this.nodes.apiMessage; node.textContent = message; node.className = 'api-message ' + (kind || ''); this.setStatus(message, kind);
-    this.nodes.syncState.textContent = kind === 'error' ? 'SYNC ERROR' : kind === 'warn' ? 'SYNC WATCH' : 'API READY'; this.nodes.syncState.className = 'pill ' + (kind === 'error' ? 'bad' : kind === 'warn' ? 'warn' : 'good');
-  }
-  toast(message) {
-    const node = document.getElementById('toast'); node.textContent = message; node.classList.add('show'); clearTimeout(this.toastTimer); this.toastTimer = setTimeout(function() { node.classList.remove('show'); }, 2300);
-  }
-  persist() {
-    this.storage.save({ version: 3, history: this.data.history, apiUrl: this.nodes.apiUrl.value.trim(), api: this.api.serialise(), engine: this.engine.serialise(), logs: this.logger.serialise(), trace: this.trace.slice(-100) });
-  }
-  render() {
-    const started = performance.now(); const forecast = this.engine.forecast(this.data.history); this.updateMs = performance.now() - started;
-    this.ui.render({ forecast: forecast, data: this.data, engine: this.engine, logger: this.logger, trace: this.trace, backtest: this.backtest, updateMs: this.updateMs });
-  }
-  afterHistoryChange() { this.persist(); this.render(); this.scheduleBacktest(); }
-  applyManual(showToast) {
-    const parsed = DataManager.parse(this.nodes.historyInput.value); const oldHash = Num.hash(this.data.history); this.data.setHistory(parsed.values);
-    if (Num.hash(this.data.history) !== oldHash) { this.engine.resetLearning(); this.trace = []; this.logger.add('info', 'Manual history applied; online learner reset because previous forecast lineage changed.'); }
-    if (parsed.ignored) this.setApiMessage('Đã bỏ qua ' + parsed.ignored + ' token không hợp lệ.', 'warn');
-    else this.setApiMessage('Đã phân tích ' + this.data.history.length + ' kết quả thủ công.', 'ok');
-    if (showToast) this.toast('Đã phân tích dữ liệu thủ công.'); this.afterHistoryChange();
-  }
-  appendObserved(digit, source) {
-    const prior = this.data.history.length >= CONFIG.MIN_HISTORY ? this.engine.forecast(this.data.history) : null;
-    if (prior) {
-      this.engine.learn(digit, prior); const best = prior.ranked[0]; this.trace.push({ time: Date.now(), p: best.p, hit: best.digit === digit, actual: digit, best: best.digit }); if (this.trace.length > 100) this.trace.shift();
-    }
-    this.data.append(digit); this.logger.add('info', 'Added observation ' + digit + ' (' + source + ').'); this.afterHistoryChange();
-  }
-  appendBatch(digits, source) {
-    if (!digits.length) return; for (const digit of digits) {
-      const prior = this.data.history.length >= CONFIG.MIN_HISTORY ? this.engine.forecast(this.data.history) : null;
-      if (prior) { this.engine.learn(digit, prior); const best = prior.ranked[0]; this.trace.push({ time: Date.now(), p: best.p, hit: best.digit === digit, actual: digit, best: best.digit }); }
-      this.data.append(digit);
-    }
-    if (this.trace.length > 100) this.trace = this.trace.slice(-100); this.logger.add('success', 'Appended ' + digits.length + ' new observation(s) from ' + source + ' with online updates.'); this.afterHistoryChange();
-  }
-  async fullSync() {
-    const button = this.nodes.fullSyncButton; button.disabled = true; this.setApiMessage('Đang nạp toàn bộ dữ liệu API...', '');
-    try {
-      const json = await this.api.fetch(this.nodes.apiUrl.value, 500); const full = this.api.full(json);
-      if (this.data.history.length && full.digits.length < this.data.history.length && !window.confirm('API trả ' + full.digits.length + ' kết quả, ít hơn ' + this.data.history.length + ' kết quả cục bộ. Thay thế dữ liệu?')) { this.setApiMessage('Đã giữ nguyên dữ liệu cục bộ.', 'warn'); return; }
-      this.data.setHistory(full.digits); this.engine.resetLearning(); this.trace = []; this.backtest = null; this.logger.add('success', 'Full API sync loaded ' + full.digits.length + ' observations. Learning state reset to prevent mixed lineages.'); this.setApiMessage('Đã đồng bộ toàn bộ ' + full.digits.length + ' kết quả.', 'ok'); this.afterHistoryChange();
-    } catch (error) { this.setApiMessage('Không thể đồng bộ API: ' + error.message + '. Dữ liệu cục bộ được giữ nguyên.', 'error'); this.logger.add('warn', 'Full sync failed: ' + error.message); }
-    finally { button.disabled = false; }
-  }
-  async incrementSync(silent) {
-    const button = this.nodes.incrementButton; if (!silent) button.disabled = true; if (!silent) this.setApiMessage('Đang kiểm tra phiên mới...', '');
-    try {
-      const json = await this.api.fetch(this.nodes.apiUrl.value, 200); const result = this.api.incremental(json, this.data.history);
-      if (result.digits.length) { this.appendBatch(result.digits, 'API'); this.setApiMessage('Đã thêm ' + result.digits.length + ' phiên mới. Tổng API: ' + result.total + '.', 'ok'); }
-      else if (!silent) this.setApiMessage('Dữ liệu đã mới nhất; không có phiên mới.', 'ok');
-      this.persist();
-    } catch (error) { this.setApiMessage('Không thể cập nhật API: ' + error.message + '. Dữ liệu cục bộ được giữ nguyên.', silent ? 'warn' : 'error'); }
-    finally { if (!silent) button.disabled = false; }
-  }
-  receiveAutoUpdate(result) {
-    if (result.digits.length) { this.appendBatch(result.digits, 'auto API'); this.setApiMessage('Tự đồng bộ đã nhận ' + result.digits.length + ' phiên mới.', 'ok'); }
-  }
-  async toggleAuto() {
-    if (!this.nodes.autoSync.checked) { this.api.setAuto(false, this.nodes.apiUrl.value); this.persist(); this.setApiMessage('Đã tắt tự đồng bộ.', 'warn'); return; }
-    if (!this.api.lastIssueId) await this.incrementSync(true);
-    this.api.setAuto(true, this.nodes.apiUrl.value); this.persist(); this.setApiMessage('Đã bật tự đồng bộ mỗi 45 giây.', 'ok');
-  }
-  parseJson() {
-    try { const json = JSON.parse(this.nodes.jsonInput.value); const full = this.api.full(json); this.data.setHistory(full.digits); this.engine.resetLearning(); this.trace = []; this.backtest = null; this.logger.add('success', 'Loaded ' + full.digits.length + ' observations from pasted JSON.'); this.setApiMessage('Đã nạp JSON thủ công: ' + full.digits.length + ' kết quả.', 'ok'); this.afterHistoryChange(); }
-    catch (error) { this.setApiMessage('JSON không hợp lệ: ' + error.message, 'error'); }
-  }
-  loadSample() {
-    const sample = '4 0 3 1 7 2 5 8 9 3 1 6 0 4 2 7 5 9 8 3 1 6 0 4 2 7 5 9 8 3 1 6 0 4 2 7 5 9 8 3 1 6 0 4 2 7 5 9 8 3 1 6 0 4 2 7 5 9 8 3 1 6 0 4 2 7 5 9 8 3 1 6 0 4 2 7 5 9 8 3 1 6 0 4 2 7 5 9 8 3 1 6 0 4 2 7 5 9 8';
-    this.data.setHistory(DataManager.parse(sample).values); this.engine.resetLearning(); this.trace = []; this.logger.add('info', 'Loaded deterministic sample data.'); this.setApiMessage('Đã nạp dữ liệu mẫu.', 'ok'); this.afterHistoryChange();
-  }
-  runSimulation() {
-    const forecast = this.engine.forecast(this.data.history); if (!forecast.ready) { this.toast('Cần ít nhất 30 kết quả để mô phỏng.'); return; }
-    const button = this.nodes.simulateButton; button.disabled = true; setTimeout(() => { this.engine.lastMonte = this.engine.monteCarlo.simulate(forecast.p, Number(this.nodes.simulationCount.value)); button.disabled = false; this.logger.add('info', 'Monte Carlo completed: ' + this.engine.lastMonte.simulations + ' simulations.'); this.persist(); this.render(); }, 0);
-  }
-  scheduleBacktest() {
-    const self = this; this.backtester.schedule(this.data.history, function(result) { self.backtest = result; self.render(); });
-  }
-  exportData() {
-    const blob = new Blob([JSON.stringify(this.storage.load({}), null, 2)], { type: 'application/json' }); const anchor = document.createElement('a'); const url = URL.createObjectURL(blob); anchor.href = url; anchor.download = 'prediction-engine-v3-' + new Date().toISOString().slice(0, 10) + '.json'; anchor.click(); setTimeout(function() { URL.revokeObjectURL(url); }, 0); this.toast('Đã xuất dữ liệu JSON.');
-  }
-  importData(event) {
-    const file = event.target.files && event.target.files[0]; if (!file) return; const reader = new FileReader(); const self = this;
-    reader.onload = function() {
-      try { const saved = JSON.parse(String(reader.result)); if (!Array.isArray(saved.history)) throw new Error('Thiếu history hợp lệ.'); self.api.destroy(); self.saved = saved; self.data.setHistory(saved.history); self.logger = new Logger(saved.logs); self.engine = new PredictionEngine(self.data, self.cache, self.stats, self.logger, saved.engine || {}); self.api = new ApiSync(saved.api || {}); self.api.onNew = self.receiveAutoUpdate.bind(self); self.api.onStatus = self.setApiMessage.bind(self); self.trace = Array.isArray(saved.trace) ? saved.trace.slice(-100) : []; self.nodes.apiUrl.value = saved.apiUrl || self.nodes.apiUrl.value; self.nodes.autoSync.checked = self.api.auto; if (self.api.auto && self.api.lastIssueId) self.api.setAuto(true, self.nodes.apiUrl.value); self.backtest = null; self.setApiMessage('Đã nhập ' + self.data.history.length + ' kết quả.', 'ok'); self.afterHistoryChange(); }
-      catch (error) { self.setApiMessage('Không thể nhập file: ' + error.message, 'error'); }
+  _load(){try{const raw=localStorage.getItem('duoi_ult_v2');if(raw){const d=JSON.parse(raw);this.history=(d.history||[]).filter(x=>D.includes(x)).slice(-MAX_HIST);if(d.winLossLog)this.engine.winLossLog=d.winLossLog;if(d.sessionCounter)this.engine.sessionCounter=d.sessionCounter;if(d.top7Hits!=null)this.engine.top7Hits=d.top7Hits;if(d.top7Total!=null)this.engine.top7Total=d.top7Total;if(d.top7HitRate!=null)this.engine.top7HitRate=d.top7HitRate;if(d.missStreak!=null)this.engine.missStreak=d.missStreak;if(d.winStreak!=null)this.engine.winStreak=d.winStreak;if(d.lastActual!=null)this.engine.lastActual=d.lastActual;if(d.lastTop7)this.engine.lastTop7=d.lastTop7;}}catch{this.history=[]}document.getElementById('historyInput').value=this.history.join(' ')}
+  _save(){try{localStorage.setItem('duoi_ult_v2',JSON.stringify({history:this.history,winLossLog:this.engine.winLossLog,sessionCounter:this.engine.sessionCounter,top7Hits:this.engine.top7Hits,top7Total:this.engine.top7Total,top7HitRate:this.engine.top7HitRate,missStreak:this.engine.missStreak,winStreak:this.engine.winStreak,lastActual:this.engine.lastActual,lastTop7:this.engine.lastTop7}))}catch{}}
+  _bind(){
+    const self=this;
+    document.getElementById('analyzeBtn').onclick=()=>this._analyze();
+    document.getElementById('historyInput').oninput=()=>{clearTimeout(this._deb);this._deb=setTimeout(()=>this._analyze(),400)};
+    document.querySelectorAll('.digit-btn').forEach(btn=>{
+      btn.onclick=()=>{
+        const d=parseInt(btn.dataset.digit);
+        if(!D.includes(d))return;
+        if(this.pred && this.pred.ready){
+          this.engine.recordResult(d, this.pred.top7);
+        }
+        this.history.push(d);
+        if(this.history.length>MAX_HIST)this.history.shift();
+        this._save();
+        document.getElementById('historyInput').value=this.history.join(' ');
+        this._analyze();
+        this._render();
+      };
+    });
+    document.getElementById('undoBtn').onclick=()=>{
+      if(this.history.length){
+        // also remove last win/loss entry if it corresponds
+        if(this.engine.winLossLog.length && this.engine.winLossLog[this.engine.winLossLog.length-1].sessionIdx===this.engine.sessionCounter){
+          this.engine.winLossLog.pop();
+          this.engine.sessionCounter--;
+          // recalc streaks
+          this._recalcStreaks();
+        }
+        this.history.pop();
+        this._save();
+        this._analyze();
+      }
     };
-    reader.readAsText(file); event.target.value = '';
+    document.getElementById('reverseBtn').onclick=()=>{
+      this.engine.missStreak=0;this.engine.winStreak=0;
+      this.history.reverse();
+      this._save();
+      this._analyze();
+    };
+    document.getElementById('sampleBtn').onclick=()=>{
+      this.engine.missStreak=0;this.engine.winStreak=0;
+      this.history=U.parse('4 0 3 1 7 2 5 8 9 3 1 6 0 4 2 7 5 9 8 3 1 6 0 4 2 7 5 9 8 3 1 6 0 4 2 7 5 9 8 3 1 6 0 4 2 7 5 9 8');
+      this._save();
+      this._analyze();
+    };
+    document.getElementById('clearBtn').onclick=()=>{
+      if(!confirm('Xoá tất cả dữ liệu lịch sử?'))return;
+      this.engine.missStreak=0;this.engine.winStreak=0;
+      this.engine.top7Hits=0;this.engine.top7Total=0;this.engine.top7HitRate=0.7;
+      this.engine.winLossLog=[];this.engine.sessionCounter=0;
+      this.engine.lastActual=null;this.engine.lastTop7=null;
+      this.history=[];
+      this._save();
+      document.getElementById('historyInput').value='';
+      this._analyze();
+      this._render();
+      this._toast('Đã xoá toàn bộ dữ liệu');
+    };
+    document.getElementById('telegramBtn').onclick=()=>this._copyTelegram();
+    document.getElementById('syncFullBtn').onclick=()=>this._syncFull();
+    document.getElementById('syncIncBtn').onclick=()=>this._syncInc();
+    document.getElementById('jsonParseBtn').onclick=()=>this._parseJson();
   }
-  async copyTelegram() {
-    const forecast = this.engine.forecast(this.data.history); const best = forecast.ranked[0]; const lines = ['🎯 *PREDICTION ENGINE v3.0*', '', '🏆 *Top 7:* ' + forecast.top7.map(function(row) { return row.digit; }).join(' '), '👑 *Đuôi #1:* ' + best.digit + ' (' + Num.pct(best.p, 1) + ')', '🚫 Loại: ' + forecast.bottom3.map(function(row) { return row.digit; }).join(' '), '', '📊 Confidence: ' + Math.round(forecast.risk.confidence) + '% | Agreement: ' + Num.pct(forecast.risk.agreement, 0), '📈 Regime: ' + forecast.regime.state + ' | Drift: ' + (forecast.drift.active ? 'YES' : 'no'), '🎲 Mẫu: ' + this.data.history.length, '', '_Không phải cam kết kết quả._'];
-    const text = lines.join('\n'); try { if (navigator.clipboard && navigator.clipboard.writeText) await navigator.clipboard.writeText(text); else throw new Error('Clipboard unavailable'); this.toast('Đã copy nội dung Telegram.'); } catch (_) { const area = document.createElement('textarea'); area.value = text; document.body.appendChild(area); area.select(); document.execCommand('copy'); area.remove(); this.toast('Đã copy nội dung Telegram.'); }
+  _recalcStreaks(){
+    let ms=0,ws=0;
+    for(let i=this.engine.winLossLog.length-1;i>=0;i--){
+      if(this.engine.winLossLog[i].hit){ws++;ms=0;}else{ms++;ws=0;}
+    }
+    this.engine.missStreak=Math.min(ms,10);
+    this.engine.winStreak=Math.min(ws,20);
   }
-  clearAll() {
-    if (!window.confirm('Xoá lịch sử, trọng số, calibration và log?')) return; this.api.destroy(); this.data.setHistory([]); this.engine.resetLearning(); this.logger = new Logger(); this.engine.logger = this.logger; this.trace = []; this.backtest = null; this.api = new ApiSync({}); this.api.onNew = this.receiveAutoUpdate.bind(this); this.api.onStatus = this.setApiMessage.bind(this); this.persist(); this.setApiMessage('Đã xoá dữ liệu cục bộ.', 'ok'); this.render();
+  _analyze(){
+    const raw=document.getElementById('historyInput').value;
+    const parsed=U.parse(raw);
+    if(parsed.length!==this.history.length||U.hash(parsed)!==U.hash(this.history)){this.history=parsed;this._save()}
+    this.pred=this.engine.predict(this.history);
+    this._render();
   }
-  clearCache() {
-    if (!window.confirm('Xoá cache mô hình, calibration và API checkpoint?')) return; this.cache.clear(); this.engine.resetLearning(); this.api.lastIssueId = ''; this.backtest = null; this.logger.add('info', 'Caches and learned state cleared.'); this.persist(); this.setApiMessage('Đã xoá cache và học trực tuyến.', 'ok'); this.render(); this.scheduleBacktest();
+  _render(){
+    const p=this.pred||{ready:false,p:U.uniform(),ranked:U.ranks(U.uniform()),top7:[],bottom3:[],best:{digit:0,p:0.1},regime:'insufficient',regimeConf:0,hurst:0.5,entropy:Math.log2(10),edge:0,z:0,signal:{score:0,label:'CHỜ'},backtest:{top7Hit:BASELINE,total:0},modelWeights:{},missStreak:0,winStreak:0,top7HitRate:0.7,winLossLog:[],rolling50:0};
+    const hist=this.history;
+    const strip=document.getElementById('historyStrip');
+    if(!hist.length){strip.innerHTML='<span class="muted">Chưa có dữ liệu</span>'}else{
+      const counts=U.counts(hist);const total=hist.length;
+      const recent=hist.slice(-40).reverse();
+      strip.innerHTML=recent.map((d,i)=>{
+        const f=counts[d]/total;
+        let cls='history-dot';
+        if(f>0.13)cls+=' hot';
+        else if(f<0.07)cls+=' cold';
+        if(i===0)cls+=' latest';
+        if(p.top7 && p.top7.includes(d))cls+=' hit';
+        else if(p.top7 && p.top7.length)cls+=' miss';
+        return `<span class="${cls}">${d}</span>`;
+      }).join('');
+    }
+    document.getElementById('parseInfo').textContent=hist.length+' kết quả';
+    document.getElementById('sampleCount').textContent=hist.length+' mẫu';
+
+    const hitRate=Math.round((p.top7HitRate||0.7)*100);
+    document.getElementById('top7HitVal').textContent=hitRate+'%';
+    document.getElementById('top7HitVal').style.color=hitRate>=70?'var(--gold)':hitRate>=50?'var(--orange)':'var(--red)';
+    document.getElementById('top7HitPill').textContent='🎯 TOP7 HIT: '+hitRate+'%';
+
+    const rolling50=Math.round((p.rolling50||0)*100);
+    document.getElementById('rolling50Val').textContent=rolling50+'%';
+    document.getElementById('rolling50Val').style.color=rolling50>=70?'var(--green)':rolling50>=50?'var(--orange)':'var(--red)';
+    document.getElementById('rollingGauge').style.setProperty('--rv',String(rolling50));
+    document.getElementById('rollingNum').textContent=rolling50+'%';
+
+    const streak=p.missStreak||0;
+    const wstreak=p.winStreak||0;
+    const streakPill=document.getElementById('lossStreakPill');
+    const winStreakPill=document.getElementById('winStreakPill');
+    if(streak>0){
+      streakPill.style.display='inline-block';
+      streakPill.textContent='📉 MISS: '+streak;
+      streakPill.className='pill '+(streak>=3?'bad':streak>=2?'warn':'');
+    }else{streakPill.style.display='none'}
+    if(wstreak>=2){
+      winStreakPill.style.display='inline-block';
+      winStreakPill.textContent='🔥 WIN: '+wstreak;
+      winStreakPill.className='pill good';
+    }else{winStreakPill.style.display='none'}
+
+    const grid=document.getElementById('predGrid');
+    const topSet=new Set(p.top7||[]);const botSet=new Set(p.bottom3||[]);
+    grid.innerHTML=D.map(d=>{const prob=p.p[d]||0;let cls='pred-cell';if(d===p.best.digit)cls+=' best';else if(topSet.has(d))cls+=' top';else if(botSet.has(d))cls+=' bot';return `<div class="${cls}"><span class="num">${d}</span><span class="prob">${U.pct(prob,1)}</span></div>`}).join('');
+    const score=Math.round((p.signal?.score||0)*100);
+    document.getElementById('gauge').style.setProperty('--v',String(score));
+    document.getElementById('gaugeNum').textContent=score+'%';
+    document.getElementById('bestLabel').textContent=p.ready?`#${p.best.digit} · ${U.pct(p.best.p,2)}`:'—';
+    const detailParts=[];
+    if(p.ready){
+      detailParts.push(p.signal?.label||'—');
+      detailParts.push(p.regime);
+      detailParts.push('TOP7: '+(p.top7||[]).join(' '));
+      if(streak>=2)detailParts.push('⚠️ SHIELD');
+      if(wstreak>=3)detailParts.push('🔥 RIDE');
+    }else{detailParts.push('Chờ dữ liệu')}
+    document.getElementById('detailLabel').textContent=detailParts.join(' · ');
+    document.getElementById('top7Val').textContent=(p.top7||[]).join(' ');
+    document.getElementById('botVal').textContent=(p.bottom3||[]).join(' ');
+    const sp=document.getElementById('statusPill');const sig=p.signal||{label:'CHỜ',score:0};sp.textContent=sig.label+(streak>=2?' ⚠️':wstreak>=3?' 🔥':'');sp.className='pill '+(streak>=3?'bad':sig.score>=0.68?'good':sig.score>=0.48?'warn':'bad');
+
+    // WIN/LOSS LOG RENDER
+    const wlLog=p.winLossLog||[];
+    const wlHits=wlLog.filter(e=>e.hit).length;
+    const wlMisses=wlLog.length-wlHits;
+    document.getElementById('wlSummary').textContent=wlHits+' thắng / '+wlMisses+' thua';
+    const wlContainer=document.getElementById('wlLog');
+    if(!wlLog.length){
+      wlContainer.innerHTML='<div class="wl-entry" style="color:var(--muted);justify-content:center;display:flex">Chưa có lịch sử — bấm số để ghi nhận</div>';
+    }else{
+      wlContainer.innerHTML=wlLog.slice(-60).reverse().map(e=>{
+        const cls=e.hit?'hit-row':'miss-row';
+        const badge=e.hit?'<span class="wl-badge hit">HIT</span>':'<span class="wl-badge miss">MISS</span>';
+        return `<div class="wl-entry ${cls}"><span class="wl-idx">#${e.sessionIdx}</span><span class="wl-top7">${e.top7.join(' ')}</span><span class="wl-actual">${e.actual}</span>${badge}</div>`;
+      }).join('');
+    }
+
+    const tbl=document.getElementById('digitTable');const freq=U.counts(hist);const total=Math.max(1,hist.length);const gaps=U.gaps(hist);
+    tbl.innerHTML=p.ranked.map((r,i)=>{
+      let cls='';const inTop7=topSet.has(r.digit);
+      if(i<TOP_N)cls='top-row';
+      if(i>=10-TOP_N)cls='bot-row';
+      return `<tr class="${cls}"><td>#${i+1}</td><td><b>${r.digit}</b>${inTop7?' 🎯':''}</td><td>${U.pct(r.p,2)}</td><td style="color:${r.p>BASELINE?'var(--green)':'var(--red)'}">${(r.p>=BASELINE?'+':'')+U.pct(r.p-BASELINE,1)}</td><td>${U.pct(freq[r.digit]/total,1)}</td><td>${gaps[r.digit]}</td><td>${inTop7?'✅':'—'}</td></tr>`;
+    }).join('');
+    const mw=p.modelWeights||{};const sorted=Object.entries(mw).sort((a,b)=>b[1]-a[1]).slice(0,10);
+    const mtbl=document.getElementById('modelTable');
+    mtbl.innerHTML=sorted.map(([name,w])=>{
+      const m=this.engine.models.find(x=>x[0]===name);
+      const top7Hit=m?this.engine._backtest(this.history).top7Hit:0;
+      const sharpe=m?m[1]:0;
+      return `<tr><td>${name}</td><td>${U.pct(w/1.2,0)}</td><td>${U.pct(top7Hit,0)}</td><td>${sharpe.toFixed(2)}</td></tr>`;
+    }).join('')||'<tr><td colspan="4">—</td></tr>';
   }
-  destroy() { clearTimeout(this.debounce); clearTimeout(this.toastTimer); this.api.destroy(); this.persist(); }
+  _copyTelegram(){
+    const p=this.pred;if(!p||!p.ready){this._toast('Chưa có dự đoán');return}
+    const streak=p.missStreak||0;const wstreak=p.winStreak||0;
+    const lines=['🎯 DỰ ĐOÁN TOP7 PRO v2','','🏆 TOP7: '+(p.top7||[]).join(' '),'👑 #1: '+p.best.digit+' ('+U.pct(p.best.p,1)+')','🚫 Loại: '+(p.bottom3||[]).join(' '),'','📊 TOP7 Hit Rate: '+Math.round((p.top7HitRate||0.7)*100)+'%','📈 Rolling 50: '+Math.round((p.rolling50||0)*100)+'%','📈 Signal: '+(p.signal?.label||'—')+' ('+Math.round((p.signal?.score||0)*100)+'%)','📉 Miss: '+streak+(streak>=2?' ⚠️ SHIELD':''),'🔥 Win: '+wstreak+(wstreak>=3?' RIDE':''),'🎲 Mẫu: '+this.history.length];
+    if(streak>=3)lines.push('🛡️ ULTRA SAFE');
+    const text=lines.join('\n');
+    if(navigator.clipboard?.writeText){navigator.clipboard.writeText(text);this._toast('Đã copy')}else{const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();this._toast('Đã copy')}
+  }
+  _toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(this._tt);this._tt=setTimeout(()=>el.classList.remove('show'),2000)}
+  async _syncFull(){
+    const status=document.getElementById('apiStatus');
+    status.textContent='⏳ Đang tải dữ liệu từ API...';
+    status.style.color='var(--orange)';
+    try{
+      const url=document.getElementById('apiUrl').value.trim();
+      const resp=await fetch(url);
+      if(!resp.ok)throw new Error('HTTP '+resp.status);
+      const json=await resp.json();
+      const list=json.t?.issueList||json.issueList||[];
+      if(!list.length){status.textContent='❌ Không có issueList trong response';status.style.color='var(--red)';return}
+      const items=[];for(const issue of list){const open=String(issue.openNum||'');const parts=open.split(',');const tail=parts[parts.length-1]?.trim();if(tail&&/^[0-9]$/.test(tail))items.push(+tail)}
+      if(!items.length){status.textContent='❌ Không trích xuất được đuôi hợp lệ';status.style.color='var(--red)';return}
+      this.history=items.slice(-MAX_HIST);
+      this._save();
+      document.getElementById('historyInput').value=this.history.join(' ');
+      status.textContent='✅ Đã đồng bộ '+this.history.length+' phiên từ API';
+      status.style.color='var(--green)';
+      this._toast('Đồng bộ thành công');
+      this._analyze();
+    }catch(e){
+      status.textContent='❌ Lỗi: '+e.message;
+      status.style.color='var(--red)';
+      this._toast('Lỗi API: '+e.message);
+    }
+  }
+  async _syncInc(){
+    const status=document.getElementById('apiStatus');
+    status.textContent='⏳ Đang kiểm tra phiên mới...';
+    status.style.color='var(--orange)';
+    try{
+      const url=document.getElementById('apiUrl').value.trim();
+      const resp=await fetch(url);
+      if(!resp.ok)throw new Error('HTTP '+resp.status);
+      const json=await resp.json();
+      const list=json.t?.issueList||json.issueList||[];
+      if(!list.length){status.textContent='❌ Không có dữ liệu';status.style.color='var(--red)';return}
+      const items=[];for(const issue of list){const open=String(issue.openNum||'');const parts=open.split(',');const tail=parts[parts.length-1]?.trim();if(tail&&/^[0-9]$/.test(tail))items.push(+tail)}
+      if(!items.length){status.textContent='❌ Không trích xuất được đuôi';status.style.color='var(--red)';return}
+      const newCount=U.findOverlap(items,this.history);
+      if(newCount>0){
+        this.history=[...this.history,...items.slice(-newCount)].slice(-MAX_HIST);
+        this._save();
+        document.getElementById('historyInput').value=this.history.join(' ');
+        status.textContent='✅ +'+newCount+' phiên mới. Tổng: '+this.history.length;
+        status.style.color='var(--green)';
+        this._toast('Đã thêm '+newCount+' phiên');
+        this._analyze();
+      }else{
+        status.textContent='✅ Dữ liệu đã mới nhất. Tổng: '+this.history.length;
+        status.style.color='var(--green)';
+      }
+    }catch(e){
+      status.textContent='❌ Lỗi: '+e.message;
+      status.style.color='var(--red)';
+      this._toast('Lỗi API: '+e.message);
+    }
+  }
+  _parseJson(){
+    const status=document.getElementById('apiStatus');
+    try{
+      const raw=document.getElementById('jsonPaste').value.trim();
+      if(!raw){status.textContent='❌ Vui lòng dán JSON vào ô';status.style.color='var(--red)';return}
+      const json=JSON.parse(raw);
+      const list=json.t?.issueList||json.issueList||[];
+      if(!list.length){status.textContent='❌ Không có issueList trong JSON';status.style.color='var(--red)';return}
+      const items=[];for(const issue of list){const open=String(issue.openNum||'');const parts=open.split(',');const tail=parts[parts.length-1]?.trim();if(tail&&/^[0-9]$/.test(tail))items.push(+tail)}
+      if(!items.length){status.textContent='❌ Không trích xuất được đuôi';status.style.color='var(--red)';return}
+      this.history=items.slice(-MAX_HIST);
+      this._save();
+      document.getElementById('historyInput').value=this.history.join(' ');
+      status.textContent='✅ Nạp '+this.history.length+' phiên từ JSON';
+      status.style.color='var(--green)';
+      this._toast('Nạp JSON thành công');
+      this._analyze();
+    }catch(e){
+      status.textContent='❌ JSON lỗi: '+e.message;
+      status.style.color='var(--red)';
+      this._toast('JSON lỗi: '+e.message);
+    }
+  }
 }
 
-window.app = new App();
+new App();
 </script>
 </body>
 </html>
