@@ -60,7 +60,6 @@ button.api-btn:hover{background:var(--gold);color:#1d1500;border-color:var(--gol
 .gauge-info .best{font-weight:800;color:var(--gold);font-size:1rem}
 .gauge-info .detail{font-size:.7rem;color:var(--muted)}
 
-/* rolling accuracy gauge */
 .rolling-gauge{--rv:0;width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--green) calc(var(--rv)*1%),#202a40 0);flex-shrink:0}
 .rolling-inner{text-align:center;background:#0b1020;border-radius:50%;width:50px;height:50px;display:grid;place-items:center;border:1px solid #2c3854}
 .rolling-num{font-size:1.1rem;font-weight:900;color:var(--green)}
@@ -86,7 +85,6 @@ tr.top-row{background:#081a0e}
 tr.bot-row td{color:#662222}
 tr.bot-row{background:#100808}
 
-/* win/loss log */
 .wl-log{max-height:220px;overflow:auto;border:1px solid #1a1a32;border-radius:8px;margin-top:4px}
 .wl-entry{display:grid;grid-template-columns:36px 1fr 40px 60px;gap:4px;padding:3px 8px;border-bottom:1px solid #182139;align-items:center;font-size:.7rem}
 .wl-entry.hit-row{background:#081a0e}
@@ -119,7 +117,6 @@ tr.bot-row{background:#100808}
   <h1>🎯 DỰ ĐOÁN — TOP7 PRO v2</h1>
   <div class="sub">26-model ensemble · adaptive weighting · streak shield · win/loss chronicle</div>
 
-  <!-- HISTORY INPUT + DIGIT BUTTONS -->
   <div class="card">
     <div class="flex">
       <textarea id="historyInput" placeholder="Nhập dãy đuôi: 4 0 3 1 7 2 ..."></textarea>
@@ -170,7 +167,6 @@ tr.bot-row{background:#100808}
     </div>
   </div>
 
-  <!-- PREDICTION -->
   <div class="card">
     <div class="pred-grid" id="predGrid"></div>
     <div class="gauge-wrap">
@@ -189,19 +185,16 @@ tr.bot-row{background:#100808}
     </div>
   </div>
 
-  <!-- WIN/LOSS CHRONICLE -->
   <div class="card">
     <div class="flex"><span style="color:var(--gold);font-weight:800;font-size:.8rem">📋 LỊCH SỬ THẮNG/THUA</span><span class="muted tiny" id="wlSummary">0 thắng / 0 thua</span></div>
     <div class="wl-log" id="wlLog"><div class="wl-entry" style="color:var(--muted);justify-content:center;display:flex">Chưa có lịch sử — bấm số để ghi nhận</div></div>
   </div>
 
-  <!-- DIGIT TABLE -->
   <div class="card">
     <div class="flex"><span style="color:var(--gold);font-weight:800;font-size:.8rem">📊 PHÂN TÍCH CHI TIẾT</span><span class="muted tiny" id="sampleCount">0 mẫu</span></div>
     <div class="table-wrap"><table><thead><tr><th>#</th><th>Đuôi</th><th>P</th><th>Edge</th><th>Freq</th><th>Gap</th><th>TOP7</th></tr></thead><tbody id="digitTable"></tbody></table></div>
   </div>
 
-  <!-- MODEL WEIGHTS -->
   <div class="card">
     <div style="color:var(--gold);font-weight:800;font-size:.8rem;margin-bottom:4px">⚙️ TOP MODELS (adaptive, TOP7-optimized)</div>
     <div class="table-wrap"><table><thead><tr><th>Model</th><th>W</th><th>TOP7 Hit</th><th>Sharpe</th></tr></thead><tbody id="modelTable"></tbody></table></div>
@@ -248,7 +241,6 @@ function runLength(){return h=>{if(h.length<10)return U.uniform();const last=h[h
 function posBayes(cycle){return h=>{if(h.length<cycle*1.5)return U.uniform();const pos=h.length%cycle;const cnt=new Float64Array(10);cnt.fill(0.05);let t=0.5;const lam=Math.log(2)/(cycle*1.5);for(let i=0;i<h.length-1;i++){if(i%cycle===pos){const w=Math.exp(-lam*(h.length-1-i));cnt[h[i+1]]+=w;t+=w}}for(let d=0;d<10;d++)cnt[d]/=t;return U.normalize(cnt)}}
 function posMarkov(order,cycle){return h=>{if(h.length<order+cycle)return U.uniform();const pos=h.length%cycle;const key=order===1?String(h[h.length-1]):h.slice(-order).join(',');const cnt=new Float64Array(10);cnt.fill(0.03);let t=0.3;const st=Math.max(0,h.length-200);for(let i=st;i<=h.length-order-1;i++){if(i%cycle!==pos)continue;const ikey=order===1?String(h[i]):h.slice(i,i+order).join(',');if(ikey===key){const w=Math.exp(-(h.length-order-i)/(cycle*2));cnt[h[i+order]]+=w;t+=w}}for(let d=0;d<10;d++)cnt[d]/=t;return U.normalize(cnt)}}
 
-// ===== ENGINE v2 — TIGHTER TOP7, WIN/LOSS LOG, ADAPTIVE WEIGHTS =====
 class Engine{
   constructor(){
     this.models=[
@@ -289,10 +281,8 @@ class Engine{
     this.top7Total=0;
     this.lastActual=null;
     this.lastTop7=null;
-    // win/loss log: array of {sessionIdx, top7, actual, hit}
     this.winLossLog=[];
     this.sessionCounter=0;
-    // per-model recent TOP7 hit tracking for adaptive weighting
     this.modelRecentHits=this.models.map(()=>[]);
   }
   _bayesDynamic(h){const cnt=new Float64Array(10);cnt.fill(0.5);let t=5;const lam=Math.log(2)/DECAY_HL;const st=Math.max(0,h.length-700);for(let i=st;i<h.length;i++){const w=Math.exp(-lam*(h.length-1-i));cnt[h[i]]+=w;t+=w}for(let d=0;d<10;d++)cnt[d]/=t;return U.normalize(cnt)}
@@ -306,25 +296,14 @@ class Engine{
     if(h.length<MIN_HIST)return {ready:false,p:U.uniform(),ranked:U.ranks(U.uniform()),top7:[],bottom3:[],best:{digit:0,p:0.1},regime:'insufficient',regimeConf:0,hurst:0.5,entropy:Math.log2(10),edge:0,z:0,signal:{score:0,label:'CHỜ'},backtest:{top7Hit:BASELINE,total:0},modelWeights:{},missStreak:this.missStreak,winStreak:this.winStreak,top7HitRate:this.top7HitRate,winLossLog:this.winLossLog,rolling50:this._rolling50()};
     this.history=h;
     const outputs=[];for(let i=0;i<this.models.length;i++){const m=this.models[i];try{outputs.push({name:m[0],p:m[2](h),weight:m[1],base:m[1],idx:i})}catch{outputs.push({name:m[0],p:U.uniform(),weight:m[1],base:m[1],idx:i})}}
-    // adaptive weighting: recent TOP7 hit rate per model + boost/malus from last outcome
     for(const out of outputs){
-      const recent=h.slice(-40);
-      let hits=0;
-      for(let i=1;i<recent.length;i++){
-        const top7=U.ranks(out.p).slice(0,7).map(r=>r.digit);
-        if(top7.includes(recent[i]))hits++;
-      }
+      const recent=h.slice(-40);let hits=0;
+      for(let i=1;i<recent.length;i++){const top7=U.ranks(out.p).slice(0,7).map(r=>r.digit);if(top7.includes(recent[i]))hits++}
       const hr=hits/Math.max(1,recent.length-1);
-      // blend base weight with recent performance
       out.weight=U.clamp(out.base*(0.55+hr*4.2),0.02,5.0);
-      // if we have last actual, apply sharper boost/malus
       if(this.lastActual!==null && this.lastTop7!==null){
         const modelTop7=U.ranks(out.p).slice(0,7).map(r=>r.digit);
-        if(modelTop7.includes(this.lastActual)){
-          out.weight*=1.45; // strong boost for correct models
-        } else {
-          out.weight*=0.55; // strong penalty for wrong models
-        }
+        if(modelTop7.includes(this.lastActual)){out.weight*=1.45}else{out.weight*=0.55}
       }
     }
     const [regime,regConf]=this._regime(h);
@@ -333,91 +312,27 @@ class Engine{
       if(regime==='patterned'&&out.weight>0.3)out.weight*=1.45;
     }
     const items=outputs.map(o=>({p:o.p,w:o.weight}));const penalized=this._corrPenalty(items);const tw=penalized.reduce((s,x)=>s+x.w,0.01);const ens=new Float64Array(10);for(const it of penalized)for(let d=0;d<10;d++)ens[d]+=it.p[d]*(it.w/tw);const ensP=U.normalize(ens);const bayes=this._bayesDynamic(h);const bw=U.clamp(h.length/350,0.15,0.45);let p=new Float64Array(10);for(let d=0;d<10;d++)p[d]=ensP[d]*(1-bw)+bayes[d]*bw;let finalP=U.normalize(p);
-
-    // streak protection
-    if(this.missStreak>=2){
-      const ranked=U.ranks(finalP);
-      const top3=ranked.slice(0,3);
-      const boost=new Float64Array(10);
-      const boostFactor=1+this.missStreak*0.35;
-      for(const r of top3)boost[r.digit]=r.p*boostFactor;
-      for(let d=0;d<10;d++)boost[d]=Math.max(boost[d],0.01);
-      finalP=U.normalize(boost);
-    }
-    if(this.missStreak>=3){
-      const ranked=U.ranks(finalP);
-      const best=ranked[0];
-      const safe=new Float64Array(10);
-      safe.fill(0.01);
-      safe[best.digit]=0.85+this.missStreak*0.02;
-      finalP=U.normalize(safe);
-    }
-    // win streak: ride the momentum but stay diversified
-    if(this.winStreak>=3){
-      const ranked=U.ranks(finalP);
-      const top5=ranked.slice(0,5);
-      const boost=new Float64Array(10);
-      for(const r of top5)boost[r.digit]=r.p*(1+this.winStreak*0.12);
-      for(let d=0;d<10;d++)boost[d]=Math.max(boost[d],0.015);
-      finalP=U.normalize(boost);
-    }
-
-    const ranked=U.ranks(finalP);
-    const best=ranked[0];
-    const top7=ranked.slice(0,TOP_N).map(r=>r.digit);
-    const bottom3=ranked.slice(-BOT_N).map(r=>r.digit).reverse();
-    const edge=best.p-BASELINE;
-    const z=U.zScore(best.p,BASELINE,h.length);
-    const bt=this._backtest(h);
-    const top7Score=bt.top7Hit||BASELINE;
-    const score=U.clamp(0.35*U.clamp((top7Score-BASELINE)/0.08,0,1)+0.25*regConf+0.2*U.clamp(edge/0.07,0,1)+0.45,0,1);
-    const label=score>=0.68?'MẠNH':score>=0.48?'KHÁ':score>=0.32?'YẾU':'RỦI RO';
-    const mw={};for(const o of outputs)mw[o.name]=o.weight;
+    if(this.missStreak>=2){const ranked=U.ranks(finalP);const top3=ranked.slice(0,3);const boost=new Float64Array(10);const boostFactor=1+this.missStreak*0.35;for(const r of top3)boost[r.digit]=r.p*boostFactor;for(let d=0;d<10;d++)boost[d]=Math.max(boost[d],0.01);finalP=U.normalize(boost)}
+    if(this.missStreak>=3){const ranked=U.ranks(finalP);const best=ranked[0];const safe=new Float64Array(10);safe.fill(0.01);safe[best.digit]=0.85+this.missStreak*0.02;finalP=U.normalize(safe)}
+    if(this.winStreak>=3){const ranked=U.ranks(finalP);const top5=ranked.slice(0,5);const boost=new Float64Array(10);for(const r of top5)boost[r.digit]=r.p*(1+this.winStreak*0.12);for(let d=0;d<10;d++)boost[d]=Math.max(boost[d],0.015);finalP=U.normalize(boost)}
+    const ranked=U.ranks(finalP);const best=ranked[0];const top7=ranked.slice(0,TOP_N).map(r=>r.digit);const bottom3=ranked.slice(-BOT_N).map(r=>r.digit).reverse();const edge=best.p-BASELINE;const z=U.zScore(best.p,BASELINE,h.length);const bt=this._backtest(h);const top7Score=bt.top7Hit||BASELINE;const score=U.clamp(0.35*U.clamp((top7Score-BASELINE)/0.08,0,1)+0.25*regConf+0.2*U.clamp(edge/0.07,0,1)+0.45,0,1);const label=score>=0.68?'MẠNH':score>=0.48?'KHÁ':score>=0.32?'YẾU':'RỦI RO';const mw={};for(const o of outputs)mw[o.name]=o.weight;
     return {ready:true,p:finalP,ranked,top7,bottom3,best,regime,regimeConf:regConf,hurst:this._hurst(h),entropy:U.entropy(finalP),edge,z,signal:{score,label},backtest:bt,modelWeights:mw,missStreak:this.missStreak,winStreak:this.winStreak,top7HitRate:this.top7HitRate,winLossLog:this.winLossLog,rolling50:this._rolling50()};
   }
-  _rolling50(){
-    const recent=this.winLossLog.slice(-50);
-    if(!recent.length)return 0;
-    const hits=recent.filter(e=>e.hit).length;
-    return hits/recent.length;
-  }
+  _rolling50(){const recent=this.winLossLog.slice(-50);if(!recent.length)return 0;const hits=recent.filter(e=>e.hit).length;return hits/recent.length}
   recordResult(actual, top7){
-    const hit=top7.includes(actual);
-    this.sessionCounter++;
-    this.winLossLog.push({
-      sessionIdx:this.sessionCounter,
-      top7:[...top7],
-      actual,
-      hit
-    });
-    // keep last 200 entries
+    const hit=top7.includes(actual);this.sessionCounter++;
+    this.winLossLog.push({sessionIdx:this.sessionCounter,top7:[...top7],actual,hit});
     if(this.winLossLog.length>200)this.winLossLog.shift();
-    if(hit){
-      this.missStreak=0;
-      this.winStreak++;
-      this.top7Hits++;
-    } else {
-      this.winStreak=0;
-      this.missStreak++;
-      if(this.missStreak>10)this.missStreak=10;
-    }
-    this.top7Total++;
-    if(this.top7Total>0)this.top7HitRate=this.top7Hits/this.top7Total;
-    this.lastActual=actual;
-    this.lastTop7=top7;
+    if(hit){this.missStreak=0;this.winStreak++;this.top7Hits++}else{this.winStreak=0;this.missStreak++;if(this.missStreak>10)this.missStreak=10}
+    this.top7Total++;if(this.top7Total>0)this.top7HitRate=this.top7Hits/this.top7Total;
+    this.lastActual=actual;this.lastTop7=top7;
   }
 }
 
-// ===== APP =====
 class App{
   constructor(){
-    this.engine=new Engine();
-    this.history=[];
-    this.pred=null;
-    this._load();
-    this._bind();
-    this._analyze();
-    this._render();
+    this.engine=new Engine();this.history=[];this.pred=null;
+    this._load();this._bind();this._analyze();this._render();
   }
   _load(){try{const raw=localStorage.getItem('duoi_ult_v2');if(raw){const d=JSON.parse(raw);this.history=(d.history||[]).filter(x=>D.includes(x)).slice(-MAX_HIST);if(d.winLossLog)this.engine.winLossLog=d.winLossLog;if(d.sessionCounter)this.engine.sessionCounter=d.sessionCounter;if(d.top7Hits!=null)this.engine.top7Hits=d.top7Hits;if(d.top7Total!=null)this.engine.top7Total=d.top7Total;if(d.top7HitRate!=null)this.engine.top7HitRate=d.top7HitRate;if(d.missStreak!=null)this.engine.missStreak=d.missStreak;if(d.winStreak!=null)this.engine.winStreak=d.winStreak;if(d.lastActual!=null)this.engine.lastActual=d.lastActual;if(d.lastTop7)this.engine.lastTop7=d.lastTop7;}}catch{this.history=[]}document.getElementById('historyInput').value=this.history.join(' ')}
   _save(){try{localStorage.setItem('duoi_ult_v2',JSON.stringify({history:this.history,winLossLog:this.engine.winLossLog,sessionCounter:this.engine.sessionCounter,top7Hits:this.engine.top7Hits,top7Total:this.engine.top7Total,top7HitRate:this.engine.top7HitRate,missStreak:this.engine.missStreak,winStreak:this.engine.winStreak,lastActual:this.engine.lastActual,lastTop7:this.engine.lastTop7}))}catch{}}
@@ -425,178 +340,55 @@ class App{
     const self=this;
     document.getElementById('analyzeBtn').onclick=()=>this._analyze();
     document.getElementById('historyInput').oninput=()=>{clearTimeout(this._deb);this._deb=setTimeout(()=>this._analyze(),400)};
-    document.querySelectorAll('.digit-btn').forEach(btn=>{
-      btn.onclick=()=>{
-        const d=parseInt(btn.dataset.digit);
-        if(!D.includes(d))return;
-        if(this.pred && this.pred.ready){
-          this.engine.recordResult(d, this.pred.top7);
-        }
-        this.history.push(d);
-        if(this.history.length>MAX_HIST)this.history.shift();
-        this._save();
-        document.getElementById('historyInput').value=this.history.join(' ');
-        this._analyze();
-        this._render();
-      };
-    });
-    document.getElementById('undoBtn').onclick=()=>{
-      if(this.history.length){
-        // also remove last win/loss entry if it corresponds
-        if(this.engine.winLossLog.length && this.engine.winLossLog[this.engine.winLossLog.length-1].sessionIdx===this.engine.sessionCounter){
-          this.engine.winLossLog.pop();
-          this.engine.sessionCounter--;
-          // recalc streaks
-          this._recalcStreaks();
-        }
-        this.history.pop();
-        this._save();
-        this._analyze();
-      }
-    };
-    document.getElementById('reverseBtn').onclick=()=>{
-      this.engine.missStreak=0;this.engine.winStreak=0;
-      this.history.reverse();
-      this._save();
-      this._analyze();
-    };
-    document.getElementById('sampleBtn').onclick=()=>{
-      this.engine.missStreak=0;this.engine.winStreak=0;
-      this.history=U.parse('4 0 3 1 7 2 5 8 9 3 1 6 0 4 2 7 5 9 8 3 1 6 0 4 2 7 5 9 8 3 1 6 0 4 2 7 5 9 8 3 1 6 0 4 2 7 5 9 8');
-      this._save();
-      this._analyze();
-    };
-    document.getElementById('clearBtn').onclick=()=>{
-      if(!confirm('Xoá tất cả dữ liệu lịch sử?'))return;
-      this.engine.missStreak=0;this.engine.winStreak=0;
-      this.engine.top7Hits=0;this.engine.top7Total=0;this.engine.top7HitRate=0.7;
-      this.engine.winLossLog=[];this.engine.sessionCounter=0;
-      this.engine.lastActual=null;this.engine.lastTop7=null;
-      this.history=[];
-      this._save();
-      document.getElementById('historyInput').value='';
-      this._analyze();
-      this._render();
-      this._toast('Đã xoá toàn bộ dữ liệu');
-    };
+    document.querySelectorAll('.digit-btn').forEach(btn=>{btn.onclick=()=>{const d=parseInt(btn.dataset.digit);if(!D.includes(d))return;if(this.pred&&this.pred.ready)this.engine.recordResult(d,this.pred.top7);this.history.push(d);if(this.history.length>MAX_HIST)this.history.shift();this._save();document.getElementById('historyInput').value=this.history.join(' ');this._analyze();this._render()}});
+    document.getElementById('undoBtn').onclick=()=>{if(this.history.length){if(this.engine.winLossLog.length&&this.engine.winLossLog[this.engine.winLossLog.length-1].sessionIdx===this.engine.sessionCounter){this.engine.winLossLog.pop();this.engine.sessionCounter--;this._recalcStreaks()}this.history.pop();this._save();this._analyze()}};
+    document.getElementById('reverseBtn').onclick=()=>{this.engine.missStreak=0;this.engine.winStreak=0;this.history.reverse();this._save();this._analyze()};
+    document.getElementById('sampleBtn').onclick=()=>{this.engine.missStreak=0;this.engine.winStreak=0;this.history=U.parse('4 0 3 1 7 2 5 8 9 3 1 6 0 4 2 7 5 9 8 3 1 6 0 4 2 7 5 9 8 3 1 6 0 4 2 7 5 9 8 3 1 6 0 4 2 7 5 9 8');this._save();this._analyze()};
+    document.getElementById('clearBtn').onclick=()=>{if(!confirm('Xoá tất cả dữ liệu lịch sử?'))return;this.engine.missStreak=0;this.engine.winStreak=0;this.engine.top7Hits=0;this.engine.top7Total=0;this.engine.top7HitRate=0.7;this.engine.winLossLog=[];this.engine.sessionCounter=0;this.engine.lastActual=null;this.engine.lastTop7=null;this.history=[];this._save();document.getElementById('historyInput').value='';this._analyze();this._render();this._toast('Đã xoá toàn bộ dữ liệu')};
     document.getElementById('telegramBtn').onclick=()=>this._copyTelegram();
     document.getElementById('syncFullBtn').onclick=()=>this._syncFull();
     document.getElementById('syncIncBtn').onclick=()=>this._syncInc();
     document.getElementById('jsonParseBtn').onclick=()=>this._parseJson();
   }
-  _recalcStreaks(){
-    let ms=0,ws=0;
-    for(let i=this.engine.winLossLog.length-1;i>=0;i--){
-      if(this.engine.winLossLog[i].hit){ws++;ms=0;}else{ms++;ws=0;}
-    }
-    this.engine.missStreak=Math.min(ms,10);
-    this.engine.winStreak=Math.min(ws,20);
-  }
-  _analyze(){
-    const raw=document.getElementById('historyInput').value;
-    const parsed=U.parse(raw);
-    if(parsed.length!==this.history.length||U.hash(parsed)!==U.hash(this.history)){this.history=parsed;this._save()}
-    this.pred=this.engine.predict(this.history);
-    this._render();
-  }
+  _recalcStreaks(){let ms=0,ws=0;for(let i=this.engine.winLossLog.length-1;i>=0;i--){if(this.engine.winLossLog[i].hit){ws++;ms=0}else{ms++;ws=0}}this.engine.missStreak=Math.min(ms,10);this.engine.winStreak=Math.min(ws,20)}
+  _analyze(){const raw=document.getElementById('historyInput').value;const parsed=U.parse(raw);if(parsed.length!==this.history.length||U.hash(parsed)!==U.hash(this.history)){this.history=parsed;this._save()}this.pred=this.engine.predict(this.history);this._render()}
   _render(){
     const p=this.pred||{ready:false,p:U.uniform(),ranked:U.ranks(U.uniform()),top7:[],bottom3:[],best:{digit:0,p:0.1},regime:'insufficient',regimeConf:0,hurst:0.5,entropy:Math.log2(10),edge:0,z:0,signal:{score:0,label:'CHỜ'},backtest:{top7Hit:BASELINE,total:0},modelWeights:{},missStreak:0,winStreak:0,top7HitRate:0.7,winLossLog:[],rolling50:0};
     const hist=this.history;
     const strip=document.getElementById('historyStrip');
-    if(!hist.length){strip.innerHTML='<span class="muted">Chưa có dữ liệu</span>'}else{
-      const counts=U.counts(hist);const total=hist.length;
-      const recent=hist.slice(-40).reverse();
-      strip.innerHTML=recent.map((d,i)=>{
-        const f=counts[d]/total;
-        let cls='history-dot';
-        if(f>0.13)cls+=' hot';
-        else if(f<0.07)cls+=' cold';
-        if(i===0)cls+=' latest';
-        if(p.top7 && p.top7.includes(d))cls+=' hit';
-        else if(p.top7 && p.top7.length)cls+=' miss';
-        return `<span class="${cls}">${d}</span>`;
-      }).join('');
-    }
+    if(!hist.length){strip.innerHTML='<span class="muted">Chưa có dữ liệu</span>'}else{const counts=U.counts(hist);const total=hist.length;const recent=hist.slice(-40).reverse();strip.innerHTML=recent.map((d,i)=>{const f=counts[d]/total;let cls='history-dot';if(f>0.13)cls+=' hot';else if(f<0.07)cls+=' cold';if(i===0)cls+=' latest';if(p.top7&&p.top7.includes(d))cls+=' hit';else if(p.top7&&p.top7.length)cls+=' miss';return `<span class="${cls}">${d}</span>`}).join('')}
     document.getElementById('parseInfo').textContent=hist.length+' kết quả';
     document.getElementById('sampleCount').textContent=hist.length+' mẫu';
-
     const hitRate=Math.round((p.top7HitRate||0.7)*100);
     document.getElementById('top7HitVal').textContent=hitRate+'%';
     document.getElementById('top7HitVal').style.color=hitRate>=70?'var(--gold)':hitRate>=50?'var(--orange)':'var(--red)';
     document.getElementById('top7HitPill').textContent='🎯 TOP7 HIT: '+hitRate+'%';
-
     const rolling50=Math.round((p.rolling50||0)*100);
     document.getElementById('rolling50Val').textContent=rolling50+'%';
     document.getElementById('rolling50Val').style.color=rolling50>=70?'var(--green)':rolling50>=50?'var(--orange)':'var(--red)';
     document.getElementById('rollingGauge').style.setProperty('--rv',String(rolling50));
     document.getElementById('rollingNum').textContent=rolling50+'%';
-
-    const streak=p.missStreak||0;
-    const wstreak=p.winStreak||0;
-    const streakPill=document.getElementById('lossStreakPill');
-    const winStreakPill=document.getElementById('winStreakPill');
-    if(streak>0){
-      streakPill.style.display='inline-block';
-      streakPill.textContent='📉 MISS: '+streak;
-      streakPill.className='pill '+(streak>=3?'bad':streak>=2?'warn':'');
-    }else{streakPill.style.display='none'}
-    if(wstreak>=2){
-      winStreakPill.style.display='inline-block';
-      winStreakPill.textContent='🔥 WIN: '+wstreak;
-      winStreakPill.className='pill good';
-    }else{winStreakPill.style.display='none'}
-
-    const grid=document.getElementById('predGrid');
-    const topSet=new Set(p.top7||[]);const botSet=new Set(p.bottom3||[]);
+    const streak=p.missStreak||0;const wstreak=p.winStreak||0;
+    const streakPill=document.getElementById('lossStreakPill');const winStreakPill=document.getElementById('winStreakPill');
+    if(streak>0){streakPill.style.display='inline-block';streakPill.textContent='📉 MISS: '+streak;streakPill.className='pill '+(streak>=3?'bad':streak>=2?'warn':'')}else{streakPill.style.display='none'}
+    if(wstreak>=2){winStreakPill.style.display='inline-block';winStreakPill.textContent='🔥 WIN: '+wstreak;winStreakPill.className='pill good'}else{winStreakPill.style.display='none'}
+    const grid=document.getElementById('predGrid');const topSet=new Set(p.top7||[]);const botSet=new Set(p.bottom3||[]);
     grid.innerHTML=D.map(d=>{const prob=p.p[d]||0;let cls='pred-cell';if(d===p.best.digit)cls+=' best';else if(topSet.has(d))cls+=' top';else if(botSet.has(d))cls+=' bot';return `<div class="${cls}"><span class="num">${d}</span><span class="prob">${U.pct(prob,1)}</span></div>`}).join('');
     const score=Math.round((p.signal?.score||0)*100);
-    document.getElementById('gauge').style.setProperty('--v',String(score));
-    document.getElementById('gaugeNum').textContent=score+'%';
+    document.getElementById('gauge').style.setProperty('--v',String(score));document.getElementById('gaugeNum').textContent=score+'%';
     document.getElementById('bestLabel').textContent=p.ready?`#${p.best.digit} · ${U.pct(p.best.p,2)}`:'—';
-    const detailParts=[];
-    if(p.ready){
-      detailParts.push(p.signal?.label||'—');
-      detailParts.push(p.regime);
-      detailParts.push('TOP7: '+(p.top7||[]).join(' '));
-      if(streak>=2)detailParts.push('⚠️ SHIELD');
-      if(wstreak>=3)detailParts.push('🔥 RIDE');
-    }else{detailParts.push('Chờ dữ liệu')}
+    const detailParts=[];if(p.ready){detailParts.push(p.signal?.label||'—');detailParts.push(p.regime);detailParts.push('TOP7: '+(p.top7||[]).join(' '));if(streak>=2)detailParts.push('⚠️ SHIELD');if(wstreak>=3)detailParts.push('🔥 RIDE')}else{detailParts.push('Chờ dữ liệu')}
     document.getElementById('detailLabel').textContent=detailParts.join(' · ');
-    document.getElementById('top7Val').textContent=(p.top7||[]).join(' ');
-    document.getElementById('botVal').textContent=(p.bottom3||[]).join(' ');
+    document.getElementById('top7Val').textContent=(p.top7||[]).join(' ');document.getElementById('botVal').textContent=(p.bottom3||[]).join(' ');
     const sp=document.getElementById('statusPill');const sig=p.signal||{label:'CHỜ',score:0};sp.textContent=sig.label+(streak>=2?' ⚠️':wstreak>=3?' 🔥':'');sp.className='pill '+(streak>=3?'bad':sig.score>=0.68?'good':sig.score>=0.48?'warn':'bad');
-
-    // WIN/LOSS LOG RENDER
-    const wlLog=p.winLossLog||[];
-    const wlHits=wlLog.filter(e=>e.hit).length;
-    const wlMisses=wlLog.length-wlHits;
+    const wlLog=p.winLossLog||[];const wlHits=wlLog.filter(e=>e.hit).length;const wlMisses=wlLog.length-wlHits;
     document.getElementById('wlSummary').textContent=wlHits+' thắng / '+wlMisses+' thua';
     const wlContainer=document.getElementById('wlLog');
-    if(!wlLog.length){
-      wlContainer.innerHTML='<div class="wl-entry" style="color:var(--muted);justify-content:center;display:flex">Chưa có lịch sử — bấm số để ghi nhận</div>';
-    }else{
-      wlContainer.innerHTML=wlLog.slice(-60).reverse().map(e=>{
-        const cls=e.hit?'hit-row':'miss-row';
-        const badge=e.hit?'<span class="wl-badge hit">HIT</span>':'<span class="wl-badge miss">MISS</span>';
-        return `<div class="wl-entry ${cls}"><span class="wl-idx">#${e.sessionIdx}</span><span class="wl-top7">${e.top7.join(' ')}</span><span class="wl-actual">${e.actual}</span>${badge}</div>`;
-      }).join('');
-    }
-
+    if(!wlLog.length){wlContainer.innerHTML='<div class="wl-entry" style="color:var(--muted);justify-content:center;display:flex">Chưa có lịch sử — bấm số để ghi nhận</div>'}else{wlContainer.innerHTML=wlLog.slice(-60).reverse().map(e=>{const cls=e.hit?'hit-row':'miss-row';const badge=e.hit?'<span class="wl-badge hit">HIT</span>':'<span class="wl-badge miss">MISS</span>';return `<div class="wl-entry ${cls}"><span class="wl-idx">#${e.sessionIdx}</span><span class="wl-top7">${e.top7.join(' ')}</span><span class="wl-actual">${e.actual}</span>${badge}</div>`}).join('')}
     const tbl=document.getElementById('digitTable');const freq=U.counts(hist);const total=Math.max(1,hist.length);const gaps=U.gaps(hist);
-    tbl.innerHTML=p.ranked.map((r,i)=>{
-      let cls='';const inTop7=topSet.has(r.digit);
-      if(i<TOP_N)cls='top-row';
-      if(i>=10-TOP_N)cls='bot-row';
-      return `<tr class="${cls}"><td>#${i+1}</td><td><b>${r.digit}</b>${inTop7?' 🎯':''}</td><td>${U.pct(r.p,2)}</td><td style="color:${r.p>BASELINE?'var(--green)':'var(--red)'}">${(r.p>=BASELINE?'+':'')+U.pct(r.p-BASELINE,1)}</td><td>${U.pct(freq[r.digit]/total,1)}</td><td>${gaps[r.digit]}</td><td>${inTop7?'✅':'—'}</td></tr>`;
-    }).join('');
+    tbl.innerHTML=p.ranked.map((r,i)=>{let cls='';const inTop7=topSet.has(r.digit);if(i<TOP_N)cls='top-row';if(i>=10-TOP_N)cls='bot-row';return `<tr class="${cls}"><td>#${i+1}</td><td><b>${r.digit}</b>${inTop7?' 🎯':''}</td><td>${U.pct(r.p,2)}</td><td style="color:${r.p>BASELINE?'var(--green)':'var(--red)'}">${(r.p>=BASELINE?'+':'')+U.pct(r.p-BASELINE,1)}</td><td>${U.pct(freq[r.digit]/total,1)}</td><td>${gaps[r.digit]}</td><td>${inTop7?'✅':'—'}</td></tr>`}).join('');
     const mw=p.modelWeights||{};const sorted=Object.entries(mw).sort((a,b)=>b[1]-a[1]).slice(0,10);
-    const mtbl=document.getElementById('modelTable');
-    mtbl.innerHTML=sorted.map(([name,w])=>{
-      const m=this.engine.models.find(x=>x[0]===name);
-      const top7Hit=m?this.engine._backtest(this.history).top7Hit:0;
-      const sharpe=m?m[1]:0;
-      return `<tr><td>${name}</td><td>${U.pct(w/1.2,0)}</td><td>${U.pct(top7Hit,0)}</td><td>${sharpe.toFixed(2)}</td></tr>`;
-    }).join('')||'<tr><td colspan="4">—</td></tr>';
+    const mtbl=document.getElementById('modelTable');mtbl.innerHTML=sorted.map(([name,w])=>{const m=this.engine.models.find(x=>x[0]===name);const top7Hit=m?this.engine._backtest(this.history).top7Hit:0;const sharpe=m?m[1]:0;return `<tr><td>${name}</td><td>${U.pct(w/1.2,0)}</td><td>${U.pct(top7Hit,0)}</td><td>${sharpe.toFixed(2)}</td></tr>`}).join('')||'<tr><td colspan="4">—</td></tr>';
   }
   _copyTelegram(){
     const p=this.pred;if(!p||!p.ready){this._toast('Chưa có dự đoán');return}
@@ -607,86 +399,51 @@ class App{
     if(navigator.clipboard?.writeText){navigator.clipboard.writeText(text);this._toast('Đã copy')}else{const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();this._toast('Đã copy')}
   }
   _toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(this._tt);this._tt=setTimeout(()=>el.classList.remove('show'),2000)}
+
+  // ===== FIXED: API trả về mới nhất trước -> đảo ngược để cũ nhất đứng đầu =====
   async _syncFull(){
-    const status=document.getElementById('apiStatus');
-    status.textContent='⏳ Đang tải dữ liệu từ API...';
-    status.style.color='var(--orange)';
+    const status=document.getElementById('apiStatus');status.textContent='⏳ Đang tải dữ liệu từ API...';status.style.color='var(--orange)';
     try{
-      const url=document.getElementById('apiUrl').value.trim();
-      const resp=await fetch(url);
+      const url=document.getElementById('apiUrl').value.trim();const resp=await fetch(url);
       if(!resp.ok)throw new Error('HTTP '+resp.status);
-      const json=await resp.json();
-      const list=json.t?.issueList||json.issueList||[];
+      const json=await resp.json();const list=json.t?.issueList||json.issueList||[];
       if(!list.length){status.textContent='❌ Không có issueList trong response';status.style.color='var(--red)';return}
       const items=[];for(const issue of list){const open=String(issue.openNum||'');const parts=open.split(',');const tail=parts[parts.length-1]?.trim();if(tail&&/^[0-9]$/.test(tail))items.push(+tail)}
       if(!items.length){status.textContent='❌ Không trích xuất được đuôi hợp lệ';status.style.color='var(--red)';return}
-      this.history=items.slice(-MAX_HIST);
-      this._save();
-      document.getElementById('historyInput').value=this.history.join(' ');
-      status.textContent='✅ Đã đồng bộ '+this.history.length+' phiên từ API';
-      status.style.color='var(--green)';
-      this._toast('Đồng bộ thành công');
-      this._analyze();
-    }catch(e){
-      status.textContent='❌ Lỗi: '+e.message;
-      status.style.color='var(--red)';
-      this._toast('Lỗi API: '+e.message);
-    }
+      items.reverse(); // ← FIX: API mới nhất trước, đảo lại cho cũ nhất đứng đầu
+      this.history=items.slice(-MAX_HIST);this._save();document.getElementById('historyInput').value=this.history.join(' ');
+      status.textContent='✅ Đã đồng bộ '+this.history.length+' phiên từ API';status.style.color='var(--green)';this._toast('Đồng bộ thành công');this._analyze();
+    }catch(e){status.textContent='❌ Lỗi: '+e.message;status.style.color='var(--red)';this._toast('Lỗi API: '+e.message)}
   }
+
   async _syncInc(){
-    const status=document.getElementById('apiStatus');
-    status.textContent='⏳ Đang kiểm tra phiên mới...';
-    status.style.color='var(--orange)';
+    const status=document.getElementById('apiStatus');status.textContent='⏳ Đang kiểm tra phiên mới...';status.style.color='var(--orange)';
     try{
-      const url=document.getElementById('apiUrl').value.trim();
-      const resp=await fetch(url);
+      const url=document.getElementById('apiUrl').value.trim();const resp=await fetch(url);
       if(!resp.ok)throw new Error('HTTP '+resp.status);
-      const json=await resp.json();
-      const list=json.t?.issueList||json.issueList||[];
+      const json=await resp.json();const list=json.t?.issueList||json.issueList||[];
       if(!list.length){status.textContent='❌ Không có dữ liệu';status.style.color='var(--red)';return}
       const items=[];for(const issue of list){const open=String(issue.openNum||'');const parts=open.split(',');const tail=parts[parts.length-1]?.trim();if(tail&&/^[0-9]$/.test(tail))items.push(+tail)}
       if(!items.length){status.textContent='❌ Không trích xuất được đuôi';status.style.color='var(--red)';return}
+      items.reverse(); // ← FIX: đảo API về đúng thứ tự cũ→mới
       const newCount=U.findOverlap(items,this.history);
-      if(newCount>0){
-        this.history=[...this.history,...items.slice(-newCount)].slice(-MAX_HIST);
-        this._save();
-        document.getElementById('historyInput').value=this.history.join(' ');
-        status.textContent='✅ +'+newCount+' phiên mới. Tổng: '+this.history.length;
-        status.style.color='var(--green)';
-        this._toast('Đã thêm '+newCount+' phiên');
-        this._analyze();
-      }else{
-        status.textContent='✅ Dữ liệu đã mới nhất. Tổng: '+this.history.length;
-        status.style.color='var(--green)';
-      }
-    }catch(e){
-      status.textContent='❌ Lỗi: '+e.message;
-      status.style.color='var(--red)';
-      this._toast('Lỗi API: '+e.message);
-    }
+      if(newCount>0){this.history=[...this.history,...items.slice(-newCount)].slice(-MAX_HIST);this._save();document.getElementById('historyInput').value=this.history.join(' ');status.textContent='✅ +'+newCount+' phiên mới. Tổng: '+this.history.length;status.style.color='var(--green)';this._toast('Đã thêm '+newCount+' phiên');this._analyze()}else{status.textContent='✅ Dữ liệu đã mới nhất. Tổng: '+this.history.length;status.style.color='var(--green)'}
+    }catch(e){status.textContent='❌ Lỗi: '+e.message;status.style.color='var(--red)';this._toast('Lỗi API: '+e.message)}
   }
+
   _parseJson(){
     const status=document.getElementById('apiStatus');
     try{
       const raw=document.getElementById('jsonPaste').value.trim();
       if(!raw){status.textContent='❌ Vui lòng dán JSON vào ô';status.style.color='var(--red)';return}
-      const json=JSON.parse(raw);
-      const list=json.t?.issueList||json.issueList||[];
+      const json=JSON.parse(raw);const list=json.t?.issueList||json.issueList||[];
       if(!list.length){status.textContent='❌ Không có issueList trong JSON';status.style.color='var(--red)';return}
       const items=[];for(const issue of list){const open=String(issue.openNum||'');const parts=open.split(',');const tail=parts[parts.length-1]?.trim();if(tail&&/^[0-9]$/.test(tail))items.push(+tail)}
       if(!items.length){status.textContent='❌ Không trích xuất được đuôi';status.style.color='var(--red)';return}
-      this.history=items.slice(-MAX_HIST);
-      this._save();
-      document.getElementById('historyInput').value=this.history.join(' ');
-      status.textContent='✅ Nạp '+this.history.length+' phiên từ JSON';
-      status.style.color='var(--green)';
-      this._toast('Nạp JSON thành công');
-      this._analyze();
-    }catch(e){
-      status.textContent='❌ JSON lỗi: '+e.message;
-      status.style.color='var(--red)';
-      this._toast('JSON lỗi: '+e.message);
-    }
+      items.reverse(); // ← FIX: JSON cũng trả về mới nhất trước
+      this.history=items.slice(-MAX_HIST);this._save();document.getElementById('historyInput').value=this.history.join(' ');
+      status.textContent='✅ Nạp '+this.history.length+' phiên từ JSON';status.style.color='var(--green)';this._toast('Nạp JSON thành công');this._analyze();
+    }catch(e){status.textContent='❌ JSON lỗi: '+e.message;status.style.color='var(--red)';this._toast('JSON lỗi: '+e.message)}
   }
 }
 
