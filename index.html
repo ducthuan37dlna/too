@@ -4,173 +4,150 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="dark">
-<title>DỰ ĐOÁN — TOP7 PRO v2</title>
+<title>🔥 PHOENIX PRO+ ULTIMATE · DỰ ĐOÁN TOP7</title>
 <style>
 :root{
   --bg:#060812;--panel:#0c1020;--line:#26314b;--text:#eaf0ff;--muted:#8d9ab5;
   --gold:#f6c85f;--cyan:#56d6ff;--green:#49e39a;--orange:#ffad4d;--red:#ff647c;--violet:#af8cff;
 }
 *{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at 10% -10%,#1d1643 0,#090d1b 36%,#05060c 100%);color:var(--text);font:14px/1.45 system-ui,sans-serif;min-height:100vh;padding:12px}
-.app{max-width:780px;margin:auto}
-h1{color:var(--gold);font-size:1.4rem;margin:0 0 2px;letter-spacing:.02em}
-.sub{color:var(--muted);font-size:.7rem;margin-bottom:12px}
-
-.card{background:#0c1020;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
-.flex{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.app{max-width:800px;margin:auto}
+h1{color:var(--gold);font-size:1.6rem;margin:0 0 2px;letter-spacing:.02em}
+.sub{color:var(--muted);font-size:.75rem;margin-bottom:12px}
+.card{background:#0c1020;border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 4px 30px rgba(0,0,0,.5)}
+.flex{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .flex-grow{flex:1;min-width:120px}
-.input,textarea,select{background:#080c17;border:1px solid #2a3650;border-radius:8px;color:var(--text);padding:6px 10px;outline:none;width:100%}
+.input,textarea,select{background:#080c17;border:1px solid #2a3650;border-radius:8px;color:var(--text);padding:6px 10px;outline:none;width:100%;font-size:.9rem}
 .input:focus,textarea:focus{border-color:var(--cyan)}
-textarea{height:52px;resize:vertical;font-family:monospace;font-size:.78rem}
-button{background:#151d31;border:1px solid #34415d;border-radius:8px;color:var(--text);padding:6px 12px;font-weight:700;cursor:pointer;transition:.1s}
+textarea{height:56px;resize:vertical;font-family:monospace;font-size:.78rem}
+button{background:#151d31;border:1px solid #34415d;border-radius:8px;color:var(--text);padding:6px 14px;font-weight:700;cursor:pointer;transition:.15s}
 button:hover{background:#1e2844;border-color:var(--cyan)}
 button.primary{background:linear-gradient(135deg,#f6c85f,#e4a72f);color:#1d1500;border-color:#f9d77f}
 button.primary:hover{background:linear-gradient(135deg,#ffdb75,#f0b942)}
 button.danger{border-color:#a74a5a;color:#ff9aaa}
 button.danger:hover{background:#2a0a0a;border-color:#ff647c}
-button.digit-btn{width:36px;height:36px;padding:0;font-size:1.1rem;font-weight:900;border-color:#34536a;color:var(--cyan);border-radius:8px}
-button.digit-btn:hover{background:var(--cyan);color:#06121a;border-color:var(--cyan)}
-button.api-btn{border-color:var(--gold);color:var(--gold);font-size:.7rem;padding:4px 10px}
-button.api-btn:hover{background:var(--gold);color:#1d1500;border-color:var(--gold)}
-
-.history-strip{display:flex;gap:4px;overflow:auto;padding:4px 0;min-height:36px;flex-wrap:nowrap}
-.history-dot{flex:0 0 30px;height:30px;display:grid;place-items:center;border-radius:6px;background:#111b31;border:1px solid #2c3a59;font-weight:800;font-size:.8rem;color:#b6c4e2}
+.digit-btn{width:36px;height:36px;padding:0;font-size:1.1rem;font-weight:900;border-color:#34536a;color:var(--cyan);border-radius:8px}
+.digit-btn:hover{background:var(--cyan);color:#06121a;border-color:var(--cyan)}
+.api-btn{border-color:var(--gold);color:var(--gold);font-size:.7rem;padding:4px 10px}
+.api-btn:hover{background:var(--gold);color:#1d1500;border-color:var(--gold)}
+.history-strip{display:flex;gap:4px;overflow:auto;padding:4px 0;min-height:40px;flex-wrap:nowrap;align-items:center}
+.history-dot{flex:0 0 32px;height:32px;display:grid;place-items:center;border-radius:6px;background:#111b31;border:1px solid #2c3a59;font-weight:800;font-size:.85rem;color:#b6c4e2}
 .history-dot.latest{border-color:var(--cyan);color:var(--cyan);box-shadow:0 0 10px #56d6ff55}
 .history-dot.hot{border-color:var(--green);color:var(--green)}
 .history-dot.cold{border-color:#3a3a5a;color:#6a6a8a}
 .history-dot.hit{background:#081a0e;border-color:var(--green);color:var(--green)}
 .history-dot.miss{background:#1a0808;border-color:#5a2a2a;color:#ff647c}
-
-.pred-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin:8px 0}
-.pred-cell{text-align:center;padding:6px 2px;border-radius:8px;background:#0a0f1d;border:2px solid #1a1a32;transition:all .2s}
+.pred-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;margin:10px 0}
+.pred-cell{text-align:center;padding:8px 2px;border-radius:10px;background:#0a0f1d;border:2px solid #1a1a32;transition:all .2s}
 .pred-cell.top{border-color:var(--green);background:#081a0e}
-.pred-cell.best{border-color:var(--gold);background:#1a1808;box-shadow:0 0 14px #f6c85f44}
+.pred-cell.best{border-color:var(--gold);background:#1a1808;box-shadow:0 0 20px #f6c85f55}
 .pred-cell.bot{border-color:#5e2a2a;background:#100808;opacity:.6}
-.pred-cell .num{font-size:1.5rem;font-weight:900;display:block;line-height:1.2}
-.pred-cell.top .num{color:var(--green)}
+.pred-cell .num{font-size:1.6rem;font-weight:900;display:block;line-height:1.2}
 .pred-cell.best .num{color:var(--gold)}
-.pred-cell .prob{font-size:.62rem;color:var(--muted)}
+.pred-cell.top .num{color:var(--green)}
+.pred-cell .prob{font-size:.65rem;color:var(--muted)}
 .pred-cell.top .prob{color:#88cc88}
-
-.gauge-wrap{display:flex;gap:16px;align-items:center;margin:6px 0}
+.gauge-wrap{display:flex;gap:16px;align-items:center;margin:8px 0}
 .gauge{--v:0;width:80px;height:80px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--gold) calc(var(--v)*1%),#202a40 0);flex-shrink:0}
 .gauge-inner{text-align:center;background:#0b1020;border-radius:50%;width:64px;height:64px;display:grid;place-items:center;border:1px solid #2c3854}
-.gauge-num{font-size:1.3rem;font-weight:900;color:var(--gold)}
+.gauge-num{font-size:1.4rem;font-weight:900;color:var(--gold)}
 .gauge-label{font-size:.55rem;color:var(--muted);text-transform:uppercase}
-.gauge-info{flex:1}
-.gauge-info .best{font-weight:800;color:var(--gold);font-size:1rem}
-.gauge-info .detail{font-size:.7rem;color:var(--muted)}
-
 .rolling-gauge{--rv:0;width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--green) calc(var(--rv)*1%),#202a40 0);flex-shrink:0}
-.rolling-inner{text-align:center;background:#0b1020;border-radius:50%;width:50px;height:50px;display:grid;place-items:center;border:1px solid #2c3854}
+.rolling-inner{background:#0b1020;border-radius:50%;width:50px;height:50px;display:grid;place-items:center;border:1px solid #2c3854}
 .rolling-num{font-size:1.1rem;font-weight:900;color:var(--green)}
-
-.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin:6px 0}
-.stat{background:#0a0f1d;border:1px solid #1a1a32;border-radius:8px;padding:5px 7px;text-align:center}
+.gauge-info{flex:1}
+.gauge-info .best{font-weight:800;color:var(--gold);font-size:1.1rem}
+.gauge-info .detail{font-size:.72rem;color:var(--muted)}
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:8px 0}
+.stat{background:#0a0f1d;border:1px solid #1a1a32;border-radius:10px;padding:6px 8px;text-align:center}
 .stat .lbl{font-size:.6rem;color:var(--muted);text-transform:uppercase;display:block}
-.stat .val{font-weight:800;font-size:.9rem}
-
-.pill{display:inline-block;padding:2px 8px;border-radius:999px;background:#141c30;border:1px solid #30405f;font-size:.65rem;font-weight:800}
+.stat .val{font-weight:800;font-size:.95rem}
+.pill{display:inline-block;padding:2px 10px;border-radius:999px;background:#141c30;border:1px solid #30405f;font-size:.65rem;font-weight:800}
 .pill.good{color:var(--green);border-color:#287653}
 .pill.warn{color:var(--orange);border-color:#8d642c}
 .pill.bad{color:var(--red);border-color:#854354}
 .pill.hit-rate{color:var(--gold);border-color:#8d6c28}
-
-.table-wrap{overflow:auto;max-height:280px;border:1px solid #1a1a32;border-radius:8px;margin-top:6px}
+.table-wrap{overflow:auto;max-height:300px;border:1px solid #1a1a32;border-radius:10px;margin-top:8px}
 table{width:100%;border-collapse:collapse;font-size:.72rem}
-th{position:sticky;top:0;background:#121a2d;color:var(--gold);padding:5px 6px;text-align:center;border-bottom:1px solid #1b2740}
-td{padding:4px 6px;text-align:center;border-bottom:1px solid #182139}
+th{position:sticky;top:0;background:#121a2d;color:var(--gold);padding:6px 8px;text-align:center;border-bottom:1px solid #1b2740}
+td{padding:4px 8px;text-align:center;border-bottom:1px solid #182139}
 tr:last-child td{border:0}
-tr.top-row td{color:var(--green)}
-tr.top-row{background:#081a0e}
-tr.bot-row td{color:#662222}
-tr.bot-row{background:#100808}
-
-.wl-log{max-height:220px;overflow:auto;border:1px solid #1a1a32;border-radius:8px;margin-top:4px}
-.wl-entry{display:grid;grid-template-columns:36px 1fr 40px 60px;gap:4px;padding:3px 8px;border-bottom:1px solid #182139;align-items:center;font-size:.7rem}
+tr.top-row td{color:var(--green)} tr.top-row{background:#081a0e}
+tr.bot-row td{color:#662222} tr.bot-row{background:#100808}
+.wl-log{max-height:240px;overflow:auto;border:1px solid #1a1a32;border-radius:8px;margin-top:6px}
+.wl-entry{display:grid;grid-template-columns:36px 1fr 40px 60px;gap:4px;padding:4px 10px;border-bottom:1px solid #182139;align-items:center;font-size:.7rem}
 .wl-entry.hit-row{background:#081a0e}
 .wl-entry.miss-row{background:#1a0808}
 .wl-entry .wl-idx{color:var(--muted);font-weight:700}
-.wl-entry .wl-top7{color:var(--text);font-family:monospace;font-size:.68rem}
+.wl-entry .wl-top7{color:var(--text);font-family:monospace;font-size:.65rem}
 .wl-entry .wl-actual{font-weight:900;font-size:.85rem}
 .wl-entry.hit-row .wl-actual{color:var(--green)}
 .wl-entry.miss-row .wl-actual{color:var(--red)}
-.wl-badge{font-size:.6rem;font-weight:800;padding:1px 6px;border-radius:999px;text-align:center}
+.wl-badge{font-size:.6rem;font-weight:800;padding:1px 8px;border-radius:999px;text-align:center}
 .wl-badge.hit{background:#0a2a15;color:var(--green);border:1px solid #287653}
 .wl-badge.miss{background:#2a0a0a;color:var(--red);border:1px solid #5a2a2a}
-
 .api-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:6px 0}
 .api-row input{flex:1;min-width:160px;font-size:.7rem;padding:4px 8px;background:#080c17;border:1px solid #2a3650;border-radius:6px;color:var(--text);outline:none}
-.api-row input:focus{border-color:var(--cyan)}
 .api-status{font-size:.65rem;color:var(--muted);margin:2px 0 0;min-height:18px}
-
 .json-collapse{background:#080c17;border:1px solid #1a1a32;border-radius:6px;padding:6px;margin-top:4px}
 .json-collapse summary{cursor:pointer;color:var(--muted);font-size:.65rem;font-weight:700}
-
-.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(12px);opacity:0;pointer-events:none;background:#17233a;border:1px solid #3c5c7f;border-radius:8px;padding:7px 14px;font-size:.75rem;transition:.2s;z-index:9}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(16px);opacity:0;pointer-events:none;background:#17233a;border:1px solid #3c5c7f;border-radius:8px;padding:8px 18px;font-size:.75rem;transition:.2s;z-index:9;backdrop-filter:blur(4px)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-@media(max-width:540px){.stat-row{grid-template-columns:repeat(2,1fr)} .pred-grid{gap:2px} .pred-cell .num{font-size:1.1rem} .gauge{width:64px;height:64px} .gauge-inner{width:50px;height:50px} .gauge-num{font-size:1rem} .wl-entry{grid-template-columns:28px 1fr 32px 48px;font-size:.65rem}}
+@media(max-width:540px){.stat-row{grid-template-columns:repeat(2,1fr)} .pred-grid{gap:2px} .pred-cell .num{font-size:1.2rem} .gauge{width:64px;height:64px} .gauge-inner{width:50px;height:50px} .gauge-num{font-size:1rem} .wl-entry{grid-template-columns:28px 1fr 32px 48px;font-size:.65rem}}
 </style>
 </head>
 <body>
 <div class="app">
-  <h1>🎯 DỰ ĐOÁN — TOP7 PRO v2</h1>
-  <div class="sub">26-model ensemble · adaptive weighting · streak shield · win/loss chronicle</div>
+  <h1>🔥 PHOENIX PRO+ ULTIMATE</h1>
+  <div class="sub">24‑model ensemble · adaptive weighting · streak shield · win/loss chronicle</div>
 
   <div class="card">
     <div class="flex">
       <textarea id="historyInput" placeholder="Nhập dãy đuôi: 4 0 3 1 7 2 ..."></textarea>
       <button class="primary" id="analyzeBtn">PHÂN TÍCH</button>
     </div>
-
-    <div class="flex" style="margin:6px 0;justify-content:center;gap:4px">
-      <button class="digit-btn" data-digit="0">0</button>
-      <button class="digit-btn" data-digit="1">1</button>
-      <button class="digit-btn" data-digit="2">2</button>
-      <button class="digit-btn" data-digit="3">3</button>
-      <button class="digit-btn" data-digit="4">4</button>
-      <button class="digit-btn" data-digit="5">5</button>
-      <button class="digit-btn" data-digit="6">6</button>
-      <button class="digit-btn" data-digit="7">7</button>
-      <button class="digit-btn" data-digit="8">8</button>
-      <button class="digit-btn" data-digit="9">9</button>
+    <div class="flex" style="margin:8px 0;justify-content:center;gap:4px">
+      <button class="digit-btn" data-digit="0">0</button><button class="digit-btn" data-digit="1">1</button>
+      <button class="digit-btn" data-digit="2">2</button><button class="digit-btn" data-digit="3">3</button>
+      <button class="digit-btn" data-digit="4">4</button><button class="digit-btn" data-digit="5">5</button>
+      <button class="digit-btn" data-digit="6">6</button><button class="digit-btn" data-digit="7">7</button>
+      <button class="digit-btn" data-digit="8">8</button><button class="digit-btn" data-digit="9">9</button>
     </div>
-
     <div class="api-row">
       <input id="apiUrl" value="https://k2d9u.k123b.club/api/front/open/lottery/history/list/game?limitNum=31&gameCode=mnmg">
       <button class="api-btn" id="syncFullBtn">📡 NẠP FULL</button>
       <button class="api-btn" id="syncIncBtn">🔄 CẬP NHẬT</button>
     </div>
-    <div class="api-status" id="apiStatus">Sẵn sàng — bấm NẠP FULL để lấy lịch sử từ API</div>
+    <div class="api-status" id="apiStatus">Sẵn sàng — bấm NẠP FULL để lấy lịch sử</div>
 
-    <details class="json-collapse"><summary>📋 Dán JSON thủ công (nếu CORS chặn)</summary>
+    <details class="json-collapse"><summary>📋 Dán JSON thủ công</summary>
       <div class="flex" style="margin-top:4px">
-        <textarea id="jsonPaste" placeholder="Dán toàn bộ JSON response ở đây..." style="height:44px;font-size:.65rem;flex:1"></textarea>
-        <button id="jsonParseBtn" style="font-size:.65rem;padding:4px 8px;border-color:var(--orange);color:var(--orange)">NẠP JSON</button>
+        <textarea id="jsonPaste" placeholder="Dán JSON response..." style="height:44px;font-size:.65rem;flex:1"></textarea>
+        <button id="jsonParseBtn" style="font-size:.65rem;padding:4px 8px;border-color:var(--orange);color:var(--orange)">NẠP</button>
       </div>
     </details>
 
     <div class="history-strip" id="historyStrip"><span class="muted">Chưa có dữ liệu</span></div>
-    <div class="flex" style="margin-top:4px">
+    <div class="flex" style="margin-top:6px">
       <button id="undoBtn">↩ UNDO</button>
       <button id="reverseBtn">⇄ ĐẢO</button>
       <button id="sampleBtn">📋 MẪU</button>
       <button id="telegramBtn">📋 COPY</button>
       <button class="danger" id="clearBtn">✖ XOÁ</button>
     </div>
-    <div class="flex" style="margin-top:4px">
+    <div class="flex" style="margin-top:6px">
       <span class="muted tiny" id="parseInfo">0 kết quả</span>
       <span class="pill" id="statusPill">SẴN SÀNG</span>
       <span class="pill hit-rate" id="top7HitPill">🎯 TOP7 HIT: —</span>
-      <span class="pill" id="lossStreakPill" style="display:none">📉 MISS STREAK: 0</span>
-      <span class="pill good" id="winStreakPill" style="display:none">🔥 WIN STREAK: 0</span>
+      <span class="pill" id="lossStreakPill" style="display:none">📉 MISS: 0</span>
+      <span class="pill good" id="winStreakPill" style="display:none">🔥 WIN: 0</span>
     </div>
   </div>
 
   <div class="card">
     <div class="pred-grid" id="predGrid"></div>
     <div class="gauge-wrap">
-      <div class="gauge" id="gauge"><div class="gauge-inner"><span class="gauge-num" id="gaugeNum">—</span><span class="gauge-label">TOP7 conf</span></div></div>
+      <div class="gauge" id="gauge"><div class="gauge-inner"><span class="gauge-num" id="gaugeNum">—</span><span class="gauge-label">CONF</span></div></div>
       <div class="rolling-gauge" id="rollingGauge"><div class="rolling-inner"><span class="rolling-num" id="rollingNum">—</span></div></div>
       <div class="gauge-info">
         <div class="best" id="bestLabel">—</div>
@@ -180,24 +157,24 @@ tr.bot-row{background:#100808}
     <div class="stat-row">
       <div class="stat"><span class="lbl">TOP 7</span><span class="val gold" id="top7Val">—</span></div>
       <div class="stat"><span class="lbl">Loại</span><span class="val red" id="botVal">—</span></div>
-      <div class="stat"><span class="lbl">TOP7 Hit Rate</span><span class="val" id="top7HitVal" style="color:var(--gold)">—</span></div>
+      <div class="stat"><span class="lbl">TOP7 Hit</span><span class="val" id="top7HitVal" style="color:var(--gold)">—</span></div>
       <div class="stat"><span class="lbl">Rolling 50</span><span class="val" id="rolling50Val" style="color:var(--green)">—</span></div>
     </div>
   </div>
 
   <div class="card">
-    <div class="flex"><span style="color:var(--gold);font-weight:800;font-size:.8rem">📋 LỊCH SỬ THẮNG/THUA</span><span class="muted tiny" id="wlSummary">0 thắng / 0 thua</span></div>
+    <div class="flex"><span style="color:var(--gold);font-weight:800;font-size:.85rem">📋 LỊCH SỬ THẮNG/THUA</span><span class="muted tiny" id="wlSummary">0 thắng / 0 thua</span></div>
     <div class="wl-log" id="wlLog"><div class="wl-entry" style="color:var(--muted);justify-content:center;display:flex">Chưa có lịch sử — bấm số để ghi nhận</div></div>
   </div>
 
   <div class="card">
-    <div class="flex"><span style="color:var(--gold);font-weight:800;font-size:.8rem">📊 PHÂN TÍCH CHI TIẾT</span><span class="muted tiny" id="sampleCount">0 mẫu</span></div>
+    <div class="flex"><span style="color:var(--gold);font-weight:800;font-size:.85rem">📊 PHÂN TÍCH CHI TIẾT</span><span class="muted tiny" id="sampleCount">0 mẫu</span></div>
     <div class="table-wrap"><table><thead><tr><th>#</th><th>Đuôi</th><th>P</th><th>Edge</th><th>Freq</th><th>Gap</th><th>TOP7</th></tr></thead><tbody id="digitTable"></tbody></table></div>
   </div>
 
   <div class="card">
-    <div style="color:var(--gold);font-weight:800;font-size:.8rem;margin-bottom:4px">⚙️ TOP MODELS (adaptive, TOP7-optimized)</div>
-    <div class="table-wrap"><table><thead><tr><th>Model</th><th>W</th><th>TOP7 Hit</th><th>Sharpe</th></tr></thead><tbody id="modelTable"></tbody></table></div>
+    <div style="color:var(--gold);font-weight:800;font-size:.85rem;margin-bottom:4px">⚙️ TOP MODELS (adaptive)</div>
+    <div class="table-wrap"><table><thead><tr><th>Model</th><th>Weight</th><th>TOP7 Hit</th><th>Sharpe</th></tr></thead><tbody id="modelTable"></tbody></table></div>
   </div>
 
   <div class="toast" id="toast"></div>
@@ -224,10 +201,10 @@ const U={
   zScore:(obs,p0,n)=>{const se=Math.sqrt(p0*(1-p0)/n);return se>0?(obs-p0)/se:0},
   parse:raw=>{const text=String(raw||'').trim();const tokens=text.split(/[\s,;|\/.-]+/).filter(Boolean);const h=[];for(const t of tokens){if(/^[0-9]$/.test(t))h.push(+t);else if(/^[0-9]{2,}$/.test(t)){for(const ch of t){const n=+ch;if(n>=0&&n<=9)h.push(n)}}}return h.slice(-MAX_HIST)},
   hash:h=>{let hh=2166136261;for(let i=0;i<h.length;i++){hh^=h[i]+i;hh=Math.imul(hh,16777619)}return h.length+':'+(hh>>>0).toString(16)},
-  findOverlap:(api,existing)=>{if(!existing.length)return api.length;if(!api.length)return 0;const sw=Math.min(50,api.length,existing.length);for(let len=sw;len>=5;len--){let ok=true;for(let i=0;i<len;i++){if(api[api.length-len+i]!==existing[existing.length-len+i]){ok=false;break}}if(ok)return api.length-len}const ctx=Math.min(5,existing.length,api.length-1);if(ctx>=3){const hc=existing.slice(-ctx);for(let i=api.length-ctx;i>=0;i--){let same=0;for(let j=0;j<ctx;j++)if(api[i+j]===hc[j])same++;if(same>=Math.ceil(ctx*0.6))return api.length-(i+ctx)}}return api.length}
+  findOverlap:(api,existing)=>{if(!existing.length)return api.length;if(!api.length)return 0;const sw=Math.min(50,api.length,existing.length);for(let len=sw;len>=5;len--){let ok=true;for(let i=0;i<len;i++){if(api[api.length-len+i]!==existing[existing.length-len+i]){ok=false;break}}if(ok)return api.length-len}return api.length}
 };
 
-// ===== MODELS =====
+// ===== MÔ HÌNH (24 model) =====
 function markovN(order,w,sm){return h=>{if(h.length<=order)return U.uniform();const key=h.slice(-order).join(',');const cnt=new Float64Array(10);cnt.fill(sm);const st=Math.max(0,h.length-w);for(let i=st;i<=h.length-order-1;i++){if(h.slice(i,i+order).join(',')===key)cnt[h[i+order]]++}return U.normalize(cnt)}}
 function freqExp(w,decay){return h=>{const p=new Float64Array(10);const st=Math.max(0,h.length-w);for(let i=st;i<h.length;i++)p[h[i]]+=Math.pow(decay,h.length-1-i);return U.normalize(p)}}
 function recency(hl){return h=>{const p=new Float64Array(10);let t=0;const lam=Math.log(2)/hl;const st=Math.max(0,h.length-300);for(let i=st;i<h.length;i++){const w=Math.exp(-lam*(h.length-1-i));p[h[i]]+=w;t+=w}for(let d=0;d<10;d++)p[d]=(p[d]+0.2)/(t+2);return U.normalize(p)}}
@@ -238,42 +215,48 @@ function pairFreq(){return h=>{if(h.length<25)return U.uniform();const last=h[h.
 function cycleModel(cycle){return h=>{if(h.length<cycle*2)return U.uniform();const cnt=new Float64Array(10);cnt.fill(0.04);const st=Math.max(0,h.length-cycle*10);for(let i=st;i<h.length-cycle;i++){if(h[i]===h[h.length-cycle])cnt[h[i+cycle]]++}return U.normalize(cnt)}}
 function entropyMR(){return h=>{if(h.length<50)return U.uniform();const p=new Float64Array(10);for(const w of [20,40,80]){const sub=h.slice(-w);const c=U.counts(sub);const ent=U.entropy(U.normalize(c));const wt=ent<2.8?1.5:ent>3.1?0.4:1;for(let d=0;d<10;d++)p[d]+=(c[d]/w)*wt}return U.normalize(p)}}
 function runLength(){return h=>{if(h.length<10)return U.uniform();const last=h[h.length-1];let len=1;for(let i=h.length-2;i>=0&&h[i]===last;i--)len++;if(len<2)return U.uniform();const runs=[];let rl=1;for(let i=1;i<h.length;i++){if(h[i]===h[i-1])rl++;else{runs.push(rl);rl=1}}runs.push(rl);const avg=U.mean(runs)||1;const p=new Float64Array(10);p.fill(0.15);if(len>avg*1.5){for(let d=0;d<10;d++)if(d!==last)p[d]+=1}else if(len<avg*0.5){p[last]+=0.6}return U.normalize(p)}}
-function posBayes(cycle){return h=>{if(h.length<cycle*1.5)return U.uniform();const pos=h.length%cycle;const cnt=new Float64Array(10);cnt.fill(0.05);let t=0.5;const lam=Math.log(2)/(cycle*1.5);for(let i=0;i<h.length-1;i++){if(i%cycle===pos){const w=Math.exp(-lam*(h.length-1-i));cnt[h[i+1]]+=w;t+=w}}for(let d=0;d<10;d++)cnt[d]/=t;return U.normalize(cnt)}}
 function posMarkov(order,cycle){return h=>{if(h.length<order+cycle)return U.uniform();const pos=h.length%cycle;const key=order===1?String(h[h.length-1]):h.slice(-order).join(',');const cnt=new Float64Array(10);cnt.fill(0.03);let t=0.3;const st=Math.max(0,h.length-200);for(let i=st;i<=h.length-order-1;i++){if(i%cycle!==pos)continue;const ikey=order===1?String(h[i]):h.slice(i,i+order).join(',');if(ikey===key){const w=Math.exp(-(h.length-order-i)/(cycle*2));cnt[h[i+order]]+=w;t+=w}}for(let d=0;d<10;d++)cnt[d]/=t;return U.normalize(cnt)}}
+// Các mô hình đặc trưng từ bản cũ
+function hotScores(w){return h=>{const p=new Float64Array(10);const st=Math.max(0,h.length-w);for(let i=st;i<h.length;i++)p[h[i]]++;return U.normalize(p)}}
+function gapScores(){return h=>{const g=U.gaps(h);const p=new Float64Array(10);for(let d=0;d<10;d++)p[d]=(h.length-g[d])/h.length;return U.normalize(p)}}
+function sumLast2(h){if(h.length<2)return U.uniform();const m={};for(let i=0;i<h.length-1;i++){const sum=(h[i]+h[i+1])%10;if(!m[sum])m[sum]={};m[sum][h[i+1]]=(m[sum][h[i+1]]||0)+1}const lastSum=(h[h.length-2]+h[h.length-1])%10;const p=m[lastSum]||{};const o=new Float64Array(10);for(let d=0;d<10;d++)o[d]=(p[d]||0)+0.02;return U.normalize(o)}
+function dayCycle(h){if(h.length<2)return U.uniform();const dc={};const dd={};h.forEach((d,i)=>{const day=i%7;if(!dc[day]){dc[day]=0;dd[day]={}}dc[day]++;dd[day][d]=(dd[day][d]||0)+1});const today=(h.length-1)%7;const p=dd[today]||{};const o=new Float64Array(10);for(let d=0;d<10;d++)o[d]=(p[d]||0)+0.02;return U.normalize(o)}
+function loRoi(h){if(h.length<3)return U.uniform();const target=h[h.length-2];const f={};for(let i=0;i<h.length-1;i++){if(h[i]===target){const n=h[i+1];f[n]=(f[n]||0)+1}}const o=new Float64Array(10);for(let d=0;d<10;d++)o[d]=(f[d]||0)+0.02;return U.normalize(o)}
+function pos3(h){if(h.length<3)return U.uniform();const m={};for(let i=2;i<h.length-1;i++){const p=h[i-2];if(!m[p])m[p]={};m[p][h[i]]=(m[p][h[i]]||0)+1}const last=h[h.length-3];const pr=m[last]||{};const o=new Float64Array(10);for(let d=0;d<10;d++)o[d]=(pr[d]||0)+0.02;return U.normalize(o)}
+// Thêm mô hình mới: weighted moving average
+function wma(weights){return h=>{const p=new Float64Array(10);const L=Math.min(h.length,weights.length);for(let i=0;i<L;i++){const w=weights[i]||0;p[h[h.length-L+i]]+=w}return U.normalize(p)}}
 
+// ===== ENGINE CHÍNH =====
 class Engine{
   constructor(){
     this.models=[
-      ['Bayes dyn',1.12,this._bayesDynamic],
-      ['Bayes pos30',0.70,posBayes(30)],
-      ['Bayes pos15',0.56,posBayes(15)],
-      ['Adaptive Markov',1.05,this._adaptiveMarkov],
-      ['Markov2',0.78,markovN(2,330,0.25)],
-      ['Markov3',0.56,markovN(3,420,0.2)],
-      ['Recency45',0.72,recency(45)],
-      ['Recency140',0.68,recency(140)],
-      ['Gap',0.48,gapModel(1.3)],
-      ['Streak',0.42,streakBreak()],
-      ['Cycle7',0.46,cycleModel(7)],
-      ['Wavelet',0.44,recency(36)],
-      ['PosMarkov30',0.45,posMarkov(1,30)],
-      ['PosMarkov15',0.40,posMarkov(1,15)],
-      ['freq20',0.70,freqExp(20,0.88)],
-      ['freq50',0.65,freqExp(50,0.92)],
-      ['freq120',0.60,freqExp(120,0.95)],
-      ['pattern4',0.60,patternFuzzy(4,1,0.992)],
-      ['pairFreq',0.50,pairFreq()],
-      ['entropyMR',0.50,entropyMR()],
-      ['runLen',0.40,runLength()],
-      ['cycle4',0.45,cycleModel(4)],
-      ['freq300',0.55,freqExp(300,0.97)],
-      ['pattern5',0.50,patternFuzzy(5,1,0.986)],
-      ['gapCold',0.45,h=>{const g=U.gaps(h);const p=new Float64Array(10);for(let d=0;d<10;d++)p[d]=1/Math.pow(g[d]+1,0.65);return U.normalize(p)}],
-      ['streakFollow',0.55,h=>{if(!h.length)return U.uniform();const last=h[h.length-1];let len=1;for(let i=h.length-2;i>=0&&h[i]===last;i--)len++;const p=new Float64Array(10);p.fill(1);if(len>=2)p[last]+=1.8+len*0.6;else p[last]+=0.15;return U.normalize(p)}]
+      ['Bayes dyn',1.2,this._bayesDynamic],
+      ['Bayes pos30',0.7,posMarkov(1,30)],
+      ['Markov1',0.9,markovN(1,280,0.3)],
+      ['Markov2',0.8,markovN(2,360,0.25)],
+      ['Markov3',0.6,markovN(3,420,0.2)],
+      ['Recency45',0.8,recency(45)],
+      ['Recency140',0.7,recency(140)],
+      ['Gap',0.6,gapModel(1.3)],
+      ['StreakBreak',0.5,streakBreak()],
+      ['Cycle7',0.5,cycleModel(7)],
+      ['Pattern4',0.6,patternFuzzy(4,1,0.992)],
+      ['PairFreq',0.55,pairFreq()],
+      ['EntropyMR',0.5,entropyMR()],
+      ['RunLen',0.45,runLength()],
+      ['PosMarkov15',0.45,posMarkov(1,15)],
+      ['Hot15',0.8,hotScores(15)],
+      ['Hot30',0.7,hotScores(30)],
+      ['GapScore',0.6,gapScores()],
+      ['SumLast2',0.7,sumLast2],
+      ['DayCycle',0.5,dayCycle],
+      ['LoRoi',0.5,loRoi],
+      ['Pos3',0.5,pos3],
+      ['WMA10',0.65,wma([0.25,0.2,0.16,0.13,0.1,0.08,0.06,0.04,0.03,0.02])],
+      ['WMA20',0.55,wma(Array.from({length:20},(_,i)=>1/(i+1)))]
     ];
     this.weights=this.models.map(m=>m[1]);
     this.history=[];
-    this._cache={};
     this.missStreak=0;
     this.winStreak=0;
     this.top7HitRate=0.7;
@@ -283,10 +266,9 @@ class Engine{
     this.lastTop7=null;
     this.winLossLog=[];
     this.sessionCounter=0;
-    this.modelRecentHits=this.models.map(()=>[]);
+    this._cache={};
   }
   _bayesDynamic(h){const cnt=new Float64Array(10);cnt.fill(0.5);let t=5;const lam=Math.log(2)/DECAY_HL;const st=Math.max(0,h.length-700);for(let i=st;i<h.length;i++){const w=Math.exp(-lam*(h.length-1-i));cnt[h[i]]+=w;t+=w}for(let d=0;d<10;d++)cnt[d]/=t;return U.normalize(cnt)}
-  _adaptiveMarkov(h){if(h.length<2)return U.uniform();const p1=markovN(1,260,0.35)(h),p2=markovN(2,360,0.25)(h),p3=markovN(3,420,0.2)(h);const ent=U.entropy(U.normalize(U.counts(h.slice(-100))));const mi=Math.max(0,Math.log2(10)-ent)*0.7;const eff=Math.max(0,mi*2.3+(3.32-ent)*0.35);const w1=0.55,w2=0.3+eff*0.22,w3=0.12+eff*0.18;const p=new Float64Array(10);for(let d=0;d<10;d++)p[d]=p1[d]*w1+p2[d]*w2+p3[d]*w3;return U.normalize(p)}
   _hurst(h){if(h.length<50)return 0.5;const lags=[4,8,16,32,64];const rs=[];for(const lag of lags){if(lag>h.length/4)continue;const segs=Math.floor(h.length/lag);let rsSum=0;for(let s=0;s<segs;s++){const slice=h.slice(s*lag,(s+1)*lag);const m=U.mean(slice);let cum=0,maxv=-1e9,minv=1e9,ss=0;for(const v of slice){cum+=v-m;if(cum>maxv)maxv=cum;if(cum<minv)minv=cum;ss+=(v-m)*(v-m)}const r=maxv-minv;const sd=Math.sqrt(ss/lag);if(sd>0)rsSum+=r/sd}rs.push(Math.log(rsSum/segs))}if(rs.length<2)return 0.5;const loglags=lags.slice(0,rs.length).map(Math.log);const mx=U.mean(loglags),my=U.mean(rs);let cov=0,varx=0;for(let i=0;i<rs.length;i++){cov+=(loglags[i]-mx)*(rs[i]-my);varx+=(loglags[i]-mx)*(loglags[i]-mx)}return U.clamp(varx>0?cov/varx:0.5,0.2,0.9)}
   _regime(h){const hurst=this._hurst(h);const ent=U.entropy(U.normalize(U.counts(h.slice(-80))));let change=0;if(h.length>=80){const rec=U.counts(h.slice(-40)),old=U.counts(h.slice(-80,-40));let chi=0;for(let d=0;d<10;d++){const e1=old[d]/40,e2=rec[d]/40;chi+=Math.pow(e1-e2,2)/((e1+e2)/2+0.001)}change=U.clamp(chi/10,0,1)}if(hurst>0.55||(Math.max(...U.counts(h.slice(-40)))/40>0.2&&change>0.2))return ['patterned',U.clamp((hurst-0.5)*3.5+change,0.25,1)];if(hurst<0.45&&ent>3.2&&change<0.2)return ['random',U.clamp((0.5-hurst)*3.5+(Math.log2(10)-ent),0.25,1)];return ['mixed',0.5]}
   _corrPenalty(items){if(items.length<3)return items;const adj=items.map(it=>({p:it.p,w:it.w,_aw:it.w}));for(let i=0;i<adj.length;i++){let pen=0;for(let j=0;j<adj.length;j++){if(i===j)continue;const jsd=this._js(adj[i].p,adj[j].p);const sim=1-Math.min(1,jsd/Math.log(2));const tw=adj.reduce((s,x)=>s+Math.abs(x.w),0.01);pen+=sim*0.35*(adj[j].w/tw)}adj[i]._aw=Math.max(0.03,adj[i].w*(1-pen))}return adj.map(it=>({p:it.p,w:it._aw}))}
@@ -296,6 +278,7 @@ class Engine{
     if(h.length<MIN_HIST)return {ready:false,p:U.uniform(),ranked:U.ranks(U.uniform()),top7:[],bottom3:[],best:{digit:0,p:0.1},regime:'insufficient',regimeConf:0,hurst:0.5,entropy:Math.log2(10),edge:0,z:0,signal:{score:0,label:'CHỜ'},backtest:{top7Hit:BASELINE,total:0},modelWeights:{},missStreak:this.missStreak,winStreak:this.winStreak,top7HitRate:this.top7HitRate,winLossLog:this.winLossLog,rolling50:this._rolling50()};
     this.history=h;
     const outputs=[];for(let i=0;i<this.models.length;i++){const m=this.models[i];try{outputs.push({name:m[0],p:m[2](h),weight:m[1],base:m[1],idx:i})}catch{outputs.push({name:m[0],p:U.uniform(),weight:m[1],base:m[1],idx:i})}}
+    // Điều chỉnh trọng số theo hiệu suất thực tế top7
     for(const out of outputs){
       const recent=h.slice(-40);let hits=0;
       for(let i=1;i<recent.length;i++){const top7=U.ranks(out.p).slice(0,7).map(r=>r.digit);if(top7.includes(recent[i]))hits++}
@@ -311,11 +294,57 @@ class Engine{
       if(regime==='random'&&U.entropy(out.p)<3.0)out.weight*=0.40;
       if(regime==='patterned'&&out.weight>0.3)out.weight*=1.45;
     }
-    const items=outputs.map(o=>({p:o.p,w:o.weight}));const penalized=this._corrPenalty(items);const tw=penalized.reduce((s,x)=>s+x.w,0.01);const ens=new Float64Array(10);for(const it of penalized)for(let d=0;d<10;d++)ens[d]+=it.p[d]*(it.w/tw);const ensP=U.normalize(ens);const bayes=this._bayesDynamic(h);const bw=U.clamp(h.length/350,0.15,0.45);let p=new Float64Array(10);for(let d=0;d<10;d++)p[d]=ensP[d]*(1-bw)+bayes[d]*bw;let finalP=U.normalize(p);
-    if(this.missStreak>=2){const ranked=U.ranks(finalP);const top3=ranked.slice(0,3);const boost=new Float64Array(10);const boostFactor=1+this.missStreak*0.35;for(const r of top3)boost[r.digit]=r.p*boostFactor;for(let d=0;d<10;d++)boost[d]=Math.max(boost[d],0.01);finalP=U.normalize(boost)}
-    if(this.missStreak>=3){const ranked=U.ranks(finalP);const best=ranked[0];const safe=new Float64Array(10);safe.fill(0.01);safe[best.digit]=0.85+this.missStreak*0.02;finalP=U.normalize(safe)}
-    if(this.winStreak>=3){const ranked=U.ranks(finalP);const top5=ranked.slice(0,5);const boost=new Float64Array(10);for(const r of top5)boost[r.digit]=r.p*(1+this.winStreak*0.12);for(let d=0;d<10;d++)boost[d]=Math.max(boost[d],0.015);finalP=U.normalize(boost)}
-    const ranked=U.ranks(finalP);const best=ranked[0];const top7=ranked.slice(0,TOP_N).map(r=>r.digit);const bottom3=ranked.slice(-BOT_N).map(r=>r.digit).reverse();const edge=best.p-BASELINE;const z=U.zScore(best.p,BASELINE,h.length);const bt=this._backtest(h);const top7Score=bt.top7Hit||BASELINE;const score=U.clamp(0.35*U.clamp((top7Score-BASELINE)/0.08,0,1)+0.25*regConf+0.2*U.clamp(edge/0.07,0,1)+0.45,0,1);const label=score>=0.68?'MẠNH':score>=0.48?'KHÁ':score>=0.32?'YẾU':'RỦI RO';const mw={};for(const o of outputs)mw[o.name]=o.weight;
+    const items=outputs.map(o=>({p:o.p,w:o.weight}));const penalized=this._corrPenalty(items);const tw=penalized.reduce((s,x)=>s+x.w,0.01);const ens=new Float64Array(10);for(const it of penalized)for(let d=0;d<10;d++)ens[d]+=it.p[d]*(it.w/tw);const ensP=U.normalize(ens);
+    const bayes=this._bayesDynamic(h);const bw=U.clamp(h.length/350,0.15,0.45);
+    let p=new Float64Array(10);for(let d=0;d<10;d++)p[d]=ensP[d]*(1-bw)+bayes[d]*bw;
+    let finalP=U.normalize(p);
+    // ===== XỬ LÝ STREAK (không có safety stop) =====
+    if(this.missStreak>=1){
+      // Anti-streak: theo đuôi nếu số vừa ra lạnh (freq <=2 trong 20 phiên)
+      const last=this.lastActual!==null?this.lastActual:0;
+      const recent20=h.slice(-20).filter(x=>x===last).length;
+      const isCold=recent20<=2;
+      if(isCold){
+        // Theo đuôi số lạnh
+        const boost=new Float64Array(10);boost.fill(1);
+        boost[last]=2.8+this.missStreak*0.4;
+        for(let d=0;d<10;d++)if(d!==last)boost[d]*=0.8;
+        finalP=U.normalize(finalP.map((v,d)=>v*boost[d]));
+      }else{
+        // Đảo chiều: bắt số lạnh (bottom 3)
+        const ranked=U.ranks(finalP);
+        const bottom=ranked.slice(-3).map(r=>r.digit);
+        const boost=new Float64Array(10);boost.fill(1);
+        for(const d of bottom)boost[d]=2.0+this.missStreak*0.25;
+        finalP=U.normalize(finalP.map((v,d)=>v*boost[d]));
+      }
+    }
+    if(this.missStreak>=2){
+      // Shield: tăng xác suất cho các số có tần suất thấp nhất trong 40 phiên
+      const counts=U.counts(h.slice(-40));
+      const minFreq=Math.min(...counts)+0.1;
+      const boost=counts.map(c=>1+minFreq/(c+0.1));
+      finalP=U.normalize(finalP.map((v,d)=>v*boost[d]));
+    }
+    if(this.winStreak>=3){
+      // Ride: tăng nhẹ top5
+      const ranked=U.ranks(finalP);
+      const top5=ranked.slice(0,5).map(r=>r.digit);
+      const boost=new Float64Array(10);boost.fill(1);
+      for(const d of top5)boost[d]=1+this.winStreak*0.08;
+      finalP=U.normalize(finalP.map((v,d)=>v*boost[d]));
+    }
+    const ranked=U.ranks(finalP);
+    const best=ranked[0];
+    const top7=ranked.slice(0,TOP_N).map(r=>r.digit);
+    const bottom3=ranked.slice(-BOT_N).map(r=>r.digit).reverse();
+    const edge=best.p-BASELINE;
+    const z=U.zScore(best.p,BASELINE,h.length);
+    const bt=this._backtest(h);
+    const top7Score=bt.top7Hit||BASELINE;
+    const score=U.clamp(0.35*U.clamp((top7Score-BASELINE)/0.08,0,1)+0.25*regConf+0.2*U.clamp(edge/0.07,0,1)+0.45,0,1);
+    const label=score>=0.68?'MẠNH':score>=0.48?'KHÁ':score>=0.32?'YẾU':'RỦI RO';
+    const mw={};for(const o of outputs)mw[o.name]=o.weight;
     return {ready:true,p:finalP,ranked,top7,bottom3,best,regime,regimeConf:regConf,hurst:this._hurst(h),entropy:U.entropy(finalP),edge,z,signal:{score,label},backtest:bt,modelWeights:mw,missStreak:this.missStreak,winStreak:this.winStreak,top7HitRate:this.top7HitRate,winLossLog:this.winLossLog,rolling50:this._rolling50()};
   }
   _rolling50(){const recent=this.winLossLog.slice(-50);if(!recent.length)return 0;const hits=recent.filter(e=>e.hit).length;return hits/recent.length}
@@ -329,13 +358,14 @@ class Engine{
   }
 }
 
+// ===== APP UI =====
 class App{
   constructor(){
     this.engine=new Engine();this.history=[];this.pred=null;
     this._load();this._bind();this._analyze();this._render();
   }
-  _load(){try{const raw=localStorage.getItem('duoi_ult_v2');if(raw){const d=JSON.parse(raw);this.history=(d.history||[]).filter(x=>D.includes(x)).slice(-MAX_HIST);if(d.winLossLog)this.engine.winLossLog=d.winLossLog;if(d.sessionCounter)this.engine.sessionCounter=d.sessionCounter;if(d.top7Hits!=null)this.engine.top7Hits=d.top7Hits;if(d.top7Total!=null)this.engine.top7Total=d.top7Total;if(d.top7HitRate!=null)this.engine.top7HitRate=d.top7HitRate;if(d.missStreak!=null)this.engine.missStreak=d.missStreak;if(d.winStreak!=null)this.engine.winStreak=d.winStreak;if(d.lastActual!=null)this.engine.lastActual=d.lastActual;if(d.lastTop7)this.engine.lastTop7=d.lastTop7;}}catch{this.history=[]}document.getElementById('historyInput').value=this.history.join(' ')}
-  _save(){try{localStorage.setItem('duoi_ult_v2',JSON.stringify({history:this.history,winLossLog:this.engine.winLossLog,sessionCounter:this.engine.sessionCounter,top7Hits:this.engine.top7Hits,top7Total:this.engine.top7Total,top7HitRate:this.engine.top7HitRate,missStreak:this.engine.missStreak,winStreak:this.engine.winStreak,lastActual:this.engine.lastActual,lastTop7:this.engine.lastTop7}))}catch{}}
+  _load(){try{const raw=localStorage.getItem('phoenix_pro_plus_ultimate');if(raw){const d=JSON.parse(raw);this.history=(d.history||[]).filter(x=>D.includes(x)).slice(-MAX_HIST);if(d.winLossLog)this.engine.winLossLog=d.winLossLog;if(d.sessionCounter)this.engine.sessionCounter=d.sessionCounter;if(d.top7Hits!=null)this.engine.top7Hits=d.top7Hits;if(d.top7Total!=null)this.engine.top7Total=d.top7Total;if(d.top7HitRate!=null)this.engine.top7HitRate=d.top7HitRate;if(d.missStreak!=null)this.engine.missStreak=d.missStreak;if(d.winStreak!=null)this.engine.winStreak=d.winStreak;if(d.lastActual!=null)this.engine.lastActual=d.lastActual;if(d.lastTop7)this.engine.lastTop7=d.lastTop7}}catch{}document.getElementById('historyInput').value=this.history.join(' ')}
+  _save(){try{localStorage.setItem('phoenix_pro_plus_ultimate',JSON.stringify({history:this.history,winLossLog:this.engine.winLossLog,sessionCounter:this.engine.sessionCounter,top7Hits:this.engine.top7Hits,top7Total:this.engine.top7Total,top7HitRate:this.engine.top7HitRate,missStreak:this.engine.missStreak,winStreak:this.engine.winStreak,lastActual:this.engine.lastActual,lastTop7:this.engine.lastTop7}))}catch{}}
   _bind(){
     const self=this;
     document.getElementById('analyzeBtn').onclick=()=>this._analyze();
@@ -377,7 +407,7 @@ class App{
     const score=Math.round((p.signal?.score||0)*100);
     document.getElementById('gauge').style.setProperty('--v',String(score));document.getElementById('gaugeNum').textContent=score+'%';
     document.getElementById('bestLabel').textContent=p.ready?`#${p.best.digit} · ${U.pct(p.best.p,2)}`:'—';
-    const detailParts=[];if(p.ready){detailParts.push(p.signal?.label||'—');detailParts.push(p.regime);detailParts.push('TOP7: '+(p.top7||[]).join(' '));if(streak>=2)detailParts.push('⚠️ SHIELD');if(wstreak>=3)detailParts.push('🔥 RIDE')}else{detailParts.push('Chờ dữ liệu')}
+    const detailParts=[];if(p.ready){detailParts.push(p.signal?.label||'—');detailParts.push(p.regime);detailParts.push('TOP7: '+(p.top7||[]).join(' '));if(streak>=2)detailParts.push('🛡️ SHIELD');if(wstreak>=3)detailParts.push('🔥 RIDE')}else{detailParts.push('Chờ dữ liệu')}
     document.getElementById('detailLabel').textContent=detailParts.join(' · ');
     document.getElementById('top7Val').textContent=(p.top7||[]).join(' ');document.getElementById('botVal').textContent=(p.bottom3||[]).join(' ');
     const sp=document.getElementById('statusPill');const sig=p.signal||{label:'CHỜ',score:0};sp.textContent=sig.label+(streak>=2?' ⚠️':wstreak>=3?' 🔥':'');sp.className='pill '+(streak>=3?'bad':sig.score>=0.68?'good':sig.score>=0.48?'warn':'bad');
@@ -393,54 +423,48 @@ class App{
   _copyTelegram(){
     const p=this.pred;if(!p||!p.ready){this._toast('Chưa có dự đoán');return}
     const streak=p.missStreak||0;const wstreak=p.winStreak||0;
-    const lines=['🎯 DỰ ĐOÁN TOP7 PRO v2','','🏆 TOP7: '+(p.top7||[]).join(' '),'👑 #1: '+p.best.digit+' ('+U.pct(p.best.p,1)+')','🚫 Loại: '+(p.bottom3||[]).join(' '),'','📊 TOP7 Hit Rate: '+Math.round((p.top7HitRate||0.7)*100)+'%','📈 Rolling 50: '+Math.round((p.rolling50||0)*100)+'%','📈 Signal: '+(p.signal?.label||'—')+' ('+Math.round((p.signal?.score||0)*100)+'%)','📉 Miss: '+streak+(streak>=2?' ⚠️ SHIELD':''),'🔥 Win: '+wstreak+(wstreak>=3?' RIDE':''),'🎲 Mẫu: '+this.history.length];
-    if(streak>=3)lines.push('🛡️ ULTRA SAFE');
+    const lines=['🔥 PHOENIX PRO+ ULTIMATE · DỰ ĐOÁN','','🏆 TOP7: '+(p.top7||[]).join(' '),'👑 #1: '+p.best.digit+' ('+U.pct(p.best.p,1)+')','🚫 Loại: '+(p.bottom3||[]).join(' '),'','📊 TOP7 Hit: '+Math.round((p.top7HitRate||0.7)*100)+'%','📈 Rolling 50: '+Math.round((p.rolling50||0)*100)+'%','📈 Signal: '+(p.signal?.label||'—')+' ('+Math.round((p.signal?.score||0)*100)+'%)','📉 Miss: '+streak+(streak>=2?' ⚠️ SHIELD':''),'🔥 Win: '+wstreak+(wstreak>=3?' RIDE':''),'🎲 Mẫu: '+this.history.length];
     const text=lines.join('\n');
     if(navigator.clipboard?.writeText){navigator.clipboard.writeText(text);this._toast('Đã copy')}else{const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();this._toast('Đã copy')}
   }
-  _toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(this._tt);this._tt=setTimeout(()=>el.classList.remove('show'),2000)}
-
-  // ===== FIXED: API trả về mới nhất trước -> đảo ngược để cũ nhất đứng đầu =====
+  _toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(this._tt);this._tt=setTimeout(()=>el.classList.remove('show'),2500)}
   async _syncFull(){
-    const status=document.getElementById('apiStatus');status.textContent='⏳ Đang tải dữ liệu từ API...';status.style.color='var(--orange)';
+    const status=document.getElementById('apiStatus');status.textContent='⏳ Đang tải...';status.style.color='var(--orange)';
     try{
       const url=document.getElementById('apiUrl').value.trim();const resp=await fetch(url);
       if(!resp.ok)throw new Error('HTTP '+resp.status);
       const json=await resp.json();const list=json.t?.issueList||json.issueList||[];
-      if(!list.length){status.textContent='❌ Không có issueList trong response';status.style.color='var(--red)';return}
+      if(!list.length){status.textContent='❌ Không có issueList';status.style.color='var(--red)';return}
       const items=[];for(const issue of list){const open=String(issue.openNum||'');const parts=open.split(',');const tail=parts[parts.length-1]?.trim();if(tail&&/^[0-9]$/.test(tail))items.push(+tail)}
-      if(!items.length){status.textContent='❌ Không trích xuất được đuôi hợp lệ';status.style.color='var(--red)';return}
-      items.reverse(); // ← FIX: API mới nhất trước, đảo lại cho cũ nhất đứng đầu
+      if(!items.length){status.textContent='❌ Không trích xuất được đuôi';status.style.color='var(--red)';return}
+      items.reverse();
       this.history=items.slice(-MAX_HIST);this._save();document.getElementById('historyInput').value=this.history.join(' ');
-      status.textContent='✅ Đã đồng bộ '+this.history.length+' phiên từ API';status.style.color='var(--green)';this._toast('Đồng bộ thành công');this._analyze();
+      status.textContent='✅ Đã đồng bộ '+this.history.length+' phiên';status.style.color='var(--green)';this._toast('Đồng bộ thành công');this._analyze();
     }catch(e){status.textContent='❌ Lỗi: '+e.message;status.style.color='var(--red)';this._toast('Lỗi API: '+e.message)}
   }
-
   async _syncInc(){
-    const status=document.getElementById('apiStatus');status.textContent='⏳ Đang kiểm tra phiên mới...';status.style.color='var(--orange)';
+    const status=document.getElementById('apiStatus');status.textContent='⏳ Kiểm tra...';status.style.color='var(--orange)';
     try{
       const url=document.getElementById('apiUrl').value.trim();const resp=await fetch(url);
       if(!resp.ok)throw new Error('HTTP '+resp.status);
       const json=await resp.json();const list=json.t?.issueList||json.issueList||[];
       if(!list.length){status.textContent='❌ Không có dữ liệu';status.style.color='var(--red)';return}
       const items=[];for(const issue of list){const open=String(issue.openNum||'');const parts=open.split(',');const tail=parts[parts.length-1]?.trim();if(tail&&/^[0-9]$/.test(tail))items.push(+tail)}
-      if(!items.length){status.textContent='❌ Không trích xuất được đuôi';status.style.color='var(--red)';return}
-      items.reverse(); // ← FIX: đảo API về đúng thứ tự cũ→mới
+      if(!items.length){status.textContent='❌ Không trích xuất đuôi';status.style.color='var(--red)';return}
+      items.reverse();
       const newCount=U.findOverlap(items,this.history);
-      if(newCount>0){this.history=[...this.history,...items.slice(-newCount)].slice(-MAX_HIST);this._save();document.getElementById('historyInput').value=this.history.join(' ');status.textContent='✅ +'+newCount+' phiên mới. Tổng: '+this.history.length;status.style.color='var(--green)';this._toast('Đã thêm '+newCount+' phiên');this._analyze()}else{status.textContent='✅ Dữ liệu đã mới nhất. Tổng: '+this.history.length;status.style.color='var(--green)'}
+      if(newCount>0){this.history=[...this.history,...items.slice(-newCount)].slice(-MAX_HIST);this._save();document.getElementById('historyInput').value=this.history.join(' ');status.textContent='✅ +'+newCount+' phiên mới. Tổng: '+this.history.length;status.style.color='var(--green)';this._toast('Đã thêm '+newCount+' phiên');this._analyze()}else{status.textContent='✅ Dữ liệu mới nhất. Tổng: '+this.history.length;status.style.color='var(--green)'}
     }catch(e){status.textContent='❌ Lỗi: '+e.message;status.style.color='var(--red)';this._toast('Lỗi API: '+e.message)}
   }
-
   _parseJson(){
     const status=document.getElementById('apiStatus');
     try{
-      const raw=document.getElementById('jsonPaste').value.trim();
-      if(!raw){status.textContent='❌ Vui lòng dán JSON vào ô';status.style.color='var(--red)';return}
+      const raw=document.getElementById('jsonPaste').value.trim();if(!raw){status.textContent='❌ Vui lòng dán JSON';status.style.color='var(--red)';return}
       const json=JSON.parse(raw);const list=json.t?.issueList||json.issueList||[];
-      if(!list.length){status.textContent='❌ Không có issueList trong JSON';status.style.color='var(--red)';return}
+      if(!list.length){status.textContent='❌ Không có issueList';status.style.color='var(--red)';return}
       const items=[];for(const issue of list){const open=String(issue.openNum||'');const parts=open.split(',');const tail=parts[parts.length-1]?.trim();if(tail&&/^[0-9]$/.test(tail))items.push(+tail)}
-      if(!items.length){status.textContent='❌ Không trích xuất được đuôi';status.style.color='var(--red)';return}
-      items.reverse(); // ← FIX: JSON cũng trả về mới nhất trước
+      if(!items.length){status.textContent='❌ Không trích xuất đuôi';status.style.color='var(--red)';return}
+      items.reverse();
       this.history=items.slice(-MAX_HIST);this._save();document.getElementById('historyInput').value=this.history.join(' ');
       status.textContent='✅ Nạp '+this.history.length+' phiên từ JSON';status.style.color='var(--green)';this._toast('Nạp JSON thành công');this._analyze();
     }catch(e){status.textContent='❌ JSON lỗi: '+e.message;status.style.color='var(--red)';this._toast('JSON lỗi: '+e.message)}
